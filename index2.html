@@ -9,128 +9,81 @@
     --bg:#f4f6fa; --panel:#fff; --border:#e3e6ec; --border-strong:#cfd4dd;
     --text:#1a1d24; --muted:#6b7280;
     --accent:#4f46e5; --accent-hover:#4338ca; --accent-soft:#eef2ff;
-    --ok:#059669; --ok-soft:#ecfdf5; --err:#dc2626; --err-soft:#fef2f2;
-    --warn:#d97706; --warn-soft:#fffbeb;
-    --radius:10px; --radius-sm:6px;
-    --shadow:0 1px 3px rgba(20,20,40,.08),0 4px 12px rgba(20,20,40,.04);
+    --ok:#059669; --err:#dc2626;
   }
-  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { margin:0; height:100%; overflow:hidden;
-              font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-              background:var(--bg); color:var(--text);
-              -webkit-font-smoothing:antialiased; }
-  .app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;overflow:hidden;
+    font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--text)}
+  .app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
-  /* ─── Header ─── */
-  header { display:flex; align-items:center; justify-content:space-between;
-           padding:9px 16px; background:var(--panel);
-           border-bottom:1px solid var(--border); flex:0 0 auto; }
-  header .brand { display:flex; align-items:center; gap:8px;
-                  font-weight:700; font-size:14px; }
-  header .brand .dot { width:9px; height:9px; border-radius:50%;
-                       background:linear-gradient(135deg,#6366f1,#8b5cf6);
-                       box-shadow:0 0 0 3px var(--accent-soft); }
-  header .status { display:flex; align-items:center; gap:6px;
-                   font-size:11px; color:var(--muted);
-                   padding:4px 10px; background:var(--bg);
-                   border-radius:14px; border:1px solid var(--border); }
-  header .status .led { width:6px; height:6px; border-radius:50%;
-                        background:var(--muted); }
-  header .status.ready .led { background:var(--ok); }
+  header{display:flex;align-items:center;justify-content:space-between;
+    padding:9px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
+  header .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+  header .brand .dot{width:9px;height:9px;border-radius:50%;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 0 0 3px var(--accent-soft)}
+  header .status{font-size:11px;color:var(--muted);
+    padding:4px 10px;background:var(--bg);border-radius:14px;border:1px solid var(--border)}
+  header .status.ready{color:var(--ok)}
 
-  /* ─── Toolbar ─── */
-  .toolbar { display:flex; gap:6px; padding:8px 16px;
-             background:var(--panel); border-bottom:1px solid var(--border);
-             flex:0 0 auto; overflow-x:auto; scrollbar-width:none; }
-  .toolbar::-webkit-scrollbar { display:none; }
-  .btn { display:inline-flex; align-items:center; gap:5px;
-         padding:7px 12px; font:inherit; font-weight:500; font-size:12px;
-         color:var(--text); background:var(--panel);
-         border:1px solid var(--border-strong); border-radius:6px;
-         cursor:pointer; white-space:nowrap; min-height:34px;
-         transition:background .12s; }
-  .btn:hover { background:#fafbfd; }
-  .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .btn.primary:hover { background:var(--accent-hover); }
-  .btn.on { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
-  select.preset { font:inherit; font-size:12px; padding:7px 10px;
-                  background:var(--panel); border:1px solid var(--border-strong);
-                  border-radius:6px; cursor:pointer; min-height:34px; }
-  .spacer { flex:1; }
+  .toolbar{display:flex;gap:6px;padding:8px 16px;background:var(--panel);
+    border-bottom:1px solid var(--border);overflow-x:auto}
+  .toolbar::-webkit-scrollbar{display:none}
+  .btn{padding:7px 12px;font:inherit;font-weight:500;font-size:12px;
+    color:var(--text);background:var(--panel);border:1px solid var(--border-strong);
+    border-radius:6px;cursor:pointer;white-space:nowrap;min-height:34px}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+  select.preset{font:inherit;font-size:12px;padding:7px 10px;background:var(--panel);
+    border:1px solid var(--border-strong);border-radius:6px;cursor:pointer}
+  .spacer{flex:1}
 
-  /* ─── Layout ─── */
-  .content { flex:1 1 auto; display:grid; grid-template-columns:1fr 1fr;
-             gap:10px; padding:10px 16px 14px; min-height:0; }
-  @media (max-width:900px) {
-    .content { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
-  }
+  .content{flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;
+    gap:10px;padding:10px 16px 14px;min-height:0}
+  @media(max-width:900px){.content{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
 
-  .card { background:var(--panel); border:1px solid var(--border);
-          border-radius:var(--radius); box-shadow:var(--shadow);
-          display:flex; flex-direction:column; min-height:0; overflow:hidden; }
-  .card-head { display:flex; align-items:center; justify-content:space-between;
-               padding:8px 12px; border-bottom:1px solid var(--border);
-               background:#fbfcfe; flex:0 0 auto; }
-  .card-head h2 { margin:0; font-size:11px; font-weight:600;
-                  text-transform:uppercase; letter-spacing:.06em;
-                  color:var(--muted); }
-  .card-head .meta { font-size:10.5px; color:var(--muted);
-                     font-variant-numeric:tabular-nums; white-space:nowrap;
-                     overflow:hidden; text-overflow:ellipsis; max-width:60%; }
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;
+    display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .card-head{display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px;border-bottom:1px solid var(--border);background:#fbfcfe}
+  .card-head h2{margin:0;font-size:11px;font-weight:600;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--muted)}
+  .card-head .meta{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
 
-  /* ─── Canvas ─── */
-  .canvas-wrap { position:relative; flex:1 1 auto; min-height:0;
-                 overflow:hidden; background:#fbfcfe;
-                 touch-action:none; user-select:none; }
-  canvas { display:block; width:100%; height:100%; background:#fff; }
+  .canvas-wrap{flex:1 1 auto;min-height:0;overflow:hidden;background:#fbfcfe;
+    touch-action:none;user-select:none;position:relative}
+  canvas{display:block;width:100%;height:100%;background:#fff}
 
-  /* ─── Tabs ─── */
-  .tabs { display:flex; padding:5px 8px 0; background:#fbfcfe;
-          border-bottom:1px solid var(--border); flex:0 0 auto; }
-  .tabs button { padding:8px 12px; font:inherit; font-size:11.5px;
-                 font-weight:600; color:var(--muted); background:transparent;
-                 border:0; border-bottom:2px solid transparent; cursor:pointer;
-                 border-radius:4px 4px 0 0; }
-  .tabs button.active { color:var(--accent); border-bottom-color:var(--accent);
-                        background:var(--panel); }
-  .tab-content { flex:1 1 auto; min-height:0; overflow:auto; display:none;
-                 background:var(--panel); }
-  .tab-content.active { display:block; }
+  .tabs{display:flex;padding:5px 8px 0;background:#fbfcfe;border-bottom:1px solid var(--border)}
+  .tabs button{padding:8px 12px;font:inherit;font-size:11.5px;font-weight:600;
+    color:var(--muted);background:transparent;border:0;border-bottom:2px solid transparent;
+    cursor:pointer;border-radius:4px 4px 0 0}
+  .tabs button.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--panel)}
+  .tab-content{flex:1 1 auto;min-height:0;overflow:auto;display:none;background:var(--panel)}
+  .tab-content.active{display:block}
 
-  textarea { width:100%; height:100%; min-height:0; border:0; outline:0;
-             resize:none; padding:12px;
-             font:12px/1.55 ui-monospace,"SF Mono",Consolas,monospace;
-             color:var(--text); background:var(--panel); }
+  textarea{width:100%;height:100%;border:0;outline:0;resize:none;padding:12px;
+    font:12px/1.55 ui-monospace,Consolas,monospace;background:var(--panel);color:var(--text)}
+  #log,#tree{padding:10px 12px;margin:0;font:11px/1.55 ui-monospace,Consolas,monospace;
+    white-space:pre-wrap;word-break:break-word}
+  #log .ok{color:var(--ok)} #log .err{color:var(--err)} #log .hi{color:var(--accent)}
+  #log .dim{color:var(--muted)}
 
-  #log, #tree { padding:10px 12px; margin:0;
-                font:11px/1.55 ui-monospace,Consolas,monospace;
-                white-space:pre-wrap; word-break:break-word; }
-  #log .line { padding:1px 0; }
-  #log .ok  { color:var(--ok); }
-  #log .err { color:var(--err); }
-  #log .hi  { color:var(--accent); }
-  #log .dim { color:var(--muted); }
+  #tree .row{display:grid;grid-template-columns:auto 40px 130px 14px 1fr;gap:6px;
+    padding:2px 4px;white-space:nowrap;border-radius:4px;cursor:pointer;align-items:center}
+  #tree .row:hover{background:#f7f8fb}
+  #tree .branch{color:#d1d5db}
+  #tree .idx{color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums}
+  #tree .type{color:#b45309;font-weight:500}
+  #tree .swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.1)}
+  #tree .props{color:var(--muted);overflow:hidden;text-overflow:ellipsis}
 
-  #tree .row { display:grid; grid-template-columns:auto 40px 130px 14px 1fr;
-               gap:6px; padding:2px 4px; white-space:nowrap;
-               border-radius:4px; cursor:pointer; align-items:center; }
-  #tree .row:hover { background:#f7f8fb; }
-  #tree .row.selected { background:var(--accent-soft); }
-  #tree .branch { color:#d1d5db; }
-  #tree .idx { color:var(--accent); font-weight:700;
-               font-variant-numeric:tabular-nums; }
-  #tree .type { color:#b45309; font-weight:500; }
-  #tree .swatch { width:14px; height:14px; border-radius:3px;
-                  border:1px solid rgba(0,0,0,.1); }
-  #tree .props { color:var(--muted); overflow:hidden; text-overflow:ellipsis; }
-
-  input[type=file] { display:none; }
-  #toast { position:fixed; left:50%; bottom:20px;
-           transform:translateX(-50%) translateY(60px);
-           background:#1a1d24; color:#fff; padding:9px 16px;
-           border-radius:20px; font-size:12.5px; opacity:0;
-           transition:all .22s; pointer-events:none; z-index:100; }
-  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  input[type=file]{display:none}
+  #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(60px);
+    background:#1a1d24;color:#fff;padding:9px 16px;border-radius:20px;font-size:12.5px;
+    opacity:0;transition:all .22s;pointer-events:none;z-index:100}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -138,9 +91,7 @@
 
   <header>
     <div class="brand"><span class="dot"></span>StickNodes Studio</div>
-    <div class="status" id="status">
-      <span class="led"></span><span id="statusText">loading…</span>
-    </div>
+    <div class="status" id="status">loading…</div>
   </header>
 
   <div class="toolbar">
@@ -149,8 +100,8 @@
     <button class="btn" id="btnExport">→ XML</button>
     <button class="btn" id="btnCopy">Copy</button>
     <button class="btn" id="btnLoad">Load</button>
-    <button class="btn on" id="btnDrag" title="Drag mode: tap a node tip to rotate/extend it">Drag</button>
-    <button class="btn on" id="btnFills" title="Render polyfills">Fills</button>
+    <button class="btn on" id="btnDrag" title="Toggle node dragging">Drag</button>
+    <button class="btn on" id="btnFills" title="Toggle polyfill fills">Fills</button>
     <div class="spacer"></div>
     <select class="preset" id="preset">
       <option value="">Preset…</option>
@@ -174,15 +125,15 @@
       </div>
     </div>
 
-    <div style="display:flex; flex-direction:column; min-height:0; gap:10px;">
-      <div class="card" style="flex:1 1 50%;">
+    <div style="display:flex;flex-direction:column;min-height:0;gap:10px">
+      <div class="card" style="flex:1 1 50%">
         <div class="card-head">
           <h2>XML</h2>
           <span class="meta" id="xmlMeta">—</span>
         </div>
         <textarea id="xml" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
       </div>
-      <div class="card" style="flex:1 1 50%; display:flex; flex-direction:column; min-height:0;">
+      <div class="card" style="flex:1 1 50%;display:flex;flex-direction:column;min-height:0">
         <div class="tabs">
           <button data-tab="log" class="active">Log</button>
           <button data-tab="tree">Tree</button>
@@ -198,463 +149,164 @@
 <div id="toast"></div>
 
 <script type="module">
-/* ═══════════════════════════════════════════════════════════════════════
-   DOM + logging
-   ═══════════════════════════════════════════════════════════════════════ */
+import { StickNodesRenderer } from './renderer.js';
+
+/* ───── DOM ───── */
 const $ = id => document.getElementById(id);
-const canvas = $('preview');
-const wrap = $('canvasWrap');
-const logEl = $('log');
-const treeEl = $('tree');
-const xmlEl = $('xml');
-const fileInput = $('fileInput');
-const toastEl = $('toast');
-const statusEl = $('status');
-const statusTextEl = $('statusText');
+const canvas = $('preview'), wrap = $('canvasWrap');
+const logEl = $('log'), treeEl = $('tree'), xmlEl = $('xml');
+const fileInput = $('fileInput'), toastEl = $('toast'), statusEl = $('status');
 
-let toastTimer = null;
-function toast(m) {
-  toastEl.textContent = m; toastEl.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+let toastTimer=null;
+function toast(m){toastEl.textContent=m;toastEl.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1800);}
+function log(kind,m){
+  const cls={ok:'ok',err:'err',hi:'hi',dim:'dim'}[kind]||'dim';
+  const line=document.createElement('div');line.className=cls;
+  line.textContent=(kind==='ok'?'✔ ':kind==='err'?'✘ ':'')+m;
+  logEl.appendChild(line);logEl.scrollTop=logEl.scrollHeight;
 }
-function log(kind, m) {
-  const cls = { ok:'ok', err:'err', hi:'hi', dim:'dim' }[kind] || 'dim';
-  const line = document.createElement('div');
-  line.className = cls;
-  line.textContent = (kind === 'ok' ? '✔ ' : kind === 'err' ? '✘ ' : '') + m;
-  logEl.appendChild(line);
-  logEl.scrollTop = logEl.scrollHeight;
-}
-const clearLog = () => { logEl.textContent = ''; };
-function setStatus(s, t) {
-  statusEl.className = 'status ' + (s || '');
-  statusTextEl.textContent = t;
-}
+const clearLog=()=>{logEl.textContent='';};
+function setStatus(s,t){statusEl.className='status '+(s||'');statusEl.textContent=t;}
 
-/* ═══════════════════════════════════════════════════════════════════════
-   Load WASM (MIME-bypass trick)
-   ═══════════════════════════════════════════════════════════════════════ */
-let mod = null;
-try {
-  const jsText = await (await fetch('./sticknodes_rs.js', { cache:'no-store' })).text();
-  const blobUrl = URL.createObjectURL(new Blob([jsText], { type:'application/javascript' }));
-  mod = await import(blobUrl);
+/* ───── WASM load (MIME bypass) ───── */
+let mod=null;
+try{
+  const jsText=await(await fetch('./sticknodes_rs.js',{cache:'no-store'})).text();
+  const blobUrl=URL.createObjectURL(new Blob([jsText],{type:'application/javascript'}));
+  mod=await import(blobUrl);
   URL.revokeObjectURL(blobUrl);
-  log('ok', 'module loaded');
-} catch (e) { log('err', 'module load failed: ' + e.message); throw e; }
+  log('ok','module loaded');
+}catch(e){log('err','load module: '+e.message);throw e;}
 
-try {
-  const wasmBytes = await (await fetch('./sticknodes_rs_bg.wasm', { cache:'no-store' })).arrayBuffer();
+try{
+  const wasmBytes=await(await fetch('./sticknodes_rs_bg.wasm',{cache:'no-store'})).arrayBuffer();
   await mod.default(wasmBytes);
-  log('ok', 'WASM ready');
-  setStatus('ready', 'ready');
-} catch (e) { log('err', 'WASM init failed: ' + e.message); setStatus('error', 'init failed'); throw e; }
+  log('ok','WASM ready');
+  setStatus('ready','ready');
+}catch(e){log('err','wasm init: '+e.message);setStatus('err','init failed');throw e;}
 
-/* ═══════════════════════════════════════════════════════════════════════
-   Color helpers
-   ═══════════════════════════════════════════════════════════════════════ */
-function parseHex(s) {
-  let h = String(s).replace(/^#/, '');
-  if (h.length === 6) h += 'FF';
-  return {
-    r: parseInt(h.slice(0,2), 16),
-    g: parseInt(h.slice(2,4), 16),
-    b: parseInt(h.slice(4,6), 16),
-    a: parseInt(h.slice(6,8), 16),
-  };
-}
-const css = (c, mul=1) =>
-  `rgba(${c.r},${c.g},${c.b},${Math.min(1, (c.a/255) * mul).toFixed(3)})`;
-const aaParams = m => Math.max(2, Math.floor((m < 80 ? m/80 : 1) * 6));
-
-/* ═══════════════════════════════════════════════════════════════════════
-   Primitives
-   ═══════════════════════════════════════════════════════════════════════ */
-function pSeg(ctx,x1,y1,x2,y2,th,col){ctx.strokeStyle=col;ctx.lineWidth=Math.max(th,.01);ctx.lineCap='butt';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
-function pRSeg(ctx,x1,y1,x2,y2,th,col){ctx.strokeStyle=col;ctx.lineWidth=Math.max(th,.01);ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
-function pCircle(ctx,cx,cy,r,col){ctx.fillStyle=col;ctx.beginPath();ctx.arc(cx,cy,Math.max(r,.01),0,Math.PI*2);ctx.fill();}
-function pRing(ctx,cx,cy,ro,ri,col){ctx.fillStyle=col;ctx.beginPath();ctx.arc(cx,cy,Math.max(ro,.01),0,Math.PI*2,false);ctx.arc(cx,cy,Math.max(ri,.01),0,Math.PI*2,true);ctx.fill('evenodd');}
-function pEllipse(ctx,cx,cy,rx,ry,ang,col){ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(cx,cy,Math.max(rx,.01),Math.max(ry,.01),ang,0,Math.PI*2);ctx.fill();}
-function pTriangle(ctx,x1,y1,x2,y2,x3,y3,col){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.lineTo(x3,y3);ctx.closePath();ctx.fill();}
-function pPoly(ctx,cx,cy,r,n,ang,col){ctx.fillStyle=col;ctx.beginPath();for(let i=0;i<n;i++){const a=ang+(i/n)*Math.PI*2;const px=cx+r*Math.cos(a),py=cy+r*Math.sin(a);i?ctx.lineTo(px,py):ctx.moveTo(px,py);}ctx.closePath();ctx.fill();}
-function pTrap(ctx,x1,y1,x2,y2,w1,w2,ang,col){const nx=-Math.sin(ang),ny=Math.cos(ang);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(x1+nx*w1/2,y1+ny*w1/2);ctx.lineTo(x2+nx*w2/2,y2+ny*w2/2);ctx.lineTo(x2-nx*w2/2,y2-ny*w2/2);ctx.lineTo(x1-nx*w1/2,y1-ny*w1/2);ctx.closePath();ctx.fill();}
-
-/* AA wrappers */
-function aRSeg(ctx,x1,y1,x2,y2,th,col){
-  const len=Math.hypot(x2-x1,y2-y1),N=aaParams(Math.max(th,len));
-  ctx.globalAlpha=.2;
-  for(let i=0;i<=N;i++) pRSeg(ctx,x1,y1,x2,y2,th+i*.14,col);
-  ctx.globalAlpha=1; pRSeg(ctx,x1,y1,x2,y2,th,col);
-}
-function aSeg(ctx,x1,y1,x2,y2,th,col){
-  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
-  const ca=len>.001?dx/len:1,sa=len>.001?dy/len:0,N=aaParams(Math.max(th,len));
-  ctx.globalAlpha=.2;
-  for(let i=1;i<=N;i++){const g=i*.18666667,h=g/2;pSeg(ctx,x1-ca*h,y1-sa*h,x2+ca*h,y2+sa*h,th+g,col);}
-  ctx.globalAlpha=1; pSeg(ctx,x1,y1,x2,y2,th,col);
-}
-function aCircle(ctx,cx,cy,r,col){
-  const g=r<40?r/40:1,N=Math.max(2,Math.floor(g*6));
-  ctx.globalAlpha=.2;
-  for(let i=0;i<=N;i++) pCircle(ctx,cx,cy,r+i*.093333334,col);
-  ctx.globalAlpha=1; pCircle(ctx,cx,cy,r,col);
-}
-function aRing(ctx,cx,cy,ro,ri,col){
-  const g=ro<40?ro/40:1,N=Math.max(2,Math.floor(g*6));
-  ctx.globalAlpha=.2;
-  for(let i=0;i<=N;i++) pRing(ctx,cx,cy,ro+i*.093333334,ri+i*.093333334,col);
-  ctx.globalAlpha=1; pRing(ctx,cx,cy,ro,ri,col);
-}
-function jitter(ctx,col,fn){
-  ctx.fillStyle=col;
-  for(let lv=1;lv<=5;lv++)
-    for(let jx=-1;jx<=1;jx++)
-      for(let jy=-1;jy<=1;jy++){
-        if(!jx&&!jy) continue;
-        ctx.globalAlpha=.1; fn(jx,jy,lv);
-      }
-  ctx.globalAlpha=1; fn(0,0,1);
-}
-function aTriangle(ctx,x1,y1,x2,y2,x3,y3,th,col){
-  const jb=.28*Math.min(Math.abs(th)/12,1);
-  jitter(ctx,col,(jx,jy,lv)=>{
-    const ox=jx*.5*jb*lv,oy=jy*.5*jb*lv;
-    pTriangle(ctx,x1+ox,y1+oy,x2+ox,y2+oy,x3+ox,y3+oy,col);
-  });
-}
-function aEllipse(ctx,cx,cy,rx,ry,ang,col){
-  const jb=.42*Math.min(Math.max(rx,ry)/128,1);
-  jitter(ctx,col,(jx,jy,lv)=>{
-    const ox=jx*.5*jb*lv,oy=jy*.5*jb*lv;
-    pEllipse(ctx,cx+ox,cy+oy,rx,ry,ang,col);
-  });
-}
-function aTrap(ctx,x1,y1,x2,y2,w1,w2,ang,col){
-  const jb=.42*Math.min(Math.max(w1,w2)/80,1);
-  jitter(ctx,col,(jx,jy,lv)=>{
-    const ox=jx*.5*jb*lv,oy=jy*.5*jb*lv;
-    pTrap(ctx,x1+ox,y1+oy,x2+ox,y2+oy,w1,w2,ang,col);
-  });
-}
-function aPoly(ctx,cx,cy,r,n,ang,col){
-  const g=r<32?r/32:1,N=Math.max(2,Math.floor(g*6));
-  ctx.globalAlpha=.2;
-  for(let i=0;i<=N;i++) pPoly(ctx,cx,cy,r+i*.23333333,n,ang,col);
-  ctx.globalAlpha=1; pPoly(ctx,cx,cy,r,n,ang,col);
-}
-
-/* Curve subdivision — correct circle-fit */
-function subdivideCurve(ax,ay,bx,by,R){
-  const dx=bx-ax,dy=by-ay,len=Math.hypot(dx,dy);
-  if(len<.5||Math.abs(R)<.5) return [[ax,ay],[bx,by]];
-  const halfLen=len/2, Rabs=Math.abs(R);
-  if(Rabs<halfLen) return [[ax,ay],[bx,by]];
-  const h=Rabs-Math.sqrt(Rabs*Rabs-halfLen*halfLen);
-  const midX=(ax+bx)/2,midY=(ay+by)/2;
-  const perpX=-dy/len,perpY=dx/len;
-  const sign=R>0?1:-1;
-  const cx=midX+perpX*h*sign,cy=midY+perpY*h*sign;
-  const a1=Math.atan2(ay-cy,ax-cx),a2=Math.atan2(by-cy,bx-cx);
-  let da=a2-a1;
-  if(sign>0){ while(da<0) da+=Math.PI*2; } else { while(da>0) da-=Math.PI*2; }
-  const n=Math.max(4,Math.min(32,Math.round(Math.abs(da)*4)));
-  const pts=[];
-  for(let i=0;i<=n;i++){const t=i/n,a=a1+da*t;pts.push([cx+Rabs*Math.cos(a),cy+Rabs*Math.sin(a)]);}
-  return pts;
-}
-function aRSegCurved(ctx,sx,sy,ex,ey,th,R,col){
-  const pts=subdivideCurve(sx,sy,ex,ey,R);
-  for(let i=0;i<pts.length-1;i++) aRSeg(ctx,pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],th,col);
-}
-function aPolyfill(ctx,verts,col){
-  if(verts.length<3) return;
-  jitter(ctx,col,(jx,jy,lv)=>{
-    const jb=.28,ox=jx*.5*jb*lv,oy=jy*.5*jb*lv;
-    ctx.fillStyle=col;ctx.beginPath();
-    ctx.moveTo(verts[0].x+ox,verts[0].y+oy);
-    for(let i=1;i<verts.length;i++) ctx.lineTo(verts[i].x+ox,verts[i].y+oy);
-    ctx.closePath();ctx.fill();
-  });
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   Scene extraction
-   ═══════════════════════════════════════════════════════════════════════ */
-let currentFig = null;
-let showFills = true;
-let dragMode = true;
-
-const view = { fit: 1, cx: 0, cy: 0, W: 0, H: 0 };
-
-function buildScene(fig) {
-  const nodes = fig.allNodes();
-  const scene = [];
-  for (const n of nodes) {
-    if (n.nodeType === -1) continue;
-    let s, e;
-    try { s = n.getGlobalStart(); e = n.getGlobalEnd(); }
-    catch (_) { continue; }
-    let hollow=false,trS=0,trE=0,np=5,cr=0;
-    try{hollow=n.circleIsHollow;}catch(_){}
-    try{trS=n.getTrapezoidThicknessStart();}catch(_){}
-    try{trE=n.getTrapezoidThicknessEnd();}catch(_){}
-    try{np=n.numPolygonVertices;}catch(_){}
-    try{cr=n.segmentCurveRadiusAndDefaultCurveRadius;}catch(_){}
-    scene.push({
-      node: n, type: n.nodeType,
-      drawIndex: n.drawIndex,
-      sx:s[0],sy:s[1],ex:e[0],ey:e[1],
-      thickness: Math.abs(n.getEffectiveThickness()||1),
-      color: parseHex(n.getDisplayColorHex()),
-      hollow, trapezoidThicknessStart:trS, trapezoidThicknessEnd:trE,
-      numPolygonVertices:np, curveRadius:cr,
-    });
-  }
-  const polyfills = [];
-  if (showFills) {
-    try {
-      const rawPfs = fig.allPolyfills();
-      for (const pf of rawPfs) {
-        try {
-          const flat = fig.getPolyfillVertices(pf.anchorDrawIndex);
-          const verts = [];
-          for (let i = 0; i+1 < flat.length; i += 2) verts.push({ x: flat[i], y: flat[i+1] });
-          if (verts.length >= 3) polyfills.push({
-            verts,
-            color: parseHex(pf.colorHex),
-            useColor: pf.usePolyfillColor,
-          });
-        } catch (_) {}
-      }
-    } catch (_) {}
-  }
-  return { scene, polyfills };
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   Renderer
-   ═══════════════════════════════════════════════════════════════════════ */
-function render(fig) {
-  if (!fig) return;
-  const dpr = window.devicePixelRatio || 1;
-  const w = wrap.clientWidth, h = wrap.clientHeight;
-  canvas.width  = Math.floor(w * dpr);
-  canvas.height = Math.floor(h * dpr);
-  canvas.style.width  = w + 'px';
-  canvas.style.height = h + 'px';
-
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.globalAlpha = 1;
-
-  const { scene, polyfills } = buildScene(fig);
-  if (!scene.length && !polyfills.length) return;
-
-  // Bounding box
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  let maxPad=0;
-  for (const n of scene) {
-    const pad = Math.max(n.thickness, Math.hypot(n.ex-n.sx,n.ey-n.sy))/2;
-    if (pad>maxPad) maxPad=pad;
-    for (const p of [[n.sx,n.sy],[n.ex,n.ey]]) {
-      if(p[0]<minX)minX=p[0]; if(p[1]<minY)minY=p[1];
-      if(p[0]>maxX)maxX=p[0]; if(p[1]>maxY)maxY=p[1];
-    }
-  }
-  for (const pf of polyfills)
-    for (const v of pf.verts) {
-      if(v.x<minX)minX=v.x; if(v.y<minY)minY=v.y;
-      if(v.x>maxX)maxX=v.x; if(v.y>maxY)maxY=v.y;
-    }
-  const pad = maxPad + 8;
-  minX-=pad; minY-=pad; maxX+=pad; maxY+=pad;
-  const spanX = Math.max(maxX-minX, 40), spanY = Math.max(maxY-minY, 40);
-  const fit = Math.min((canvas.width-40)/spanX, (canvas.height-40)/spanY);
-  const cx = (minX+maxX)/2, cy = (minY+maxY)/2;
-
-  view.fit = fit; view.cx = cx; view.cy = cy;
-  view.W = canvas.width; view.H = canvas.height;
-
-  ctx.save();
-  ctx.translate(canvas.width/2, canvas.height/2);
-  ctx.scale(fit, fit);
-  ctx.translate(-cx, -cy);
-
-  for (const n of scene) drawNode(ctx, n);
-
-  let figColor = { r:32,g:32,b:32,a:255 };
-  try { figColor = parseHex(fig.colorHex); } catch (_) {}
-  for (const pf of polyfills) {
-    const col = pf.useColor ? pf.color : figColor;
-    aPolyfill(ctx, pf.verts, css(col));
-  }
-
-  ctx.restore();
-  ctx.globalAlpha = 1;
-
-  previewMeta.textContent =
-    '×' + fit.toFixed(3) + '  ·  ' + scene.length + ' nodes' +
-    (polyfills.length ? '  ·  ' + polyfills.length + ' fills' : '');
-}
-
-function drawNode(ctx, s) {
-  const len = Math.hypot(s.ex-s.sx, s.ey-s.sy);
-  const angle = Math.atan2(s.ey-s.sy, s.ex-s.sx);
-  const col = css(s.color);
-
-  switch (s.type) {
-    case 1:
-      if (s.curveRadius) aRSegCurved(ctx,s.sx,s.sy,s.ex,s.ey,s.thickness,s.curveRadius,col);
-      else aSeg(ctx,s.sx,s.sy,s.ex,s.ey,s.thickness,col);
-      break;
-    case 0:
-      if (s.curveRadius) aRSegCurved(ctx,s.sx,s.sy,s.ex,s.ey,s.thickness,s.curveRadius,col);
-      else aRSeg(ctx,s.sx,s.sy,s.ex,s.ey,s.thickness,col);
-      break;
-    case 2: {
-      const oR = (len + s.thickness)/2;
-      const iR = Math.max(0, oR - s.thickness);
-      if (s.hollow) aRing(ctx,s.ex,s.ey,oR,iR,col);
-      else aCircle(ctx,s.ex,s.ey,oR,col);
-      break;
-    }
-    case 4:
-      aCircle(ctx,s.ex,s.ey,Math.max(len,s.thickness)/2,col);
-      break;
-    case 3: {
-      const r = Math.max(1,len);
-      const base = angle + Math.PI, side = 2*Math.PI/3;
-      aTriangle(ctx,
-        s.ex,s.ey,
-        s.ex+r*Math.cos(base+side/2), s.ey+r*Math.sin(base+side/2),
-        s.ex+r*Math.cos(base-side/2), s.ey+r*Math.sin(base-side/2),
-        s.thickness, col);
-      break;
-    }
-    case 5:
-      aEllipse(ctx,s.ex,s.ey,Math.max(.5,len/2),Math.max(.5,s.thickness/2),angle,col);
-      break;
-    case 6: {
-      const w1 = s.trapezoidThicknessStart || s.thickness;
-      const w2 = s.trapezoidThicknessEnd   || s.thickness*0.5;
-      aTrap(ctx,s.sx,s.sy,s.ex,s.ey,w1,w2,angle,col);
-      break;
-    }
-    case 7:
-      aPoly(ctx,s.ex,s.ey,Math.max(1,len),Math.max(3,s.numPolygonVertices),angle,col);
-      break;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   Screen ↔ World
-   ═══════════════════════════════════════════════════════════════════════ */
-function screenToWorld(sx, sy) {
-  const wx = (sx - view.W/2) / view.fit + view.cx;
-  const wy = (sy - view.H/2) / view.fit + view.cy;
-  return { x: wx, y: wy };
-}
-
-/* ═══════════════════════════════════════════════════════════════════════
-   Drag-to-edit nodes
-   ═══════════════════════════════════════════════════════════════════════ */
-let dragging = null;
-
-canvas.addEventListener('pointerdown', e => {
-  if (!dragMode || !currentFig) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  const sx = (e.clientX - rect.left) * (canvas.width / rect.width);
-  const sy = (e.clientY - rect.top)  * (canvas.height / rect.height);
-  const world = screenToWorld(sx, sy);
-
-  const nodes = currentFig.allNodes();
-  let best = null, bestDist = Infinity;
-
-  for (const n of nodes) {
-    if (n.nodeType === -1) continue;
-    const end = n.getGlobalEnd();
-    const d = Math.hypot(world.x - end[0], world.y - end[1]);
-    const tol = Math.max(20 / view.fit, (Math.abs(n.getEffectiveThickness())||1) * 0.75);
-    if (d < tol && d < bestDist) { best = n; bestDist = d; }
-  }
-
-  if (best) {
-    dragging = {
-      node: best,
-      parentStart: best.getGlobalStart(),
-    };
-    canvas.setPointerCapture(e.pointerId);
-    e.preventDefault();
-    toast('Dragging node [' + best.drawIndex + ']');
+/* ───── Renderer ───── */
+const renderer = new StickNodesRenderer(canvas);
+renderer.onNodeChanged(()=>{
+  // When a node is dragged, refresh XML text and tree
+  if(currentFig){
+    xmlEl.value=figureToXml(currentFig);
+    updateXmlMeta();
+    renderTree(currentFig);
   }
 });
 
-canvas.addEventListener('pointermove', e => {
-  if (!dragging || !currentFig) return;
-  const rect = canvas.getBoundingClientRect();
-  const sx = (e.clientX - rect.left) * (canvas.width / rect.width);
-  const sy = (e.clientY - rect.top)  * (canvas.height / rect.height);
-  const world = screenToWorld(sx, sy);
+/* ───── Presets ───── */
+const BODY='#42489DFF',SKIN='#FFCC99FF';
+const PRESETS={
+  empty:['<?xml version="1.0"?>','<stickfigure version="425" build="100" scale="1.0" color="#202020FF">','  <!-- nodes here -->','</stickfigure>'].join('\n'),
+  standing:[
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="'+SKIN+'" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="'+BODY+'" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'].join('\n'),
+  tpose:[
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="'+SKIN+'" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="55" thickness="12" angle="90" color="'+BODY+'" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="55" thickness="12" angle="-90" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'].join('\n'),
+  running:[
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="280" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="'+SKIN+'" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="40" thickness="12" angle="130" color="'+BODY+'" useSegmentColor="true">',
+    '      <node type="RoundedSegment" length="35" thickness="11" angle="-50" color="'+BODY+'" useSegmentColor="true"/>',
+    '    </node>',
+    '    <node type="RoundedSegment" length="40" thickness="12" angle="210" color="'+BODY+'" useSegmentColor="true">',
+    '      <node type="RoundedSegment" length="35" thickness="11" angle="50" color="'+BODY+'" useSegmentColor="true"/>',
+    '    </node>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="55" thickness="16" angle="50" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="50" thickness="14" angle="40" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="55" thickness="16" angle="110" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="30" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'].join('\n'),
+  sitting:[
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="'+SKIN+'" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="'+BODY+'" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'].join('\n'),
+  waving:[
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="'+SKIN+'" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="70" color="'+BODY+'" useSegmentColor="true">',
+    '      <node type="RoundedSegment" length="40" thickness="11" angle="-40" color="'+BODY+'" useSegmentColor="true"/>',
+    '    </node>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="'+BODY+'" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="'+BODY+'" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'].join('\n'),
+};
 
-  const node = dragging.node;
-  const ps = dragging.parentStart;
-  const dx = world.x - ps[0];
-  const dy = world.y - ps[1];
-  const len = Math.hypot(dx, dy);
-  if (len < 1) return;
-  const globalAngleDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+/* ───── XML parsing ───── */
+const NODE_TYPE_NAME={[-1]:'RootNode',0:'RoundedSegment',1:'Segment',2:'Circle',3:'Triangle',4:'FilledCircle',5:'Ellipse',6:'Trapezoid',7:'Polygon'};
+const NODE_TYPE_VALID={RoundedSegment:1,Segment:1,Circle:1,Triangle:1,FilledCircle:1,Ellipse:1,Trapezoid:1,Polygon:1};
 
-  let parentGlobalAngle = 0;
-  try {
-    const parentIdx = node.getParentIndex();
-    if (parentIdx !== undefined && parentIdx >= 0) {
-      const parent = currentFig.getNode(parentIdx);
-      parentGlobalAngle = parent.getGlobalAngle();
-    }
-  } catch (_) {}
+function colorToWasm(hex){
+  let h=String(hex).replace(/^#/,'');
+  if(h.length===3)h=h.split('').map(c=>c+c).join('')+'FF';
+  else if(h.length===4)h=h.split('').map(c=>c+c).join('');
+  else if(h.length===6)h+='FF';
+  return{red:parseInt(h.slice(0,2),16),green:parseInt(h.slice(2,4),16),
+         blue:parseInt(h.slice(4,6),16),alpha:parseInt(h.slice(6,8),16)};
+}
 
-  const figScale = currentFig.scale || 1;
-  const segScale = node.useSegmentScale ? (node.scale || 1) : 1;
-
-  try {
-    node.localAngle = globalAngleDeg - parentGlobalAngle;
-    node.length = len / figScale / segScale;
-  } catch (err) {
-    log('err', 'set failed: ' + err.message);
+function nodeOptionsFromEl(el){
+  const o={};
+  if(el.hasAttribute('type')){
+    const t=el.getAttribute('type');
+    if(!NODE_TYPE_VALID[t])throw new Error('unknown type '+t);
+    o.nodeType=t;
   }
-
-  render(currentFig);
-});
-
-canvas.addEventListener('pointerup', e => {
-  if (dragging) {
-    try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
-    dragging = null;
-  }
-});
-canvas.addEventListener('pointercancel', () => { dragging = null; });
-
-/* ═══════════════════════════════════════════════════════════════════════
-   XML parsing + building
-   ═══════════════════════════════════════════════════════════════════════ */
-const NODE_TYPE_NAME = { [-1]:'RootNode',0:'RoundedSegment',1:'Segment',2:'Circle',3:'Triangle',4:'FilledCircle',5:'Ellipse',6:'Trapezoid',7:'Polygon' };
-const NODE_TYPE_VALID = { RoundedSegment:1,Segment:1,Circle:1,Triangle:1,FilledCircle:1,Ellipse:1,Trapezoid:1,Polygon:1 };
-
-function nodeOptionsFromEl(el) {
-  const o = {};
-  if (el.hasAttribute('type')) {
-    const t = el.getAttribute('type');
-    if (!NODE_TYPE_VALID[t]) throw new Error('unknown node type "' + t + '"');
-    o.nodeType = t;
-  }
-  const num = {
-    length:'length', defaultLength:'defaultLength',
-    thickness:'thickness', defaultThickness:'defaultThickness',
-    scale:'scale', angle:'localAngle', defaultAngle:'defaultAngle',
+  const num={length:'length',defaultLength:'defaultLength',
+    thickness:'thickness',defaultThickness:'defaultThickness',
+    scale:'scale',angle:'localAngle',defaultAngle:'defaultAngle',
     defaultLocalAngle:'defaultLocalAngle',
     curveRadius:'segmentCurveRadiusAndDefaultCurveRadius',
     curvePrecision:'segmentCurvePolyfillPrecision',
@@ -663,19 +315,17 @@ function nodeOptionsFromEl(el) {
     polygonVertices:'numPolygonVertices',
     angleLockRelativeMultiplier:'angleLockRelativeMultiplier',
     dragLockAngle:'dragLockAngle',
-    smartStretchMultiplier:'smartStretchMultiplier',
-  };
-  for (const a in num)
-    if (el.hasAttribute(a)) o[num[a]] = parseFloat(el.getAttribute(a));
-  const bool = {
-    static:'isStatic', stretchy:'isStretchy', floaty:'isFloaty',
+    smartStretchMultiplier:'smartStretchMultiplier'};
+  for(const a in num)
+    if(el.hasAttribute(a))o[num[a]]=parseFloat(el.getAttribute(a));
+  const bool={static:'isStatic',stretchy:'isStretchy',floaty:'isFloaty',
     smartStretch:'isSmartStretch',
     doNotApplySmartStretch:'doNotApplySmartStretch',
     smartStretchResetImpulse:'smartStretchResetImpulse',
     useSegmentColor:'useSegmentColor',
     useCircleOutline:'useCircleOutline',
     hollow:'circleIsHollow',
-    useGradient:'useGradient', reverseGradient:'reverseGradient',
+    useGradient:'useGradient',reverseGradient:'reverseGradient',
     useSegmentScale:'useSegmentScale',
     curveCirculization:'curveCirculization',
     halfArc:'halfArc',
@@ -685,313 +335,229 @@ function nodeOptionsFromEl(el) {
     useTrapezoidEnd:'useTrapezoidThicknessEnd',
     trapezoidRoundedStart:'trapezoidIsRoundedStart',
     trapezoidRoundedEnd:'trapezoidIsRoundedEnd',
-    dragLocked:'isDragLocked',
-  };
-  for (const a in bool)
-    if (el.hasAttribute(a)) {
-      const v = el.getAttribute(a);
-      o[bool[a]] = !(v === 'false' || v === '0' || v === '');
+    dragLocked:'isDragLocked'};
+  for(const a in bool)
+    if(el.hasAttribute(a)){
+      const v=el.getAttribute(a);
+      o[bool[a]]=!(v==='false'||v==='0'||v==='');
     }
-  const cols = { color:'color', gradientColor:'gradientColor', outlineColor:'circleOutlineColor' };
-  for (const a in cols)
-    if (el.hasAttribute(a)) o[cols[a]] = parseHex(el.getAttribute(a));
-  if (el.hasAttribute('gradientMode')) o.gradientMode = el.getAttribute('gradientMode');
-  if (el.hasAttribute('triangleType')) o.triangleType = el.getAttribute('triangleType');
-  if (el.hasAttribute('angleLock')) o.angleLockMode = el.getAttribute('angleLock');
+  const cols={color:'color',gradientColor:'gradientColor',outlineColor:'circleOutlineColor'};
+  for(const a in cols)
+    if(el.hasAttribute(a))o[cols[a]]=colorToWasm(el.getAttribute(a));
+  if(el.hasAttribute('gradientMode'))o.gradientMode=el.getAttribute('gradientMode');
+  if(el.hasAttribute('triangleType'))o.triangleType=el.getAttribute('triangleType');
+  if(el.hasAttribute('angleLock'))o.angleLockMode=el.getAttribute('angleLock');
   return o;
 }
 
-function buildFigure(xmlText) {
-  const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
-  const perr = doc.querySelector('parsererror');
-  if (perr) throw new Error('XML parse error');
-  const rootEl = doc.documentElement;
-  if (rootEl.tagName.toLowerCase() !== 'stickfigure') throw new Error('root must be <stickfigure>');
+function buildFigure(xmlText){
+  const doc=new DOMParser().parseFromString(xmlText,'application/xml');
+  const perr=doc.querySelector('parsererror');
+  if(perr)throw new Error('XML parse error: '+perr.textContent.trim());
+  const rootEl=doc.documentElement;
+  if(rootEl.tagName.toLowerCase()!=='stickfigure')throw new Error('root must be <stickfigure>');
 
-  const fig = new mod.Stickfigure();
-  try { fig.setNodeLimitEnabled(false); } catch (_) {}
-  if (rootEl.hasAttribute('version')) fig.setVersion(parseInt(rootEl.getAttribute('version'), 10));
-  if (rootEl.hasAttribute('build'))   fig.build = parseInt(rootEl.getAttribute('build'), 10);
-  if (rootEl.hasAttribute('scale'))   fig.scale = parseFloat(rootEl.getAttribute('scale'));
-  if (rootEl.hasAttribute('color'))   fig.colorHex = rootEl.getAttribute('color');
+  const fig=new mod.Stickfigure();
+  try{fig.setNodeLimitEnabled(false);}catch(_){}
+  if(rootEl.hasAttribute('version'))fig.setVersion(parseInt(rootEl.getAttribute('version'),10));
+  if(rootEl.hasAttribute('build'))fig.build=parseInt(rootEl.getAttribute('build'),10);
+  if(rootEl.hasAttribute('scale'))fig.scale=parseFloat(rootEl.getAttribute('scale'));
+  if(rootEl.hasAttribute('color'))fig.colorHex=rootEl.getAttribute('color');
 
-  const root = fig.rootNode();
-  let added = 0;
-  const walk = (parent, containerEl) => {
-    for (const el of containerEl.children) {
-      if (el.tagName.toLowerCase() !== 'node') continue;
-      const child = parent.addChild(nodeOptionsFromEl(el));
+  const root=fig.rootNode();
+  let added=0;
+  const walk=(parent,containerEl)=>{
+    for(const el of containerEl.children){
+      if(el.tagName.toLowerCase()!=='node')continue;
+      const child=parent.addChild(nodeOptionsFromEl(el));
       added++;
-      walk(child, el);
+      walk(child,el);
     }
   };
-  walk(root, rootEl);
+  walk(root,rootEl);
 
-  let pf = 0;
-  for (const el of rootEl.children) {
-    if (el.tagName.toLowerCase() !== 'polyfill') continue;
-    try {
+  let pf=0;
+  for(const el of rootEl.children){
+    if(el.tagName.toLowerCase()!=='polyfill')continue;
+    try{
       fig.addPolyfill({
-        anchor: parseInt(el.getAttribute('anchor') || '0', 10),
-        colorHex: el.getAttribute('color') || '#000000FF',
-        useColor: el.getAttribute('useColor') !== 'false',
-        attached: (el.getAttribute('attached') || '').split(',').filter(Boolean).map(Number),
+        anchor:parseInt(el.getAttribute('anchor')||'0',10),
+        colorHex:el.getAttribute('color')||'#000000FF',
+        useColor:el.getAttribute('useColor')!=='false',
+        attached:(el.getAttribute('attached')||'').split(',').filter(Boolean).map(Number),
       });
       pf++;
-    } catch (e) { log('err', 'polyfill skipped: ' + e.message); }
+    }catch(e){log('err','polyfill skipped: '+e.message);}
   }
-  return { fig, added, pf };
+  return{fig,added,pf};
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   Tree view
-   ═══════════════════════════════════════════════════════════════════════ */
-function renderTree(fig) {
-  treeEl.textContent = '';
-  const visit = (node, depth) => {
-    const row = document.createElement('div');
-    row.className = 'row';
-    const branch = document.createElement('span'); branch.className='branch';
-    branch.textContent = '│ '.repeat(Math.min(depth, 20));
-    const idx = document.createElement('span'); idx.className='idx';
-    idx.textContent = '[' + node.drawIndex + ']';
-    const type = document.createElement('span'); type.className='type';
-    type.textContent = NODE_TYPE_NAME[node.nodeType] || node.nodeType;
-    const swatch = document.createElement('span'); swatch.className='swatch';
-    try { swatch.style.background = node.colorHex; } catch (_) {}
-    const props = document.createElement('span'); props.className='props';
-    let p = '';
-    if (node.length) p += 'len=' + node.length.toFixed(1) + ' ';
-    if (node.thickness) p += 'th=' + node.thickness + ' ';
-    if (node.localAngle) p += '∠' + node.localAngle.toFixed(1) + '°';
-    props.textContent = p;
+/* ───── Tree ───── */
+function renderTree(fig){
+  treeEl.textContent='';
+  const visit=(node,depth)=>{
+    const row=document.createElement('div');row.className='row';
+    const branch=document.createElement('span');branch.className='branch';
+    branch.textContent='│ '.repeat(Math.min(depth,20));
+    const idx=document.createElement('span');idx.className='idx';
+    idx.textContent='['+node.drawIndex+']';
+    const type=document.createElement('span');type.className='type';
+    type.textContent=NODE_TYPE_NAME[node.nodeType]||node.nodeType;
+    const swatch=document.createElement('span');swatch.className='swatch';
+    try{swatch.style.background=node.colorHex;}catch(_){}
+    const props=document.createElement('span');props.className='props';
+    let p='';
+    if(node.length)p+='len='+node.length.toFixed(1)+' ';
+    if(node.thickness)p+='th='+node.thickness+' ';
+    if(node.localAngle)p+='∠'+node.localAngle.toFixed(1)+'°';
+    props.textContent=p;
     row.appendChild(branch);row.appendChild(idx);row.appendChild(type);
     row.appendChild(swatch);row.appendChild(props);
     treeEl.appendChild(row);
-    for (const k of node.children()) visit(k, depth+1);
+    for(const k of node.children())visit(k,depth+1);
   };
-  visit(fig.rootNode(), 0);
+  visit(fig.rootNode(),0);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   XML export
-   ═══════════════════════════════════════════════════════════════════════ */
-function figureToXml(fig) {
-  const out = ['<?xml version="1.0"?>'];
-  out.push('<stickfigure version="' + fig.version + '" build="' + fig.build +
-           '" scale="' + fig.scale + '" color="' + fig.colorHex + '">');
-  const write = (node, depth) => {
-    const pad = '  '.repeat(depth);
-    const a = [];
-    const t = NODE_TYPE_NAME[node.nodeType];
-    if (t && t !== 'RootNode') a.push('type="' + t + '"');
-    if (node.length) a.push('length="' + node.length + '"');
-    if (node.thickness) a.push('thickness="' + node.thickness + '"');
-    if (node.localAngle) a.push('angle="' + node.localAngle + '"');
-    if (node.useSegmentColor) {
-      try { a.push('color="' + node.colorHex + '"'); a.push('useSegmentColor="true"'); } catch (_) {}
+/* ───── XML export ───── */
+function figureToXml(fig){
+  const out=['<?xml version="1.0"?>'];
+  out.push('<stickfigure version="'+fig.version+'" build="'+fig.build+
+    '" scale="'+fig.scale+'" color="'+fig.colorHex+'">');
+  const write=(node,depth)=>{
+    const pad='  '.repeat(depth);
+    const a=[];
+    const t=NODE_TYPE_NAME[node.nodeType];
+    if(t&&t!=='RootNode')a.push('type="'+t+'"');
+    if(node.length)a.push('length="'+node.length+'"');
+    if(node.thickness)a.push('thickness="'+node.thickness+'"');
+    if(node.localAngle)a.push('angle="'+node.localAngle+'"');
+    if(node.useSegmentColor){
+      try{a.push('color="'+node.colorHex+'"');
+        a.push('useSegmentColor="true"');}catch(_){}
     }
-    const kids = node.children();
-    const open = pad + '<node ' + a.join(' ');
-    if (!kids.length) { out.push(open + '/>'); return; }
-    out.push(open + '>');
-    for (const k of kids) write(k, depth+1);
-    out.push(pad + '</node>');
+    if(node.useSegmentScale)a.push('useSegmentScale="true"');
+    const kids=node.children();
+    const open=pad+'<node '+a.join(' ');
+    if(!kids.length){out.push(open+'/>');return;}
+    out.push(open+'>');
+    for(const k of kids)write(k,depth+1);
+    out.push(pad+'</node>');
   };
-  for (const k of fig.rootNode().children()) write(k, 1);
+  for(const k of fig.rootNode().children())write(k,1);
   out.push('</stickfigure>');
   return out.join('\n');
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   UI wiring
-   ═══════════════════════════════════════════════════════════════════════ */
-function updateXmlMeta() {
-  const t = xmlEl.value;
-  $('xmlMeta').textContent = t.split('\n').length + ' lines · ' + new Blob([t]).size + ' B';
-}
-xmlEl.addEventListener('input', updateXmlMeta);
+/* ───── UI ───── */
+let currentFig=null;
 
-function buildAndShow() {
+function updateXmlMeta(){
+  const t=xmlEl.value;
+  $('xmlMeta').textContent=t.split('\n').length+' lines · '+new Blob([t]).size+' B';
+}
+xmlEl.addEventListener('input',updateXmlMeta);
+
+function buildAndShow(){
   clearLog();
-  try {
-    const r = buildFigure(xmlEl.value);
-    currentFig = r.fig;
-    render(currentFig);
-    renderTree(currentFig);
-    log('ok', 'built ' + r.added + ' nodes' + (r.pf ? ', ' + r.pf + ' fills' : ''));
-  } catch (e) { log('err', e.message); toast('Build failed'); }
+  try{
+    const r=buildFigure(xmlEl.value);
+    currentFig=r.fig;
+    renderer.setFigure(r.fig);
+    const info=renderer.render();
+    renderTree(r.fig);
+    log('ok','built '+r.added+' nodes'+(r.pf?', '+r.pf+' fills':''));
+    $('previewMeta').textContent='×'+info.fit.toFixed(3)+'  ·  '+info.nodeCount+
+      ' nodes'+(info.fillCount?'  ·  '+info.fillCount+' fills':'');
+  }catch(e){log('err',e.message);toast('Build failed: '+e.message);}
 }
 
-$('btnBuild').addEventListener('click', buildAndShow);
+$('btnBuild').addEventListener('click',buildAndShow);
 
-$('btnDownload').addEventListener('click', () => {
-  try {
-    if (!currentFig) buildAndShow();
-    if (!currentFig) return;
-    const bytes = currentFig.toBytes();
-    const blob = new Blob([bytes], { type:'application/octet-stream' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'figure.nodes';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
-    log('ok', 'exported ' + bytes.length + ' bytes');
-    toast('Downloaded');
-  } catch (e) { log('err', e.message); }
+$('btnDownload').addEventListener('click',()=>{
+  try{
+    if(!currentFig)buildAndShow();
+    if(!currentFig)return;
+    const bytes=currentFig.toBytes();
+    const blob=new Blob([bytes],{type:'application/octet-stream'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='figure.nodes';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    log('ok','exported '+bytes.length+' bytes');
+    toast('Downloaded figure.nodes');
+  }catch(e){log('err',e.message);}
 });
 
-$('btnExport').addEventListener('click', () => {
-  try {
-    if (!currentFig) buildAndShow();
-    if (!currentFig) return;
-    xmlEl.value = figureToXml(currentFig);
+$('btnExport').addEventListener('click',()=>{
+  try{
+    if(!currentFig)buildAndShow();
+    if(!currentFig)return;
+    xmlEl.value=figureToXml(currentFig);
     updateXmlMeta();
-    log('ok', 'XML exported from current figure');
-    toast('XML updated');
-  } catch (e) { log('err', e.message); }
+    log('ok','XML updated from current figure');
+    toast('XML written');
+  }catch(e){log('err',e.message);}
 });
 
-$('btnCopy').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(xmlEl.value); toast('Copied'); }
-  catch (_) { xmlEl.focus(); xmlEl.select(); toast('Select-all — Ctrl+C'); }
+$('btnCopy').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(xmlEl.value);toast('Copied');}
+  catch(_){xmlEl.focus();xmlEl.select();toast('Select-all — Ctrl+C');}
 });
 
-$('btnLoad').addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', async () => {
-  const f = fileInput.files[0];
-  if (!f) return;
-  try {
-    const buf = new Uint8Array(await f.arrayBuffer());
-    const fig = mod.Stickfigure.fromBytes(buf);
-    try { fig.setNodeLimitEnabled(false); } catch (_) {}
-    currentFig = fig;
-    render(fig); renderTree(fig);
-    xmlEl.value = figureToXml(fig); updateXmlMeta();
-    log('ok', 'loaded ' + f.name + ' · ' + buf.length + ' bytes');
-    toast('Loaded ' + f.name);
-  } catch (e) { log('err', 'load: ' + e.message); }
-  finally { fileInput.value = ''; }
+$('btnLoad').addEventListener('click',()=>fileInput.click());
+fileInput.addEventListener('change',async()=>{
+  const f=fileInput.files[0];if(!f)return;
+  try{
+    const buf=new Uint8Array(await f.arrayBuffer());
+    const fig=mod.Stickfigure.fromBytes(buf);
+    try{fig.setNodeLimitEnabled(false);}catch(_){}
+    currentFig=fig;
+    renderer.setFigure(fig);
+    const info=renderer.render();
+    renderTree(fig);
+    xmlEl.value=figureToXml(fig);updateXmlMeta();
+    log('ok','loaded '+f.name+' · '+buf.length+' bytes');
+    $('previewMeta').textContent='×'+info.fit.toFixed(3)+'  ·  '+info.nodeCount+
+      ' nodes'+(info.fillCount?'  ·  '+info.fillCount+' fills':'');
+    toast('Loaded '+f.name);
+  }catch(e){log('err','load: '+e.message);}
+  finally{fileInput.value='';}
 });
 
-$('btnDrag').addEventListener('click', () => {
-  dragMode = !dragMode;
-  $('btnDrag').classList.toggle('on', dragMode);
-  toast('Drag: ' + (dragMode ? 'ON — tap a node tip' : 'OFF — pan mode'));
+$('btnDrag').addEventListener('click',()=>{
+  const on=!$('btnDrag').classList.contains('on');
+  $('btnDrag').classList.toggle('on',on);
+  renderer.setDragEnabled(on);
+  toast('Drag: '+(on?'ON — tap a node tip':'OFF'));
 });
-$('btnFills').addEventListener('click', () => {
-  showFills = !showFills;
-  $('btnFills').classList.toggle('on', showFills);
-  if (currentFig) render(currentFig);
-  toast('Fills: ' + (showFills ? 'ON' : 'OFF'));
+$('btnFills').addEventListener('click',()=>{
+  const on=!$('btnFills').classList.contains('on');
+  $('btnFills').classList.toggle('on',on);
+  renderer.setFills(on);
+  renderer.render();
+  toast('Fills: '+(on?'ON':'OFF'));
 });
 
-document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
-  document.querySelector('.tab-content[data-tab="' + b.dataset.tab + '"]').classList.add('active');
+  document.querySelector('.tab-content[data-tab="'+b.dataset.tab+'"]').classList.add('active');
 }));
 
-/* Presets */
-const BODY = '#42489DFF', SKIN = '#FFCC99FF';
-const PRESETS = {
-  empty: ['<?xml version="1.0"?>','<stickfigure version="425" build="100" scale="1.0" color="#202020FF">','  <!-- nodes here -->','</stickfigure>'].join('\n'),
-  standing: [
-    '<?xml version="1.0"?>',
-    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="' + BODY + '" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '</stickfigure>'].join('\n'),
-  tpose: [
-    '<?xml version="1.0"?>',
-    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="55" thickness="12" angle="90" color="' + BODY + '" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="55" thickness="12" angle="-90" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '</stickfigure>'].join('\n'),
-  running: [
-    '<?xml version="1.0"?>',
-    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <node type="RoundedSegment" length="65" thickness="20" angle="280" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="40" thickness="12" angle="130" color="' + BODY + '" useSegmentColor="true">',
-    '      <node type="RoundedSegment" length="35" thickness="11" angle="-50" color="' + BODY + '" useSegmentColor="true"/>',
-    '    </node>',
-    '    <node type="RoundedSegment" length="40" thickness="12" angle="210" color="' + BODY + '" useSegmentColor="true">',
-    '      <node type="RoundedSegment" length="35" thickness="11" angle="50" color="' + BODY + '" useSegmentColor="true"/>',
-    '    </node>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="55" thickness="16" angle="50" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="50" thickness="14" angle="40" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="55" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="30" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '</stickfigure>'].join('\n'),
-  sitting: [
-    '<?xml version="1.0"?>',
-    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="' + BODY + '" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '</stickfigure>'].join('\n'),
-  waving: [
-    '<?xml version="1.0"?>',
-    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="70" color="' + BODY + '" useSegmentColor="true">',
-    '      <node type="RoundedSegment" length="40" thickness="11" angle="-40" color="' + BODY + '" useSegmentColor="true"/>',
-    '    </node>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
-    '  </node>',
-    '</stickfigure>'].join('\n'),
-};
-
-$('preset').addEventListener('change', e => {
-  const k = e.target.value;
-  if (!k) return;
-  xmlEl.value = PRESETS[k]; updateXmlMeta(); buildAndShow();
-  e.target.value = '';
+$('preset').addEventListener('change',e=>{
+  const k=e.target.value;if(!k)return;
+  xmlEl.value=PRESETS[k];updateXmlMeta();buildAndShow();
+  e.target.value='';
 });
 
 /* Init */
-xmlEl.value = PRESETS.standing;
+xmlEl.value=PRESETS.standing;
 updateXmlMeta();
 buildAndShow();
-window.addEventListener('resize', () => { if (currentFig) render(currentFig); });
+window.addEventListener('resize',()=>{if(currentFig)renderer.render();});
 </script>
 </body>
 </html>
