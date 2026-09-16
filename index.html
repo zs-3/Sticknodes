@@ -6,149 +6,189 @@
 <title>StickNodes Studio</title>
 <style>
   :root {
-    --bg: #f4f6fa; --panel: #ffffff; --border: #e3e6ec; --border-strong: #cfd4dd;
-    --text: #1a1d24; --muted: #6b7280;
-    --accent: #4f46e5; --accent-hover: #4338ca; --accent-soft: #eef2ff;
-    --ok: #059669; --ok-soft: #ecfdf5; --err: #dc2626; --err-soft: #fef2f2;
-    --radius: 10px; --radius-sm: 6px;
-    --shadow-sm: 0 1px 2px rgba(20,20,40,.05);
-    --shadow: 0 1px 3px rgba(20,20,40,.08), 0 4px 12px rgba(20,20,40,.04);
-    --shadow-lg: 0 4px 12px rgba(20,20,40,.08), 0 12px 32px rgba(20,20,40,.06);
+    --bg:#f4f6fa; --panel:#fff; --border:#e3e6ec; --border-strong:#cfd4dd;
+    --text:#1a1d24; --muted:#6b7280;
+    --accent:#4f46e5; --accent-hover:#4338ca; --accent-soft:#eef2ff;
+    --ok:#059669; --ok-soft:#ecfdf5; --err:#dc2626; --err-soft:#fef2f2;
+    --warn:#d97706; --warn-soft:#fffbeb;
+    --radius:10px; --radius-sm:6px;
+    --shadow-sm:0 1px 2px rgba(20,20,40,.05);
+    --shadow:0 1px 3px rgba(20,20,40,.08),0 4px 12px rgba(20,20,40,.04);
+    --shadow-lg:0 4px 12px rgba(20,20,40,.08),0 12px 32px rgba(20,20,40,.06);
   }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; padding: 0; height: 100%; }
-  body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-         "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text);
-         overflow: hidden; -webkit-font-smoothing: antialiased; }
-  .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh;
-         max-width: 1400px; margin: 0 auto; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; padding:0; height:100%; }
+  body {
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
+         "Helvetica Neue",Arial,sans-serif;
+    background:var(--bg); color:var(--text); overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app { display:flex; flex-direction:column; height:100vh; height:100dvh;
+         max-width:1500px; margin:0 auto; }
 
-  header { display: flex; align-items: center; justify-content: space-between;
-           gap: 12px; padding: 14px 20px; background: var(--panel);
-           border-bottom: 1px solid var(--border); flex: 0 0 auto; }
-  header .brand { display: flex; align-items: center; gap: 10px;
-                  font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
-  header .brand .dot { width: 10px; height: 10px; border-radius: 50%;
-                       background: linear-gradient(135deg, #6366f1, #8b5cf6);
-                       box-shadow: 0 0 0 3px var(--accent-soft); }
-  header .status { display: flex; align-items: center; gap: 6px; font-size: 12px;
-                   color: var(--muted); padding: 5px 10px; background: var(--bg);
-                   border-radius: 20px; border: 1px solid var(--border); }
-  header .status .led { width: 7px; height: 7px; border-radius: 50%;
-                        background: var(--muted); transition: background .2s; }
-  header .status.ready .led { background: var(--ok); box-shadow: 0 0 6px rgba(5,150,105,.5); }
-  header .status.error .led { background: var(--err); }
+  /* Header */
+  header { display:flex; align-items:center; justify-content:space-between;
+           gap:12px; padding:12px 20px; background:var(--panel);
+           border-bottom:1px solid var(--border); flex:0 0 auto; }
+  header .brand { display:flex; align-items:center; gap:10px;
+                  font-weight:700; font-size:16px; letter-spacing:-.01em; }
+  header .brand .dot { width:10px; height:10px; border-radius:50%;
+                       background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                       box-shadow:0 0 0 3px var(--accent-soft); }
+  header .status { display:flex; align-items:center; gap:8px;
+                   font-size:12px; color:var(--muted);
+                   padding:5px 12px; background:var(--bg);
+                   border-radius:20px; border:1px solid var(--border); }
+  header .status .led { width:7px; height:7px; border-radius:50%;
+                        background:var(--muted); transition:background .2s; }
+  header .status.ready .led { background:var(--ok); box-shadow:0 0 6px rgba(5,150,105,.5); }
+  header .status.error .led { background:var(--err); }
 
-  .toolbar { display: flex; gap: 8px; padding: 12px 20px; background: var(--panel);
-             border-bottom: 1px solid var(--border); flex: 0 0 auto;
-             overflow-x: auto; scrollbar-width: none; }
-  .toolbar::-webkit-scrollbar { display: none; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px;
-         font: inherit; font-weight: 500; font-size: 13px; color: var(--text);
-         background: var(--panel); border: 1px solid var(--border-strong);
-         border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
-         min-height: 38px; transition: all .12s ease; box-shadow: var(--shadow-sm); }
-  .btn:hover { background: #fafbfd; border-color: #b6bcc7; }
-  .btn:active { transform: translateY(1px); box-shadow: none; }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff;
-                 box-shadow: 0 1px 3px rgba(79,70,229,.3), 0 4px 12px rgba(79,70,229,.15); }
-  .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-  .btn svg { width: 14px; height: 14px; stroke-width: 2; fill: none; stroke: currentColor; }
-  .btn.toggle.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
-  select.preset { font: inherit; font-size: 13px; font-weight: 500; padding: 9px 12px;
-                  background: var(--panel); border: 1px solid var(--border-strong);
-                  border-radius: var(--radius-sm); cursor: pointer; min-height: 38px;
-                  color: var(--text); box-shadow: var(--shadow-sm); }
-  .spacer { flex: 1; }
+  /* Toolbar */
+  .toolbar { display:flex; gap:8px; padding:10px 20px;
+             background:var(--panel); border-bottom:1px solid var(--border);
+             flex:0 0 auto; overflow-x:auto; scrollbar-width:none; }
+  .toolbar::-webkit-scrollbar { display:none; }
+  .btn { display:inline-flex; align-items:center; gap:6px;
+         padding:9px 14px; font:inherit; font-weight:500; font-size:13px;
+         color:var(--text); background:var(--panel);
+         border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+         cursor:pointer; white-space:nowrap; min-height:38px;
+         transition:all .12s ease; box-shadow:var(--shadow-sm); }
+  .btn:hover { background:#fafbfd; border-color:#b6bcc7; }
+  .btn:active { transform:translateY(1px); box-shadow:none; }
+  .btn.primary { background:var(--accent); border-color:var(--accent);
+                 color:#fff;
+                 box-shadow:0 1px 3px rgba(79,70,229,.3),0 4px 12px rgba(79,70,229,.15); }
+  .btn.primary:hover { background:var(--accent-hover); border-color:var(--accent-hover); }
+  .btn svg { width:14px; height:14px; stroke-width:2; fill:none; stroke:currentColor; }
+  .btn.toggle.on { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
+  select.preset { font:inherit; font-size:13px; font-weight:500;
+                  padding:9px 12px; background:var(--panel);
+                  border:1px solid var(--border-strong);
+                  border-radius:var(--radius-sm); cursor:pointer;
+                  min-height:38px; color:var(--text); box-shadow:var(--shadow-sm); }
+  .spacer { flex:1; }
 
-  .content { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr;
-             gap: 12px; padding: 12px 20px 20px; min-height: 0; }
-  @media (max-width: 900px) {
-    .content { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-    header { padding: 12px 14px; } .toolbar { padding: 10px 14px; }
-    .content { padding: 10px 14px 14px; }
+  /* Content */
+  .content { flex:1 1 auto; display:grid; grid-template-columns:1fr 1fr;
+             gap:12px; padding:12px 20px 16px; min-height:0; }
+  @media (max-width:900px) {
+    .content { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
+    header { padding:10px 14px; } .toolbar { padding:8px 14px; }
+    .content { padding:10px 14px 12px; }
   }
 
-  .card { background: var(--panel); border: 1px solid var(--border);
-          border-radius: var(--radius); box-shadow: var(--shadow);
-          display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-  .card-head { display: flex; align-items: center; justify-content: space-between;
-               padding: 10px 14px; border-bottom: 1px solid var(--border);
-               background: #fbfcfe; flex: 0 0 auto; }
-  .card-head h2 { margin: 0; font-size: 12px; font-weight: 600;
-                  text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-  .card-head .meta { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .card { background:var(--panel); border:1px solid var(--border);
+          border-radius:var(--radius); box-shadow:var(--shadow);
+          display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+  .card-head { display:flex; align-items:center; justify-content:space-between;
+               padding:9px 14px; border-bottom:1px solid var(--border);
+               background:#fbfcfe; flex:0 0 auto; gap:12px; }
+  .card-head h2 { margin:0; font-size:12px; font-weight:600;
+                  text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .card-head .meta { font-size:11px; color:var(--muted);
+                     font-variant-numeric:tabular-nums; white-space:nowrap; }
 
-  .preview-wrap { position: relative; flex: 1 1 auto; min-height: 0;
-                  display: flex; align-items: center; justify-content: center;
-                  padding: 12px; overflow: hidden; background: #fbfcfe; }
-  canvas { display: block; max-width: 100%; max-height: 100%;
-           border-radius: var(--radius-sm); background: #ffffff;
-           box-shadow: inset 0 0 0 1px var(--border); }
+  /* Preview */
+  .preview-wrap { position:relative; flex:1 1 auto; min-height:0;
+                  display:flex; align-items:center; justify-content:center;
+                  padding:12px; overflow:hidden; background:#fbfcfe; }
+  canvas { display:block; max-width:100%; max-height:100%;
+           border-radius:var(--radius-sm); background:#fff;
+           box-shadow:inset 0 0 0 1px var(--border); }
 
-  textarea { flex: 1 1 auto; width: 100%; min-height: 0; border: 0; outline: 0;
-             resize: none; padding: 14px 16px;
-             font: 12.5px/1.65 "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-             color: var(--text); background: var(--panel); tab-size: 2; }
-  textarea::selection { background: var(--accent-soft); }
+  /* Info bar */
+  .info-bar { display:flex; flex-wrap:wrap; gap:6px 16px;
+              padding:7px 14px; background:#f7f8fb;
+              border-top:1px solid var(--border);
+              font:11px/1.4 ui-monospace,"SF Mono",Consolas,monospace;
+              color:var(--muted); flex:0 0 auto; }
+  .info-bar b { color:var(--text); font-weight:600; }
 
-  .bottom { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
-  .tabs { display: flex; gap: 2px; padding: 6px 8px 0; background: #fbfcfe;
-          border-bottom: 1px solid var(--border); flex: 0 0 auto; }
-  .tabs button { padding: 9px 14px; font: inherit; font-size: 12px; font-weight: 600;
-                 letter-spacing: 0.02em; color: var(--muted); background: transparent;
-                 border: 0; border-bottom: 2px solid transparent; cursor: pointer;
-                 border-radius: var(--radius-sm) var(--radius-sm) 0 0; transition: all .12s; }
-  .tabs button:hover { color: var(--text); background: #f3f5f9; }
-  .tabs button.active { color: var(--accent); border-bottom-color: var(--accent);
-                        background: var(--panel); }
-  .tab-content { flex: 1 1 auto; min-height: 0; overflow: auto; display: none;
-                 background: var(--panel); }
-  .tab-content.active { display: block; }
+  /* XML editor */
+  textarea { flex:1 1 auto; width:100%; min-height:0; border:0; outline:0;
+             resize:none; padding:14px 16px;
+             font:12.5px/1.65 "SF Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+             color:var(--text); background:var(--panel); tab-size:2; }
+  textarea::selection { background:var(--accent-soft); }
 
-  #log { padding: 12px 16px; margin: 0;
-         font: 11.5px/1.6 "SF Mono", ui-monospace, Consolas, monospace;
-         white-space: pre-wrap; word-break: break-word; color: var(--text); }
-  #log .line { padding: 2px 0; display: flex; gap: 8px; }
-  #log .line .badge { flex: 0 0 auto; display: inline-flex;
-                      align-items: center; justify-content: center;
-                      min-width: 44px; padding: 1px 6px; font-size: 10px;
-                      font-weight: 700; letter-spacing: 0.04em; border-radius: 4px;
-                      height: 18px; margin-top: 1px; }
-  #log .ok .badge  { background: var(--ok-soft); color: var(--ok); }
-  #log .err .badge { background: var(--err-soft); color: var(--err); }
-  #log .hi .badge  { background: var(--accent-soft); color: var(--accent); }
-  #log .dim        { color: var(--muted); }
-  #log .dim .badge { background: #f3f4f6; color: var(--muted); }
-  #log .line .msg  { flex: 1; min-width: 0; }
+  /* Bottom tabs */
+  .bottom { display:flex; flex-direction:column; min-height:0; flex:1 1 auto; }
+  .tabs { display:flex; gap:2px; padding:6px 8px 0; background:#fbfcfe;
+          border-bottom:1px solid var(--border); flex:0 0 auto; }
+  .tabs button { padding:9px 14px; font:inherit; font-size:12px; font-weight:600;
+                 letter-spacing:.02em; color:var(--muted); background:transparent;
+                 border:0; border-bottom:2px solid transparent; cursor:pointer;
+                 border-radius:var(--radius-sm) var(--radius-sm) 0 0;
+                 transition:all .12s; }
+  .tabs button:hover { color:var(--text); background:#f3f5f9; }
+  .tabs button.active { color:var(--accent); border-bottom-color:var(--accent);
+                        background:var(--panel); }
+  .tab-content { flex:1 1 auto; min-height:0; overflow:auto; display:none;
+                 background:var(--panel); }
+  .tab-content.active { display:block; }
 
-  #tree { padding: 10px 14px; font: 12px/1.7 "SF Mono", ui-monospace, Consolas, monospace; }
-  #tree .row { display: grid; grid-template-columns: auto 44px 140px 1fr;
-               gap: 10px; padding: 3px 0; white-space: nowrap; border-radius: 4px; }
-  #tree .row:hover { background: #f7f8fb; }
-  #tree .branch { color: #d1d5db; }
-  #tree .idx { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
-  #tree .type { color: #b45309; font-weight: 500; }
-  #tree .props { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+  /* Log */
+  #log { padding:12px 16px; margin:0;
+         font:11.5px/1.6 "SF Mono",ui-monospace,Consolas,monospace;
+         white-space:pre-wrap; word-break:break-word; color:var(--text); }
+  #log .line { padding:2px 0; display:flex; gap:8px; }
+  #log .line .badge { flex:0 0 auto; display:inline-flex;
+                      align-items:center; justify-content:center;
+                      min-width:44px; padding:1px 6px; font-size:10px;
+                      font-weight:700; letter-spacing:.04em; border-radius:4px;
+                      height:18px; margin-top:1px; }
+  #log .ok .badge  { background:var(--ok-soft); color:var(--ok); }
+  #log .err .badge { background:var(--err-soft); color:var(--err); }
+  #log .hi .badge  { background:var(--accent-soft); color:var(--accent); }
+  #log .warn .badge { background:var(--warn-soft); color:var(--warn); }
+  #log .dim        { color:var(--muted); }
+  #log .dim .badge { background:#f3f4f6; color:var(--muted); }
+  #log .line .msg  { flex:1; min-width:0; }
 
-  #toast { position: fixed; left: 50%; bottom: 24px;
-           transform: translateX(-50%) translateY(80px);
-           background: #1a1d24; color: #fff; padding: 10px 18px;
-           border-radius: 24px; font-size: 13px; font-weight: 500;
-           box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none;
-           transition: all .25s cubic-bezier(.2,.8,.2,1); z-index: 100; }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* Tree */
+  #tree { padding:8px 12px;
+          font:12px/1.55 "SF Mono",ui-monospace,Consolas,monospace; }
+  #tree .row { display:grid;
+               grid-template-columns:auto 42px 130px 18px 1fr;
+               gap:8px; padding:2px 4px; white-space:nowrap;
+               border-radius:4px; align-items:center; }
+  #tree .row:hover { background:#f7f8fb; }
+  #tree .branch { color:#d1d5db; }
+  #tree .idx { color:var(--accent); font-weight:700;
+               font-variant-numeric:tabular-nums; }
+  #tree .type { color:#b45309; font-weight:500; }
+  #tree .swatch { width:14px; height:14px; border-radius:3px;
+                  border:1px solid rgba(0,0,0,.1); }
+  #tree .props { color:var(--muted); overflow:hidden; text-overflow:ellipsis; }
+  #tree .tag { display:inline-block; padding:0 5px; font-size:9px;
+               font-weight:700; letter-spacing:.03em; border-radius:3px;
+               margin-left:6px; vertical-align:1px; }
+  #tree .tag.pf  { background:#eef2ff; color:#4f46e5; }
+  #tree .tag.conn { background:#fef3c7; color:#b45309; }
 
-  input[type=file] { display: none; }
-  @media (max-width: 500px) {
-    .toolbar .btn .label { display: none; }
-    .toolbar .btn { padding: 9px 10px; }
-    #tree .row { grid-template-columns: auto 38px 110px 1fr; }
+  /* Toast */
+  #toast { position:fixed; left:50%; bottom:24px;
+           transform:translateX(-50%) translateY(80px);
+           background:#1a1d24; color:#fff; padding:10px 18px;
+           border-radius:24px; font-size:13px; font-weight:500;
+           box-shadow:var(--shadow-lg); opacity:0; pointer-events:none;
+           transition:all .25s cubic-bezier(.2,.8,.2,1); z-index:100; }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  input[type=file] { display:none; }
+  @media (max-width:560px) {
+    .toolbar .btn .label { display:none; }
+    .toolbar .btn { padding:9px 10px; }
+    #tree .row { grid-template-columns:auto 36px 100px 16px 1fr; }
   }
 </style>
 </head>
 <body>
 <div class="app">
+
   <header>
     <div class="brand"><span class="dot"></span>StickNodes Studio</div>
     <div class="status" id="status">
@@ -177,21 +217,25 @@
       <svg viewBox="0 0 24 24"><path d="M4 4h12l4 4v12H4z"/><path d="M12 11v6m0 0l-3-3m3 3l3-3"/></svg>
       <span class="label">Load</span>
     </button>
-    <button class="btn toggle" id="btnFlip" title="Flip Y axis in preview">
-      <svg viewBox="0 0 24 24"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
-      <span class="label">Flip Y</span>
+    <button class="btn" id="btnJson">
+      <svg viewBox="0 0 24 24"><path d="M8 3H4v4M16 3h4v4M8 21H4v-4M16 21h4v-4"/></svg>
+      <span class="label">JSON</span>
     </button>
-    <button class="btn toggle on" id="btnFit" title="Robust fit (trim outliers)">
-      <svg viewBox="0 0 24 24"><path d="M4 4h4M4 4v4M20 4h-4M20 4v4M4 20h4M4 20v-4M20 20h-4M20 20v-4"/></svg>
-      <span class="label">Trim</span>
+    <button class="btn toggle" id="btnFlip" title="Flip Y in preview">
+      <svg viewBox="0 0 24 24"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
+      <span class="label">Flip</span>
+    </button>
+    <button class="btn toggle on" id="btnFill" title="Draw polyfills">
+      <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9-9 9z"/></svg>
+      <span class="label">Fills</span>
     </button>
 
     <div class="spacer"></div>
 
     <select class="preset" id="preset">
       <option value="">Load preset…</option>
-      <option value="empty">Empty figure</option>
-      <option value="standing">Standing humanoid</option>
+      <option value="empty">Empty</option>
+      <option value="standing">Standing</option>
       <option value="tpose">T-pose</option>
       <option value="running">Running</option>
       <option value="sitting">Sitting</option>
@@ -206,20 +250,28 @@
         <span class="meta" id="previewMeta">—</span>
       </div>
       <div class="preview-wrap">
-        <canvas id="preview" width="720" height="620"></canvas>
+        <canvas id="preview" width="800" height="700"></canvas>
+      </div>
+      <div class="info-bar" id="infoBar">
+        <span>wasm <b id="wasmVer">?</b></span>
+        <span>fig <b id="figVer">—</b></span>
+        <span>nodes <b id="nCount">0</b></span>
+        <span>polyfills <b id="pfCount">0</b></span>
+        <span>connectors <b id="cnCount">0</b></span>
       </div>
     </div>
 
-    <div style="display: flex; flex-direction: column; min-height: 0; gap: 12px;">
-      <div class="card" style="flex: 1 1 55%;">
+    <div style="display:flex; flex-direction:column; min-height:0; gap:12px;">
+      <div class="card" style="flex:1 1 52%;">
         <div class="card-head">
           <h2>XML</h2>
           <span class="meta" id="xmlMeta">—</span>
         </div>
-        <textarea id="xml" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea>
+        <textarea id="xml" spellcheck="false" autocapitalize="off"
+                  autocorrect="off" autocomplete="off"></textarea>
       </div>
 
-      <div class="card bottom" style="flex: 1 1 45%;">
+      <div class="card bottom" style="flex:1 1 48%;">
         <div class="tabs">
           <button data-tab="log" class="active">Log</button>
           <button data-tab="tree">Tree</button>
@@ -235,13 +287,16 @@
 <div id="toast"></div>
 
 <script type="module">
+/* ════════════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
-const xmlEl = $('xml'), logEl = $('log'), treeEl = $('tree'), canvas = $('preview');
-const fileInput = $('fileInput'), statusEl = $('status'), statusTextEl = $('statusText');
-const xmlMeta = $('xmlMeta'), previewMeta = $('previewMeta'), toastEl = $('toast');
+const xmlEl = $('xml'), logEl = $('log'), treeEl = $('tree'),
+      canvas = $('preview'), fileInput = $('fileInput'),
+      statusEl = $('status'), statusTextEl = $('statusText'),
+      xmlMeta = $('xmlMeta'), previewMeta = $('previewMeta'),
+      toastEl = $('toast'), infoBar = $('infoBar');
 
-let flipY = false;   // when true, mirror vertical
-let trimFit = true;  // when true, trim outliers from bbox
+let flipY = false;
+let showFills = true;
 
 let toastTimer = null;
 function toast(msg) {
@@ -255,18 +310,22 @@ function setStatus(state, text) {
   statusTextEl.textContent = text;
 }
 function logMsg(kind, msg) {
-  const kc = { ok:'ok', err:'err', hi:'hi', dim:'dim' }[kind] || 'dim';
-  const bt = { ok:'OK', err:'FAIL', hi:'INFO', dim:'···' }[kind] || '···';
+  const kc = { ok:'ok', err:'err', hi:'hi', dim:'dim', warn:'warn' }[kind] || 'dim';
+  const bt = { ok:'OK', err:'FAIL', hi:'INFO', dim:'···', warn:'WARN' }[kind] || '···';
   const line = document.createElement('div');
   line.className = 'line ' + kc;
   const b = document.createElement('span'); b.className = 'badge'; b.textContent = bt;
   const t = document.createElement('span'); t.className = 'msg'; t.textContent = msg;
   line.appendChild(b); line.appendChild(t);
-  logEl.appendChild(line); logEl.scrollTop = logEl.scrollHeight;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
   try { console.log('[studio]', kind, msg); } catch (_) {}
 }
 function clearLog() { logEl.textContent = ''; }
 
+/* ════════════════════════════════════════════════════════════════
+   Load module (MIME-bypass) + WASM
+   ════════════════════════════════════════════════════════════════ */
 let mod = null;
 
 async function loadLibrary() {
@@ -277,18 +336,19 @@ async function loadLibrary() {
     const r = await fetch('./sticknodes_rs.js', { cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     jsText = await r.text();
-    logMsg('ok', 'fetched ' + jsText.length + ' chars');
+    logMsg('ok', 'fetched ' + jsText.length.toLocaleString() + ' chars');
   } catch (e) {
     logMsg('err', 'fetch sticknodes_rs.js: ' + e.message);
-    setStatus('error', 'library fetch failed');
+    setStatus('error', 'fetch failed');
     throw e;
   }
-  const blobUrl = URL.createObjectURL(new Blob([jsText], { type: 'application/javascript' }));
+
+  const blobUrl = URL.createObjectURL(new Blob([jsText], { type:'application/javascript' }));
   try {
     mod = await import(blobUrl);
     logMsg('ok', 'module imported');
   } catch (e) {
-    logMsg('err', 'import module: ' + e.message);
+    logMsg('err', 'import: ' + e.message);
     setStatus('error', 'module error');
     throw e;
   } finally { URL.revokeObjectURL(blobUrl); }
@@ -305,18 +365,32 @@ async function loadLibrary() {
     setStatus('error', 'wasm fetch failed');
     throw e;
   }
+
   logMsg('hi', 'Initializing WASM');
   try {
     await mod.default(wasmBytes);
     logMsg('ok', 'WASM ready');
-    setStatus('ready', 'ready');
   } catch (e) {
     logMsg('err', 'init: ' + e.message);
     setStatus('error', 'wasm init failed');
     throw e;
   }
+
+  // Report supported version/build
+  try {
+    const sv = mod.SUPPORTED_VERSION ? mod.SUPPORTED_VERSION() : '?';
+    const sb = mod.SUPPORTED_BUILD   ? mod.SUPPORTED_BUILD()   : '?';
+    $('wasmVer').textContent = sv + '/' + sb;
+    logMsg('hi', 'SUPPORTED_VERSION=' + sv + ' SUPPORTED_BUILD=' + sb +
+                 (sv === 9999999 ? ' (tryreadanyway active)' : ''));
+  } catch (e) { logMsg('warn', 'SUPPORTED_*: ' + e.message); }
+
+  setStatus('ready', 'ready');
 }
 
+/* ════════════════════════════════════════════════════════════════
+   Constants
+   ════════════════════════════════════════════════════════════════ */
 const NODE_TYPE_NAME = {
   [-1]:'RootNode', 0:'RoundedSegment', 1:'Segment', 2:'Circle',
   3:'Triangle', 4:'FilledCircle', 5:'Ellipse', 6:'Trapezoid', 7:'Polygon'
@@ -326,10 +400,13 @@ const NODE_TYPE_VALID = {
   FilledCircle:1, Ellipse:1, Trapezoid:1, Polygon:1
 };
 
+/* ════════════════════════════════════════════════════════════════
+   Colors
+   ════════════════════════════════════════════════════════════════ */
 function parseHexObj(hex) {
   let h = String(hex).trim().replace(/^#/, '');
-  if (h.length === 3) h = h.split('').map(c => c+c).join('') + 'FF';
-  else if (h.length === 4) h = h.split('').map(c => c+c).join('');
+  if (h.length === 3) h = h.split('').map(c=>c+c).join('') + 'FF';
+  else if (h.length === 4) h = h.split('').map(c=>c+c).join('');
   else if (h.length === 6) h += 'FF';
   else if (h.length !== 8) throw new Error('bad hex: ' + hex);
   const n = i => parseInt(h.slice(i, i+2), 16);
@@ -343,7 +420,13 @@ const cssFromHex = hex => {
   return 'rgba(' + c.red + ',' + c.green + ',' + c.blue + ',' +
          (c.alpha/255).toFixed(3) + ')';
 };
+const toHexFromObj = c => '#'
+  + [c.red, c.green, c.blue, c.alpha]
+      .map(v => v.toString(16).padStart(2,'0')).join('').toUpperCase();
 
+/* ════════════════════════════════════════════════════════════════
+   XML → NodeOptions
+   ════════════════════════════════════════════════════════════════ */
 const ATTR_NUM = {
   length:'length', defaultLength:'defaultLength',
   thickness:'thickness', defaultThickness:'defaultThickness',
@@ -435,11 +518,13 @@ function buildFigure(xmlText) {
   const rootEl = doc.documentElement;
   if (rootEl.tagName.toLowerCase() !== 'stickfigure')
     throw new Error('root element must be <stickfigure>');
+
   const fig = new mod.Stickfigure();
   if (rootEl.hasAttribute('version')) fig.setVersion(parseInt(rootEl.getAttribute('version'), 10));
   if (rootEl.hasAttribute('build'))   fig.build = parseInt(rootEl.getAttribute('build'), 10);
   if (rootEl.hasAttribute('scale'))   fig.scale = parseFloat(rootEl.getAttribute('scale'));
   if (rootEl.hasAttribute('color'))   fig.colorHex = rootEl.getAttribute('color');
+
   const rootNode = fig.rootNode();
   let added = 0;
   const walk = (parent, containerEl) => {
@@ -451,6 +536,7 @@ function buildFigure(xmlText) {
     }
   };
   walk(rootNode, rootEl);
+
   let pfAdded = 0;
   for (const el of rootEl.children) {
     if (el.tagName.toLowerCase() !== 'polyfill') continue;
@@ -460,93 +546,122 @@ function buildFigure(xmlText) {
   return { fig, added, pfAdded };
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   World walk. Applies figure.scale to each offset — matches how
-   StickNodes' renderer scales the whole figure.
-   ══════════════════════════════════════════════════════════════════ */
-function walkWorld(fig) {
-  const out = [];
+/* ════════════════════════════════════════════════════════════════
+   SCENE — reads positions and polyfills via WASM methods
+   ════════════════════════════════════════════════════════════════ */
+function computeScene(fig) {
   const figScale = fig.scale || 1;
-  const visit = (node, sx, sy, parentAngle) => {
-    const ga = parentAngle + (node.localAngle || 0);
-    const rad = ga * Math.PI / 180;
-    const len = node.length || 0;
-    const sf = node.useSegmentScale ? (node.scale || 1) : 1;
-    const ex = sx + len * Math.cos(rad) * sf * figScale;
-    const ey = sy + len * Math.sin(rad) * sf * figScale;
-    out.push({ node, sx, sy, ex, ey, angle: ga });
-    for (const k of node.children()) visit(k, ex, ey, ga);
-  };
-  visit(fig.rootNode(), 0, 0, 0);
-  return out;
-}
+  const nodes = [];
+  let nodeList = [];
+  try { nodeList = fig.allNodes(); }
+  catch (e) { logMsg('warn', 'allNodes: ' + e.message); }
 
-/* ══════════════════════════════════════════════════════════════════
-   Robust bbox: collects all node endpoints, trims extreme 2% when
-   trimFit is on, then pads by half thickness (not length!).
-   ══════════════════════════════════════════════════════════════════ */
-function computeBBox(items) {
-  if (items.length === 0) return { minX:-60, minY:-60, maxX:60, maxY:60 };
-  const pts = [];
-  let maxPad = 0;
-  for (const it of items) {
-    const th = Math.abs(it.node.thickness || 0);
-    const pad = th / 2;
-    if (pad > maxPad) maxPad = pad;
-    pts.push([it.sx, it.sy, pad]);
-    pts.push([it.ex, it.ey, pad]);
+  for (const node of nodeList) {
+    let type;
+    try { type = node.nodeType; } catch { continue; }
+    if (type === -1) continue;      // skip root
+
+    let s, e;
+    try {
+      s = node.getGlobalStart();
+      e = node.getGlobalEnd();
+    } catch (err) {
+      logMsg('warn', 'pos failed on [' + node.drawIndex + ']: ' + err.message);
+      continue;
+    }
+
+    let th = 1;
+    try { th = node.getEffectiveThickness(); } catch {}
+    let colorHex = '#888';
+    try { colorHex = node.getDisplayColorHex(); } catch {}
+
+    nodes.push({
+      node, type,
+      drawIndex: node.drawIndex,
+      sx: s[0] * figScale, sy: s[1] * figScale,
+      ex: e[0] * figScale, ey: e[1] * figScale,
+      thickness: th,
+      colorHex,
+    });
   }
-  let minX, minY, maxX, maxY;
-  if (trimFit && pts.length >= 20) {
-    const xs = pts.map(p => p[0]).sort((a,b) => a-b);
-    const ys = pts.map(p => p[1]).sort((a,b) => a-b);
-    const trimFrac = 0.02;
-    const loX = Math.floor(xs.length * trimFrac);
-    const hiX = Math.ceil(xs.length * (1 - trimFrac)) - 1;
-    const loY = Math.floor(ys.length * trimFrac);
-    const hiY = Math.ceil(ys.length * (1 - trimFrac)) - 1;
-    minX = xs[loX]; maxX = xs[hiX];
-    minY = ys[loY]; maxY = ys[hiY];
-  } else {
-    minX = Infinity; minY = Infinity; maxX = -Infinity; maxY = -Infinity;
-    for (const p of pts) {
-      if (p[0] < minX) minX = p[0];
-      if (p[1] < minY) minY = p[1];
-      if (p[0] > maxX) maxX = p[0];
-      if (p[1] > maxY) maxY = p[1];
+  nodes.sort((a, b) => a.drawIndex - b.drawIndex);
+
+  // Polyfills
+  const polyfills = [];
+  let pfData = [];
+  try { pfData = fig.allPolyfills(); }
+  catch (e) { logMsg('warn', 'allPolyfills: ' + e.message); }
+
+  for (const pf of pfData) {
+    try {
+      const flat = fig.getPolyfillVertices(pf.anchorDrawIndex);
+      const verts = [];
+      for (let i = 0; i + 1 < flat.length; i += 2) {
+        verts.push({ x: flat[i] * figScale, y: flat[i+1] * figScale });
+      }
+      polyfills.push({
+        anchor: pf.anchorDrawIndex,
+        colorHex: pf.colorHex,
+        useColor: pf.usePolyfillColor,
+        verts,
+      });
+    } catch (e) {
+      logMsg('warn', 'polyfill verts for anchor ' + pf.anchorDrawIndex + ': ' + e.message);
     }
   }
-  const pad = Math.max(maxPad, 6) + 6;
-  return { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
+
+  return { nodes, polyfills, figScale };
 }
 
+/* ════════════════════════════════════════════════════════════════
+   Renderer
+   ════════════════════════════════════════════════════════════════ */
 function render(fig) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
 
-  const items = walkWorld(fig);
-  const bb = computeBBox(items);
-  const spanX = Math.max(bb.maxX - bb.minX, 40);
-  const spanY = Math.max(bb.maxY - bb.minY, 40);
-  const fit = Math.min((W - 40) / spanX, (H - 40) / spanY);
-  const cx = (bb.minX + bb.maxX) / 2, cy = (bb.minY + bb.maxY) / 2;
+  const scene = computeScene(fig);
 
-  // ── MINIMUM VISUAL WIDTH so thin segments don't dissolve into AA gray ──
-  const MIN_PX = 2.0;                        // 2 screen pixels
-  const minWorldW = MIN_PX / fit;            // convert pixels → world units
+  // Bounding box
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  let maxTh = 0;
+  const addPt = (x, y) => {
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+  };
+  for (const n of scene.nodes) {
+    maxTh = Math.max(maxTh, Math.abs(n.thickness || 0) / 2);
+    addPt(n.sx, n.sy);
+    addPt(n.ex, n.ey);
+  }
+  for (const pf of scene.polyfills) {
+    for (const v of pf.verts) addPt(v.x, v.y);
+  }
+  if (!isFinite(minX)) { minX = minY = -50; maxX = maxY = 50; }
+
+  const pad = Math.max(maxTh, 6) + 8;
+  minX -= pad; minY -= pad; maxX += pad; maxY += pad;
+  const spanX = Math.max(maxX - minX, 40);
+  const spanY = Math.max(maxY - minY, 40);
+  const fit = Math.min((W - 40) / spanX, (H - 40) / spanY);
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+
+  const minWorldW = 2 / fit;    // 2 screen pixels, in world units
 
   ctx.save();
   ctx.translate(W/2, H/2);
   ctx.scale(fit, flipY ? -fit : fit);
   ctx.translate(-cx, -cy);
 
-  // Light grid
-  ctx.strokeStyle = 'rgba(0,0,0,0.045)';
+  // Grid
+  ctx.strokeStyle = 'rgba(0,0,0,.045)';
   ctx.lineWidth = 1 / fit;
   const step = 50;
-  const gx0 = Math.floor(bb.minX / step) * step, gx1 = Math.ceil(bb.maxX / step) * step;
-  const gy0 = Math.floor(bb.minY / step) * step, gy1 = Math.ceil(bb.maxY / step) * step;
+  const gx0 = Math.floor(minX / step) * step, gx1 = Math.ceil(maxX / step) * step;
+  const gy0 = Math.floor(minY / step) * step, gy1 = Math.ceil(maxY / step) * step;
   for (let gx = gx0; gx <= gx1; gx += step) {
     ctx.beginPath(); ctx.moveTo(gx, gy0); ctx.lineTo(gx, gy1); ctx.stroke();
   }
@@ -554,126 +669,120 @@ function render(fig) {
     ctx.beginPath(); ctx.moveTo(gx0, gy); ctx.lineTo(gx1, gy); ctx.stroke();
   }
 
-  // Origin cross
-  ctx.strokeStyle = 'rgba(79,70,229,0.14)';
+  // Origin axes
+  ctx.strokeStyle = 'rgba(79,70,229,.14)';
   ctx.lineWidth = 1.4 / fit;
   ctx.beginPath();
   ctx.moveTo(gx0, 0); ctx.lineTo(gx1, 0);
   ctx.moveTo(0, gy0); ctx.lineTo(0, gy1);
   ctx.stroke();
+  const osz = 5 / fit;
+  ctx.fillStyle = 'rgba(79,70,229,.85)';
+  ctx.beginPath(); ctx.arc(0, 0, osz, 0, Math.PI*2); ctx.fill();
 
-  const osz = 6 / fit;
-  ctx.fillStyle = 'rgba(79,70,229,0.85)';
-  ctx.beginPath(); ctx.arc(0, 0, osz, 0, Math.PI * 2); ctx.fill();
+  // Figure default color (used when a node has useSegmentColor=false)
+  let figColorCss = 'rgba(32,32,32,1)';
+  try { figColorCss = cssFromHex(fig.colorHex); } catch {}
 
-  // Figure
-  let figCol;
-  try { figCol = cssFromHex(fig.colorHex); }
-  catch { figCol = 'rgba(32,32,32,1)'; }
+  // Draw nodes in z-order
+  for (const n of scene.nodes) {
+    let col;
+    try { col = cssFromHex(n.colorHex); } catch { col = figColorCss; }
 
-  // Sort by thickness descending so thin details render ON TOP of thick ones.
-  // This mirrors how StickNodes appears to layer: big body fills first, tiny
-  // hair strands overlay last.
-  const sorted = items.slice().sort((a, b) => {
-    if (a.node.nodeType === -1) return -1;
-    if (b.node.nodeType === -1) return 1;
-    return (b.node.thickness || 0) - (a.node.thickness || 0);
-  });
-
-  for (const it of sorted) {
-    const n = it.node;
-    if (n.nodeType === -1) continue;
-
-    let col = figCol;
-    if (n.useSegmentColor) {
-      try { col = cssFromHex(n.colorHex); } catch {}
-    }
     ctx.strokeStyle = col;
-    ctx.fillStyle = col;
+    ctx.fillStyle   = col;
     ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
+    ctx.lineCap  = 'round';
 
-    const rawTh = Math.max(0.3, Math.abs(n.thickness || 1));
-    const rawLn = Math.max(0.3, Math.abs(n.length || 0));
-    const th = Math.max(rawTh, minWorldW);          // ← the fix
-    const angle = Math.atan2(it.ey - it.sy, it.ex - it.sx);
+    const dx = n.ex - n.sx, dy = n.ey - n.sy;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const angle = Math.atan2(dy, dx);
+    const th = Math.max(0.5, Math.abs(n.thickness) || 1);
+    const thW = Math.max(th, minWorldW);
 
-    switch (n.nodeType) {
-      case 1:   // Segment
-      case 0:   // RoundedSegment
-        ctx.lineWidth = th;
-        ctx.lineCap = n.nodeType === 0 ? 'round' : 'butt';
+    switch (n.type) {
+      case 0: // RoundedSegment
+      case 1: // Segment
+        ctx.lineWidth = thW;
+        ctx.lineCap = n.type === 0 ? 'round' : 'butt';
         ctx.beginPath();
-        ctx.moveTo(it.sx, it.sy);
-        ctx.lineTo(it.ex, it.ey);
+        ctx.moveTo(n.sx, n.sy);
+        ctx.lineTo(n.ex, n.ey);
         ctx.stroke();
-        // Draw a filled circle at the end to guarantee joins never show a gap
-        if (n.nodeType === 0 && th < rawLn) {
+        if (n.type === 0) {
+          // Guarantee a solid joint
           ctx.beginPath();
-          ctx.arc(it.ex, it.ey, th / 2, 0, Math.PI * 2);
+          ctx.arc(n.ex, n.ey, thW/2, 0, Math.PI*2);
           ctx.fill();
         }
         break;
 
-      case 2:   // Circle (hollow outline, but thick thickness fills it)
+      case 2: // Circle (hollow outline)
       case 4: { // FilledCircle
-        const d = Math.max(rawLn, rawTh);
-        const r = d / 2;
+        const diam = Math.max(len, th);
+        const r = diam / 2;
         ctx.beginPath();
-        ctx.arc(it.ex, it.ey, r, 0, Math.PI * 2);
-        if (n.nodeType === 4) ctx.fill();
-        else { ctx.lineWidth = th; ctx.stroke(); }
+        ctx.arc(n.ex, n.ey, r, 0, Math.PI*2);
+        let hollow = false;
+        try { hollow = n.node.circleIsHollow; } catch {}
+        if (n.type === 4 && !hollow) {
+          ctx.fill();
+        } else {
+          ctx.lineWidth = thW;
+          ctx.stroke();
+        }
         break;
       }
 
-      case 5:   // Ellipse
+      case 5: { // Ellipse
         ctx.save();
-        ctx.translate(it.ex, it.ey);
+        ctx.translate(n.ex, n.ey);
         ctx.rotate(angle);
         ctx.beginPath();
-        ctx.ellipse(0, 0, rawLn / 2, Math.max(0.3, th / 2), 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, Math.max(0.5, len/2), Math.max(0.5, th/2), 0, 0, Math.PI*2);
         ctx.fill();
         ctx.restore();
         break;
+      }
 
       case 3: { // Triangle
-        const r = rawLn;
+        const r = Math.max(1, len);
         const base = angle + Math.PI;
         const side = 2 * Math.PI / 3;
         ctx.beginPath();
-        ctx.moveTo(it.ex, it.ey);
-        ctx.lineTo(it.ex + r * Math.cos(base + side / 2),
-                   it.ey + r * Math.sin(base + side / 2));
-        ctx.lineTo(it.ex + r * Math.cos(base - side / 2),
-                   it.ey + r * Math.sin(base - side / 2));
+        ctx.moveTo(n.ex, n.ey);
+        ctx.lineTo(n.ex + r * Math.cos(base + side/2), n.ey + r * Math.sin(base + side/2));
+        ctx.lineTo(n.ex + r * Math.cos(base - side/2), n.ey + r * Math.sin(base - side/2));
         ctx.closePath();
         ctx.fill();
         break;
       }
 
       case 6: { // Trapezoid
-        const w1 = Math.abs(n.trapezoidThicknessStart ?? rawTh) || rawTh;
-        const w2 = Math.abs(n.trapezoidThicknessEnd   ?? rawTh * 0.5) || rawTh * 0.5;
+        let w1 = th, w2 = th * 0.5;
+        try { w1 = n.node.getTrapezoidThicknessStart() || th; } catch {}
+        try { w2 = n.node.getTrapezoidThicknessEnd()   || th * 0.5; } catch {}
         const nx = -Math.sin(angle), ny = Math.cos(angle);
         ctx.beginPath();
-        ctx.moveTo(it.sx + nx * w1 / 2, it.sy + ny * w1 / 2);
-        ctx.lineTo(it.ex + nx * w2 / 2, it.ey + ny * w2 / 2);
-        ctx.lineTo(it.ex - nx * w2 / 2, it.ey - ny * w2 / 2);
-        ctx.lineTo(it.sx - nx * w1 / 2, it.sy - ny * w1 / 2);
+        ctx.moveTo(n.sx + nx*w1/2, n.sy + ny*w1/2);
+        ctx.lineTo(n.ex + nx*w2/2, n.ey + ny*w2/2);
+        ctx.lineTo(n.ex - nx*w2/2, n.ey - ny*w2/2);
+        ctx.lineTo(n.sx - nx*w1/2, n.sy - ny*w1/2);
         ctx.closePath();
         ctx.fill();
         break;
       }
 
       case 7: { // Polygon
-        const sides = Math.max(3, n.numPolygonVertices || 5);
-        const r = rawLn;
+        let sides = 5;
+        try { sides = Math.max(3, n.node.numPolygonVertices || 5); } catch {}
+        const r = Math.max(1, len);
         ctx.beginPath();
         for (let i = 0; i < sides; i++) {
           const a = angle + (i / sides) * Math.PI * 2;
-          const px = it.ex + r * Math.cos(a);
-          const py = it.ey + r * Math.sin(a);
-          i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+          const px = n.ex + r * Math.cos(a);
+          const py = n.ey + r * Math.sin(a);
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
         }
         ctx.closePath();
         ctx.fill();
@@ -681,49 +790,117 @@ function render(fig) {
       }
     }
   }
+
+  // Draw polyfills (on top — the key visual fix)
+  if (showFills) {
+    for (const pf of scene.polyfills) {
+      if (pf.verts.length < 3) continue;
+      let col = figColorCss;
+      if (pf.useColor) {
+        try { col = cssFromHex(pf.colorHex); } catch {}
+      }
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(pf.verts[0].x, pf.verts[0].y);
+      for (let i = 1; i < pf.verts.length; i++) {
+        ctx.lineTo(pf.verts[i].x, pf.verts[i].y);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
   ctx.restore();
 
-  previewMeta.textContent =
-    '×' + fit.toFixed(2) + '  ·  ' + items.length + ' nodes' +
-    (flipY ? '  ·  flipped' : '') +
-    (trimFit ? '  ·  trim' : '');
+  // Meta
+  previewMeta.textContent = '×' + fit.toFixed(2) +
+    '  ·  ' + scene.nodes.length + ' nodes' +
+    (scene.polyfills.length ? '  ·  ' + scene.polyfills.length + ' fills' : '');
+
+  // Info bar
+  try { $('figVer').textContent = fig.version + '/' + fig.build + ' (s=' + (fig.scale||1).toFixed(2) + ')'; }
+  catch {}
+  $('nCount').textContent = scene.nodes.length;
+  $('pfCount').textContent = scene.polyfills.length;
+
+  let connectorCount = 0;
+  for (const n of scene.nodes) {
+    try { if (n.node.hasConnector) connectorCount++; } catch {}
+  }
+  $('cnCount').textContent = connectorCount;
 }
 
+/* ════════════════════════════════════════════════════════════════
+   Tree
+   ════════════════════════════════════════════════════════════════ */
 function renderTree(fig) {
   treeEl.textContent = '';
+  const pfAnchors = new Set();
+  try {
+    for (const pf of fig.allPolyfills()) pfAnchors.add(pf.anchorDrawIndex);
+  } catch {}
+
   const visit = (node, depth) => {
     const row = document.createElement('div');
     row.className = 'row';
+
     const branch = document.createElement('span');
     branch.className = 'branch';
-    branch.textContent = '│ '.repeat(Math.min(depth, 20));
+    branch.textContent = '│ '.repeat(Math.min(depth, 24));
+
     const idx = document.createElement('span');
     idx.className = 'idx';
     idx.textContent = '[' + node.drawIndex + ']';
+
     const type = document.createElement('span');
     type.className = 'type';
-    type.textContent = NODE_TYPE_NAME[node.nodeType] || node.nodeType;
+    type.textContent = NODE_TYPE_NAME[node.nodeType] ?? ('Type' + node.nodeType);
+
+    const swatch = document.createElement('span');
+    swatch.className = 'swatch';
+    try { swatch.style.background = node.getDisplayColorHex(); } catch {}
+
     const props = document.createElement('span');
     props.className = 'props';
-    let s = '';
-    if (node.length)     s += 'len=' + node.length.toFixed(1) + ' ';
-    if (node.thickness)  s += 'th='  + node.thickness + ' ';
-    if (node.localAngle) s += '∠'    + node.localAngle.toFixed(1) + '° ';
-    if (node.useSegmentColor) { try { s += node.colorHex; } catch {} }
-    props.textContent = s.trim();
-    row.appendChild(branch); row.appendChild(idx);
-    row.appendChild(type); row.appendChild(props);
+    const bits = [];
+    if (node.length)     bits.push('len=' + node.length.toFixed(1));
+    if (node.thickness)  bits.push('th=' + node.thickness);
+    if (node.localAngle) bits.push('∠' + node.localAngle.toFixed(1) + '°');
+    props.textContent = bits.join(' ');
+    if (pfAnchors.has(node.drawIndex)) {
+      const tag = document.createElement('span');
+      tag.className = 'tag pf'; tag.textContent = 'FILL';
+      props.appendChild(tag);
+    }
+    try {
+      if (node.hasConnector) {
+        const tag = document.createElement('span');
+        tag.className = 'tag conn'; tag.textContent = 'CONN';
+        props.appendChild(tag);
+      }
+    } catch {}
+
+    row.appendChild(branch);
+    row.appendChild(idx);
+    row.appendChild(type);
+    row.appendChild(swatch);
+    row.appendChild(props);
     treeEl.appendChild(row);
+
     for (const k of node.children()) visit(k, depth + 1);
   };
   visit(fig.rootNode(), 0);
 }
 
+/* ════════════════════════════════════════════════════════════════
+   Reverse export
+   ════════════════════════════════════════════════════════════════ */
 function figureToXml(fig) {
   const out = [];
   out.push('<?xml version="1.0"?>');
   out.push('<stickfigure version="' + fig.version + '" build="' + fig.build +
            '" scale="' + fig.scale + '" color="' + fig.colorHex + '">');
+
   const write = (node, depth) => {
     const pad = '  '.repeat(depth);
     const attrs = [];
@@ -739,6 +916,7 @@ function figureToXml(fig) {
       } catch {}
     }
     if (node.useSegmentScale) attrs.push('useSegmentScale="true"');
+
     const kids = node.children();
     const open = pad + '<node ' + attrs.join(' ');
     if (kids.length === 0) { out.push(open + '/>'); return; }
@@ -751,13 +929,16 @@ function figureToXml(fig) {
   return out.join('\n');
 }
 
+/* ════════════════════════════════════════════════════════════════
+   Presets
+   ════════════════════════════════════════════════════════════════ */
 const BODY = '#42489DFF';
 const SKIN = '#FFCC99FF';
 const PRESETS = {
   empty: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <!-- Add <node> elements here -->',
+    '  <!-- add <node> elements here -->',
     '</stickfigure>'
   ].join('\n'),
   standing: [
@@ -848,6 +1029,9 @@ const PRESETS = {
   ].join('\n'),
 };
 
+/* ════════════════════════════════════════════════════════════════
+   UI
+   ════════════════════════════════════════════════════════════════ */
 let currentFig = null;
 
 function updateXmlMeta() {
@@ -867,7 +1051,7 @@ function buildAndShow() {
     renderTree(r.fig);
     logMsg('ok', 'Built ' + r.added + ' node(s)' +
         (r.pfAdded ? ' · ' + r.pfAdded + ' polyfill(s)' : ''));
-    logMsg('dim', 'version=' + r.fig.version + ' · build=' + r.fig.build +
+    logMsg('dim', 'v' + r.fig.version + ' · b' + r.fig.build +
         ' · scale=' + r.fig.scale);
     toast('Built ' + r.added + ' node' + (r.added === 1 ? '' : 's'));
   } catch (e) {
@@ -884,21 +1068,15 @@ $('btnDownload').addEventListener('click', () => {
     if (!currentFig) buildAndShow();
     if (!currentFig) return;
     const bytes = currentFig.toBytes();
-    const blob = new Blob([bytes], { type: 'application/octet-stream' });
+    const blob = new Blob([bytes], { type:'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'figure.nodes';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    a.href = url; a.download = 'figure.nodes';
+    document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
     logMsg('ok', 'Exported ' + bytes.length.toLocaleString() + ' bytes');
     toast('Downloaded figure.nodes');
-  } catch (e) {
-    logMsg('err', e.message || String(e));
-    toast('Export failed');
-  }
+  } catch (e) { logMsg('err', e.message || String(e)); }
 });
 
 $('btnExport').addEventListener('click', () => {
@@ -907,7 +1085,7 @@ $('btnExport').addEventListener('click', () => {
     if (!currentFig) return;
     xmlEl.value = figureToXml(currentFig);
     updateXmlMeta();
-    logMsg('ok', 'XML written from figure');
+    logMsg('ok', 'XML written from figure (partial — polyfills not round-tripped)');
     toast('XML exported');
   } catch (e) { logMsg('err', e.message || String(e)); }
 });
@@ -916,9 +1094,8 @@ $('btnCopy').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(xmlEl.value);
     toast('Copied to clipboard');
-  } catch (e) {
-    xmlEl.focus();
-    xmlEl.select();
+  } catch {
+    xmlEl.focus(); xmlEl.select();
     toast('Select-all — press Ctrl/Cmd+C');
   }
 });
@@ -945,18 +1122,32 @@ fileInput.addEventListener('change', async () => {
   } finally { fileInput.value = ''; }
 });
 
+$('btnJson').addEventListener('click', () => {
+  try {
+    if (!currentFig) buildAndShow();
+    if (!currentFig) return;
+    const obj = currentFig.toJsObject();
+    const text = JSON.stringify(obj, null, 2);
+    console.log('fig.toJsObject():', obj);
+    logMsg('hi', 'toJsObject dumped to console (' + text.length.toLocaleString() + ' chars)');
+    logMsg('dim', text.slice(0, 800) + (text.length > 800 ? '\n…' : ''));
+    document.querySelector('.tabs button[data-tab="log"]').click();
+    toast('JSON dumped to console');
+  } catch (e) { logMsg('err', 'json: ' + (e.message || String(e))); }
+});
+
 $('btnFlip').addEventListener('click', () => {
   flipY = !flipY;
   $('btnFlip').classList.toggle('on', flipY);
   if (currentFig) render(currentFig);
-  toast('Preview Y-flip: ' + (flipY ? 'ON' : 'OFF'));
+  toast('Flip Y: ' + (flipY ? 'ON' : 'OFF'));
 });
 
-$('btnFit').addEventListener('click', () => {
-  trimFit = !trimFit;
-  $('btnFit').classList.toggle('on', trimFit);
+$('btnFill').addEventListener('click', () => {
+  showFills = !showFills;
+  $('btnFill').classList.toggle('on', showFills);
   if (currentFig) render(currentFig);
-  toast('Trim outliers: ' + (trimFit ? 'ON' : 'OFF'));
+  toast('Polyfill rendering: ' + (showFills ? 'ON' : 'OFF'));
 });
 
 $('preset').addEventListener('change', e => {
@@ -978,13 +1169,19 @@ document.querySelectorAll('.tabs button').forEach(btn => {
   });
 });
 
+/* ════════════════════════════════════════════════════════════════
+   Boot
+   ════════════════════════════════════════════════════════════════ */
 (async () => {
   try {
     await loadLibrary();
     xmlEl.value = PRESETS.standing;
     updateXmlMeta();
     buildAndShow();
-  } catch (e) {}
+    logMsg('hi', 'Ready. Load a real .nodes file to test polyfills and connectors.');
+  } catch (e) {
+    // already logged in loadLibrary
+  }
 })();
 
 window.addEventListener('resize', () => { if (currentFig) render(currentFig); });
