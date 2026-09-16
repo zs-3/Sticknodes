@@ -19,14 +19,12 @@
     --ok-soft: #ecfdf5;
     --err: #dc2626;
     --err-soft: #fef2f2;
-    --warn: #d97706;
     --radius: 10px;
     --radius-sm: 6px;
     --shadow-sm: 0 1px 2px rgba(20, 20, 40, .05);
     --shadow: 0 1px 3px rgba(20, 20, 40, .08), 0 4px 12px rgba(20, 20, 40, .04);
     --shadow-lg: 0 4px 12px rgba(20, 20, 40, .08), 0 12px 32px rgba(20, 20, 40, .06);
   }
-
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; height: 100%; }
   body {
@@ -37,277 +35,114 @@
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
   }
+  .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh;
+         max-width: 1400px; margin: 0 auto; }
 
-  .app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    height: 100dvh;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  /* ─────────── Header ─────────── */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 20px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    flex: 0 0 auto;
-  }
-  header .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 700;
-    font-size: 16px;
-    letter-spacing: -0.01em;
-  }
-  header .brand .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-  header .status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--muted);
-    padding: 5px 10px;
-    background: var(--bg);
-    border-radius: 20px;
-    border: 1px solid var(--border);
-  }
-  header .status .led {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--muted);
-    transition: background .2s;
-  }
+  /* ─── Header ─── */
+  header { display: flex; align-items: center; justify-content: space-between;
+           gap: 12px; padding: 14px 20px; background: var(--panel);
+           border-bottom: 1px solid var(--border); flex: 0 0 auto; }
+  header .brand { display: flex; align-items: center; gap: 10px;
+                  font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
+  header .brand .dot { width: 10px; height: 10px; border-radius: 50%;
+                       background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                       box-shadow: 0 0 0 3px var(--accent-soft); }
+  header .status { display: flex; align-items: center; gap: 6px;
+                   font-size: 12px; color: var(--muted);
+                   padding: 5px 10px; background: var(--bg);
+                   border-radius: 20px; border: 1px solid var(--border); }
+  header .status .led { width: 7px; height: 7px; border-radius: 50%;
+                        background: var(--muted); transition: background .2s; }
   header .status.ready .led { background: var(--ok); box-shadow: 0 0 6px rgba(5,150,105,.5); }
   header .status.error .led { background: var(--err); }
 
-  /* ─────────── Toolbar ─────────── */
-  .toolbar {
-    display: flex;
-    gap: 8px;
-    padding: 12px 20px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    flex: 0 0 auto;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
+  /* ─── Toolbar ─── */
+  .toolbar { display: flex; gap: 8px; padding: 12px 20px;
+             background: var(--panel); border-bottom: 1px solid var(--border);
+             flex: 0 0 auto; overflow-x: auto; scrollbar-width: none; }
   .toolbar::-webkit-scrollbar { display: none; }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 9px 14px;
-    font: inherit;
-    font-weight: 500;
-    font-size: 13px;
-    color: var(--text);
-    background: var(--panel);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    white-space: nowrap;
-    min-height: 38px;
-    transition: all .12s ease;
-    box-shadow: var(--shadow-sm);
-  }
+  .btn { display: inline-flex; align-items: center; gap: 6px;
+         padding: 9px 14px; font: inherit; font-weight: 500; font-size: 13px;
+         color: var(--text); background: var(--panel);
+         border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+         cursor: pointer; white-space: nowrap; min-height: 38px;
+         transition: all .12s ease; box-shadow: var(--shadow-sm); }
   .btn:hover { background: #fafbfd; border-color: #b6bcc7; }
   .btn:active { transform: translateY(1px); box-shadow: none; }
-  .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-    box-shadow: 0 1px 3px rgba(79, 70, 229, .3), 0 4px 12px rgba(79, 70, 229, .15);
-  }
+  .btn.primary { background: var(--accent); border-color: var(--accent);
+                 color: #fff;
+                 box-shadow: 0 1px 3px rgba(79, 70, 229, .3), 0 4px 12px rgba(79, 70, 229, .15); }
   .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
-  .btn svg { width: 14px; height: 14px; stroke-width: 2; }
-
-  select.preset {
-    font: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 9px 12px;
-    background: var(--panel);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    min-height: 38px;
-    color: var(--text);
-    box-shadow: var(--shadow-sm);
-  }
-
+  .btn svg { width: 14px; height: 14px; stroke-width: 2; fill: none; stroke: currentColor; }
+  .btn.toggle.on { background: var(--accent-soft); border-color: var(--accent);
+                   color: var(--accent); }
+  select.preset { font: inherit; font-size: 13px; font-weight: 500;
+                  padding: 9px 12px; background: var(--panel);
+                  border: 1px solid var(--border-strong);
+                  border-radius: var(--radius-sm); cursor: pointer;
+                  min-height: 38px; color: var(--text); box-shadow: var(--shadow-sm); }
   .spacer { flex: 1; }
 
-  /* ─────────── Content grid ─────────── */
-  .content {
-    flex: 1 1 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
-    gap: 12px;
-    padding: 12px 20px 20px;
-    min-height: 0;
-  }
+  /* ─── Content ─── */
+  .content { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr;
+             gap: 12px; padding: 12px 20px 20px; min-height: 0; }
   @media (max-width: 900px) {
     .content { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-    header { padding: 12px 14px; }
-    .toolbar { padding: 10px 14px; }
+    header { padding: 12px 14px; } .toolbar { padding: 10px 14px; }
     .content { padding: 10px 14px 14px; }
   }
 
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
-  }
+  .card { background: var(--panel); border: 1px solid var(--border);
+          border-radius: var(--radius); box-shadow: var(--shadow);
+          display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .card-head { display: flex; align-items: center; justify-content: space-between;
+               padding: 10px 14px; border-bottom: 1px solid var(--border);
+               background: #fbfcfe; flex: 0 0 auto; }
+  .card-head h2 { margin: 0; font-size: 12px; font-weight: 600;
+                  text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .card-head .meta { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-  .card-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    background: #fbfcfe;
-    flex: 0 0 auto;
-  }
-  .card-head h2 {
-    margin: 0;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-  }
-  .card-head .meta {
-    font-size: 11px;
-    color: var(--muted);
-    font-variant-numeric: tabular-nums;
-  }
+  /* ─── Preview ─── */
+  .preview-wrap { position: relative; flex: 1 1 auto; min-height: 0;
+                  display: flex; align-items: center; justify-content: center;
+                  padding: 12px; overflow: hidden;
+                  background: #fbfcfe; }
+  canvas { display: block; max-width: 100%; max-height: 100%;
+           border-radius: var(--radius-sm); background: #ffffff;
+           box-shadow: inset 0 0 0 1px var(--border); }
 
-  /* ─────────── Preview ─────────── */
-  .preview-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-      linear-gradient(45deg, #f8fafc 25%, transparent 25%) -8px 0/16px 16px,
-      linear-gradient(-45deg, #f8fafc 25%, transparent 25%) -8px 0/16px 16px,
-      linear-gradient(45deg, transparent 75%, #f8fafc 75%) -8px 0/16px 16px,
-      linear-gradient(-45deg, transparent 75%, #f8fafc 75%) -8px 0/16px 16px,
-      #ffffff;
-    flex: 1 1 auto;
-    min-height: 0;
-    padding: 16px;
-    overflow: hidden;
-  }
-  canvas {
-    display: block;
-    max-width: 100%;
-    max-height: 100%;
-    border-radius: var(--radius-sm);
-  }
-
-  /* ─────────── XML editor ─────────── */
-  textarea {
-    flex: 1 1 auto;
-    width: 100%;
-    min-height: 0;
-    border: 0;
-    outline: 0;
-    resize: none;
-    padding: 14px 16px;
-    font: 12.5px/1.65 "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-    color: var(--text);
-    background: var(--panel);
-    tab-size: 2;
-  }
+  /* ─── XML editor ─── */
+  textarea { flex: 1 1 auto; width: 100%; min-height: 0; border: 0; outline: 0;
+             resize: none; padding: 14px 16px;
+             font: 12.5px/1.65 "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+             color: var(--text); background: var(--panel); tab-size: 2; }
   textarea::selection { background: var(--accent-soft); }
 
-  /* ─────────── Bottom panel tabs ─────────── */
-  .bottom {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    flex: 1 1 auto;
-  }
-  .tabs {
-    display: flex;
-    gap: 2px;
-    padding: 6px 8px 0;
-    background: #fbfcfe;
-    border-bottom: 1px solid var(--border);
-    flex: 0 0 auto;
-  }
-  .tabs button {
-    padding: 9px 14px;
-    font: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--muted);
-    background: transparent;
-    border: 0;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    transition: all .12s;
-  }
+  /* ─── Bottom tabs ─── */
+  .bottom { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+  .tabs { display: flex; gap: 2px; padding: 6px 8px 0;
+          background: #fbfcfe; border-bottom: 1px solid var(--border); flex: 0 0 auto; }
+  .tabs button { padding: 9px 14px; font: inherit; font-size: 12px; font-weight: 600;
+                 letter-spacing: 0.02em; color: var(--muted); background: transparent;
+                 border: 0; border-bottom: 2px solid transparent; cursor: pointer;
+                 border-radius: var(--radius-sm) var(--radius-sm) 0 0; transition: all .12s; }
   .tabs button:hover { color: var(--text); background: #f3f5f9; }
-  .tabs button.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-    background: var(--panel);
-  }
-  .tab-content {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: auto;
-    display: none;
-    background: var(--panel);
-  }
+  .tabs button.active { color: var(--accent); border-bottom-color: var(--accent);
+                        background: var(--panel); }
+  .tab-content { flex: 1 1 auto; min-height: 0; overflow: auto; display: none;
+                 background: var(--panel); }
   .tab-content.active { display: block; }
 
-  /* ─────────── Log ─────────── */
-  #log {
-    padding: 12px 16px;
-    margin: 0;
-    font: 11.5px/1.6 "SF Mono", ui-monospace, Consolas, monospace;
-    white-space: pre-wrap;
-    word-break: break-word;
-    color: var(--text);
-  }
+  /* ─── Log ─── */
+  #log { padding: 12px 16px; margin: 0;
+         font: 11.5px/1.6 "SF Mono", ui-monospace, Consolas, monospace;
+         white-space: pre-wrap; word-break: break-word; color: var(--text); }
   #log .line { padding: 2px 0; display: flex; gap: 8px; }
-  #log .line .badge {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    padding: 1px 6px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    border-radius: 4px;
-    height: 18px;
-    margin-top: 1px;
-  }
+  #log .line .badge { flex: 0 0 auto; display: inline-flex;
+                      align-items: center; justify-content: center;
+                      min-width: 44px; padding: 1px 6px; font-size: 10px;
+                      font-weight: 700; letter-spacing: 0.04em; border-radius: 4px;
+                      height: 18px; margin-top: 1px; }
   #log .ok .badge  { background: var(--ok-soft); color: var(--ok); }
   #log .err .badge { background: var(--err-soft); color: var(--err); }
   #log .hi .badge  { background: var(--accent-soft); color: var(--accent); }
@@ -315,66 +150,28 @@
   #log .dim .badge { background: #f3f4f6; color: var(--muted); }
   #log .line .msg  { flex: 1; min-width: 0; }
 
-  /* ─────────── Tree ─────────── */
+  /* ─── Tree ─── */
   #tree { padding: 10px 14px; font: 12px/1.7 "SF Mono", ui-monospace, Consolas, monospace; }
-  #tree .row {
-    display: grid;
-    grid-template-columns: auto 44px 140px 1fr;
-    gap: 10px;
-    padding: 3px 0;
-    white-space: nowrap;
-    border-radius: 4px;
-  }
+  #tree .row { display: grid; grid-template-columns: auto 44px 140px 1fr;
+               gap: 10px; padding: 3px 0; white-space: nowrap; border-radius: 4px; }
   #tree .row:hover { background: #f7f8fb; }
   #tree .branch { color: #d1d5db; }
-  #tree .idx {
-    color: var(--accent);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-  }
+  #tree .idx { color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
   #tree .type { color: #b45309; font-weight: 500; }
   #tree .props { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 
-  /* ─────────── Empty/status states ─────────── */
-  .empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    color: var(--muted);
-    font-size: 13px;
-    text-align: center;
-  }
+  /* ─── Toast ─── */
+  #toast { position: fixed; left: 50%; bottom: 24px;
+           transform: translateX(-50%) translateY(80px);
+           background: #1a1d24; color: #fff; padding: 10px 18px;
+           border-radius: 24px; font-size: 13px; font-weight: 500;
+           box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none;
+           transition: all .25s cubic-bezier(.2,.8,.2,1); z-index: 100; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ─────────── File input ─────────── */
   input[type=file] { display: none; }
-
-  /* ─────────── Toast ─────────── */
-  #toast {
-    position: fixed;
-    left: 50%;
-    bottom: 24px;
-    transform: translateX(-50%) translateY(80px);
-    background: #1a1d24;
-    color: #fff;
-    padding: 10px 18px;
-    border-radius: 24px;
-    font-size: 13px;
-    font-weight: 500;
-    box-shadow: var(--shadow-lg);
-    opacity: 0;
-    pointer-events: none;
-    transition: all .25s cubic-bezier(.2,.8,.2,1);
-    z-index: 100;
-  }
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* ─────────── Fullscreen width on very small screens ─────────── */
   @media (max-width: 500px) {
-    .toolbar .btn span.label { display: none; }
+    .toolbar .btn .label { display: none; }
     .toolbar .btn { padding: 9px 10px; }
     #tree .row { grid-template-columns: auto 38px 110px 1fr; }
   }
@@ -384,36 +181,36 @@
 <div class="app">
 
   <header>
-    <div class="brand">
-      <span class="dot"></span>
-      StickNodes Studio
-    </div>
+    <div class="brand"><span class="dot"></span>StickNodes Studio</div>
     <div class="status" id="status">
-      <span class="led"></span>
-      <span id="statusText">loading…</span>
+      <span class="led"></span><span id="statusText">loading…</span>
     </div>
   </header>
 
   <div class="toolbar">
     <button class="btn primary" id="btnBuild">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
       <span class="label">Build</span>
     </button>
     <button class="btn" id="btnDownload">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
       <span class="label">Download</span>
     </button>
     <button class="btn" id="btnExport">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h12l4 4v12H4z"/><path d="M8 10h8M8 14h5"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M4 4h12l4 4v12H4z"/><path d="M8 10h8M8 14h5"/></svg>
       <span class="label">Export XML</span>
     </button>
     <button class="btn" id="btnCopy">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg>
+      <svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg>
       <span class="label">Copy</span>
     </button>
     <button class="btn" id="btnLoad">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h12l4 4v12H4z"/><path d="M12 11v6m0 0l-3-3m3 3l3-3"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M4 4h12l4 4v12H4z"/><path d="M12 11v6m0 0l-3-3m3 3l3-3"/></svg>
       <span class="label">Load</span>
+    </button>
+    <button class="btn toggle" id="btnFlip" title="Flip Y axis in preview">
+      <svg viewBox="0 0 24 24"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
+      <span class="label">Flip Y</span>
     </button>
 
     <div class="spacer"></div>
@@ -425,25 +222,22 @@
       <option value="tpose">T-pose</option>
       <option value="running">Running</option>
       <option value="sitting">Sitting</option>
+      <option value="waving">Waving</option>
     </select>
   </div>
 
   <div class="content">
-
-    <!-- Preview card -->
     <div class="card">
       <div class="card-head">
         <h2>Preview</h2>
         <span class="meta" id="previewMeta">—</span>
       </div>
       <div class="preview-wrap">
-        <canvas id="preview" width="800" height="700"></canvas>
+        <canvas id="preview" width="720" height="620"></canvas>
       </div>
     </div>
 
-    <!-- Right column: XML editor + bottom tabs -->
     <div style="display: flex; flex-direction: column; min-height: 0; gap: 12px;">
-
       <div class="card" style="flex: 1 1 55%;">
         <div class="card-head">
           <h2>XML</h2>
@@ -457,37 +251,24 @@
           <button data-tab="log" class="active">Log</button>
           <button data-tab="tree">Tree</button>
         </div>
-        <div class="tab-content active" data-tab="log">
-          <pre id="log"></pre>
-        </div>
-        <div class="tab-content" data-tab="tree">
-          <div id="tree"></div>
-        </div>
+        <div class="tab-content active" data-tab="log"><pre id="log"></pre></div>
+        <div class="tab-content" data-tab="tree"><div id="tree"></div></div>
       </div>
-
     </div>
   </div>
-
 </div>
 
 <input type="file" id="fileInput">
 <div id="toast"></div>
 
 <script type="module">
-/* ════════════════════════════════════════════════════════════════
-   DOM helpers
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
-const xmlEl = $('xml');
-const logEl = $('log');
-const treeEl = $('tree');
-const canvas = $('preview');
-const fileInput = $('fileInput');
-const statusEl = $('status');
-const statusTextEl = $('statusText');
-const xmlMeta = $('xmlMeta');
-const previewMeta = $('previewMeta');
-const toastEl = $('toast');
+const xmlEl = $('xml'), logEl = $('log'), treeEl = $('tree'), canvas = $('preview');
+const fileInput = $('fileInput'), statusEl = $('status'), statusTextEl = $('statusText');
+const xmlMeta = $('xmlMeta'), previewMeta = $('previewMeta'), toastEl = $('toast');
+
+let flipY = false;   // if true, mirror vertical for preview
 
 let toastTimer = null;
 function toast(msg) {
@@ -496,15 +277,10 @@ function toast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
 }
-
 function setStatus(state, text) {
   statusEl.className = 'status ' + (state || '');
   statusTextEl.textContent = text;
 }
-
-/* ════════════════════════════════════════════════════════════════
-   Logger
-   ════════════════════════════════════════════════════════════════ */
 function logMsg(kind, msg) {
   const kindClass = { ok: 'ok', err: 'err', hi: 'hi', dim: 'dim' }[kind] || 'dim';
   const badgeText = { ok: 'OK', err: 'FAIL', hi: 'INFO', dim: '···' }[kind] || '···';
@@ -520,21 +296,18 @@ function logMsg(kind, msg) {
   line.appendChild(text);
   logEl.appendChild(line);
   logEl.scrollTop = logEl.scrollHeight;
-  // mirror to console (helps debugging on desktop)
   try { console.log('[studio]', kind, msg); } catch (_) {}
 }
 function clearLog() { logEl.textContent = ''; }
 
-/* ════════════════════════════════════════════════════════════════
-   Module loader — bypasses the file server's MIME table by loading
-   the JS as text and the WASM as raw bytes, then initializing with
-   the ArrayBuffer directly.
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   Load module + WASM (MIME-bypass trick for Android file servers)
+   ══════════════════════════════════════════════════════════════════ */
 let mod = null;
 
 async function loadLibrary() {
   setStatus('', 'loading library…');
-  logMsg('hi', 'Loading sticknodes_rs.js as text (MIME bypass)');
+  logMsg('hi', 'Fetching sticknodes_rs.js as text');
   let jsText;
   try {
     const r = await fetch('./sticknodes_rs.js', { cache: 'no-store' });
@@ -546,10 +319,7 @@ async function loadLibrary() {
     setStatus('error', 'library fetch failed');
     throw e;
   }
-
-  const blobUrl = URL.createObjectURL(
-    new Blob([jsText], { type: 'application/javascript' })
-  );
+  const blobUrl = URL.createObjectURL(new Blob([jsText], { type: 'application/javascript' }));
   try {
     mod = await import(blobUrl);
     logMsg('ok', 'module imported');
@@ -557,9 +327,7 @@ async function loadLibrary() {
     logMsg('err', 'import module: ' + e.message);
     setStatus('error', 'module error');
     throw e;
-  } finally {
-    URL.revokeObjectURL(blobUrl);
-  }
+  } finally { URL.revokeObjectURL(blobUrl); }
 
   logMsg('hi', 'Fetching WASM binary');
   let wasmBytes;
@@ -573,7 +341,6 @@ async function loadLibrary() {
     setStatus('error', 'wasm fetch failed');
     throw e;
   }
-
   logMsg('hi', 'Initializing WASM');
   try {
     await mod.default(wasmBytes);
@@ -586,9 +353,7 @@ async function loadLibrary() {
   }
 }
 
-/* ════════════════════════════════════════════════════════════════
-   Node type tables
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════ */
 const NODE_TYPE_NAME = {
   [-1]:'RootNode', 0:'RoundedSegment', 1:'Segment', 2:'Circle',
   3:'Triangle', 4:'FilledCircle', 5:'Ellipse', 6:'Trapezoid', 7:'Polygon'
@@ -598,9 +363,6 @@ const NODE_TYPE_VALID = {
   FilledCircle:1, Ellipse:1, Trapezoid:1, Polygon:1
 };
 
-/* ════════════════════════════════════════════════════════════════
-   Colors
-   ════════════════════════════════════════════════════════════════ */
 function parseHexObj(hex) {
   let h = String(hex).trim().replace(/^#/, '');
   if (h.length === 3) h = h.split('').map(c => c+c).join('') + 'FF';
@@ -613,19 +375,12 @@ function parseHexObj(hex) {
     throw new Error('bad hex: ' + hex);
   return c;
 }
-const toHex = c => '#'
-  + [c.red, c.green, c.blue, c.alpha]
-      .map(v => v.toString(16).padStart(2,'0')).join('').toUpperCase();
 const cssFromHex = hex => {
   const c = parseHexObj(hex);
   return 'rgba(' + c.red + ',' + c.green + ',' + c.blue + ',' +
          (c.alpha/255).toFixed(3) + ')';
 };
 
-/* ════════════════════════════════════════════════════════════════
-   XML attribute maps (camelCase — matches our wrapper's
-   #[serde(rename_all = "camelCase")] on NodeOptions)
-   ════════════════════════════════════════════════════════════════ */
 const ATTR_NUM = {
   length:'length', defaultLength:'defaultLength',
   thickness:'thickness', defaultThickness:'defaultThickness',
@@ -661,16 +416,9 @@ const ATTR_BOOL = {
   trapezoidRoundedEnd:'trapezoidIsRoundedEnd',
   dragLocked:'isDragLocked',
 };
-const ATTR_COLOR = {
-  color:'color',
-  gradientColor:'gradientColor',
-  outlineColor:'circleOutlineColor',
-};
+const ATTR_COLOR = { color:'color', gradientColor:'gradientColor', outlineColor:'circleOutlineColor' };
 const asBool = v => !(v === 'false' || v === '0' || v === '');
 
-/* ════════════════════════════════════════════════════════════════
-   XML → options
-   ════════════════════════════════════════════════════════════════ */
 function nodeOptionsFromEl(el) {
   const o = {};
   if (el.hasAttribute('type')) {
@@ -689,29 +437,19 @@ function nodeOptionsFromEl(el) {
     if (el.hasAttribute(a)) o[ATTR_BOOL[a]] = asBool(el.getAttribute(a));
   for (const a in ATTR_COLOR)
     if (el.hasAttribute(a)) o[ATTR_COLOR[a]] = parseHexObj(el.getAttribute(a));
-
-  if (el.hasAttribute('gradientMode'))
-    o.gradientMode = el.getAttribute('gradientMode');
-  if (el.hasAttribute('triangleType'))
-    o.triangleType = el.getAttribute('triangleType');
-  if (el.hasAttribute('angleLock'))
-    o.angleLockMode = el.getAttribute('angleLock');
-
+  if (el.hasAttribute('gradientMode')) o.gradientMode = el.getAttribute('gradientMode');
+  if (el.hasAttribute('triangleType')) o.triangleType = el.getAttribute('triangleType');
+  if (el.hasAttribute('angleLock'))    o.angleLockMode = el.getAttribute('angleLock');
   const connEl = Array.from(el.children).find(c => c.tagName.toLowerCase() === 'connector');
   if (connEl) {
     const cd = {};
-    const map = {
-      localX:'localX', localY:'localY', percent:'percent',
+    const map = { localX:'localX', localY:'localY', percent:'percent',
       percentDefault:'percentDefault', value:'value',
-      ancestralValue:'smartStretchAncestralValue',
-      end:'endNodeDrawIndex'
-    };
+      ancestralValue:'smartStretchAncestralValue', end:'endNodeDrawIndex' };
     for (const a in map)
       if (connEl.hasAttribute(a)) cd[map[a]] = parseFloat(connEl.getAttribute(a));
-    if (connEl.hasAttribute('method'))
-      cd.method = connEl.getAttribute('method');
-    if (connEl.hasAttribute('reversed'))
-      cd.reversed = asBool(connEl.getAttribute('reversed'));
+    if (connEl.hasAttribute('method')) cd.method = connEl.getAttribute('method');
+    if (connEl.hasAttribute('reversed')) cd.reversed = asBool(connEl.getAttribute('reversed'));
     o.connectorData = cd;
   }
   return o;
@@ -721,16 +459,12 @@ function polyfillOptionsFromEl(el) {
   return {
     anchor: parseInt(el.getAttribute('anchor') || '0', 10),
     colorHex: el.getAttribute('color') || '#000000FF',
-    useColor: el.hasAttribute('useColor')
-      ? asBool(el.getAttribute('useColor')) : true,
-    attached: (el.getAttribute('attached') || '')
-      .split(',').map(s => s.trim()).filter(Boolean).map(Number),
+    useColor: el.hasAttribute('useColor') ? asBool(el.getAttribute('useColor')) : true,
+    attached: (el.getAttribute('attached') || '').split(',')
+      .map(s => s.trim()).filter(Boolean).map(Number),
   };
 }
 
-/* ════════════════════════════════════════════════════════════════
-   Build figure from XML
-   ════════════════════════════════════════════════════════════════ */
 function buildFigure(xmlText) {
   const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
   const perr = doc.querySelector('parsererror');
@@ -738,18 +472,11 @@ function buildFigure(xmlText) {
   const rootEl = doc.documentElement;
   if (rootEl.tagName.toLowerCase() !== 'stickfigure')
     throw new Error('root element must be <stickfigure>');
-
   const fig = new mod.Stickfigure();
-
-  if (rootEl.hasAttribute('version'))
-    fig.setVersion(parseInt(rootEl.getAttribute('version'), 10));
-  if (rootEl.hasAttribute('build'))
-    fig.build = parseInt(rootEl.getAttribute('build'), 10);
-  if (rootEl.hasAttribute('scale'))
-    fig.scale = parseFloat(rootEl.getAttribute('scale'));
-  if (rootEl.hasAttribute('color'))
-    fig.colorHex = rootEl.getAttribute('color');
-
+  if (rootEl.hasAttribute('version')) fig.setVersion(parseInt(rootEl.getAttribute('version'), 10));
+  if (rootEl.hasAttribute('build'))   fig.build = parseInt(rootEl.getAttribute('build'), 10);
+  if (rootEl.hasAttribute('scale'))   fig.scale = parseFloat(rootEl.getAttribute('scale'));
+  if (rootEl.hasAttribute('color'))   fig.colorHex = rootEl.getAttribute('color');
   const rootNode = fig.rootNode();
   let added = 0;
   const walk = (parent, containerEl) => {
@@ -761,7 +488,6 @@ function buildFigure(xmlText) {
     }
   };
   walk(rootNode, rootEl);
-
   let pfAdded = 0;
   for (const el of rootEl.children) {
     if (el.tagName.toLowerCase() !== 'polyfill') continue;
@@ -771,12 +497,9 @@ function buildFigure(xmlText) {
   return { fig, added, pfAdded };
 }
 
-/* ════════════════════════════════════════════════════════════════
-   World walk — matches the Rust writer exactly:
-     global_angle = parent_angle + local_angle
-     x = length * cos(rad)
-     y = length * sin(rad)         ← +y is DOWN (matches StickNodes)
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   World walk — matches Rust writer: +Y is down (canvas default)
+   ══════════════════════════════════════════════════════════════════ */
 function walkWorld(fig) {
   const out = [];
   const visit = (node, sx, sy, parentAngle) => {
@@ -793,9 +516,9 @@ function walkWorld(fig) {
   return out;
 }
 
-/* ════════════════════════════════════════════════════════════════
-   Canvas render — NO Y-flip this time. Matches StickNodes orientation.
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   Canvas renderer
+   ══════════════════════════════════════════════════════════════════ */
 function render(fig) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
@@ -803,34 +526,73 @@ function render(fig) {
 
   const items = walkWorld(fig);
 
+  // bbox
   let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
   for (const it of items) {
-    const pad = Math.max(Math.abs(it.node.thickness || 0), Math.abs(it.node.length || 0)) / 2 + 5;
-    for (const p of [[it.sx,it.sy],[it.ex,it.ey]]) {
+    const th = Math.abs(it.node.thickness || 0);
+    const ln = Math.abs(it.node.length || 0);
+    const pad = Math.max(th, ln) / 2 + 20;
+    const pts = [[it.sx,it.sy],[it.ex,it.ey]];
+    for (const p of pts) {
       if (p[0]-pad < minX) minX = p[0]-pad;
       if (p[1]-pad < minY) minY = p[1]-pad;
       if (p[0]+pad > maxX) maxX = p[0]+pad;
       if (p[1]+pad > maxY) maxY = p[1]+pad;
     }
   }
-  if (!isFinite(minX)) { minX=minY=-50; maxX=maxY=50; }
-  const spanX = Math.max(maxX - minX, 40);
-  const spanY = Math.max(maxY - minY, 40);
+  if (!isFinite(minX)) { minX=minY=-60; maxX=maxY=60; }
+  const spanX = Math.max(maxX - minX, 60);
+  const spanY = Math.max(maxY - minY, 60);
   const fit = Math.min((W - 60) / spanX, (H - 60) / spanY);
   const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
 
+  // Background (light grid)
   ctx.save();
   ctx.translate(W/2, H/2);
-  ctx.scale(fit, fit);                // ← no Y flip
+  ctx.scale(fit, flipY ? -fit : fit);
   ctx.translate(-cx, -cy);
 
+  // Very light grid lines every 50 world units
+  ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+  ctx.lineWidth = 1 / fit;
+  const gx0 = Math.floor(minX / 50) * 50, gx1 = Math.ceil(maxX / 50) * 50;
+  const gy0 = Math.floor(minY / 50) * 50, gy1 = Math.ceil(maxY / 50) * 50;
+  for (let gx = gx0; gx <= gx1; gx += 50) {
+    ctx.beginPath(); ctx.moveTo(gx, gy0); ctx.lineTo(gx, gy1); ctx.stroke();
+  }
+  for (let gy = gy0; gy <= gy1; gy += 50) {
+    ctx.beginPath(); ctx.moveTo(gx0, gy); ctx.lineTo(gx1, gy); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = 'rgba(79,70,229,0.15)';
+  ctx.lineWidth = 1.4 / fit;
+  ctx.beginPath();
+  ctx.moveTo(gx0, 0); ctx.lineTo(gx1, 0);   // X axis
+  ctx.moveTo(0, gy0); ctx.lineTo(0, gy1);   // Y axis
+  ctx.stroke();
+
+  // Origin marker
+  const osz = 8 / fit;
+  ctx.fillStyle = 'rgba(79,70,229,0.9)';
+  ctx.beginPath();
+  ctx.arc(0, 0, osz * 0.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(79,70,229,0.3)';
+  ctx.lineWidth = 1.2 / fit;
+  ctx.beginPath();
+  ctx.arc(0, 0, osz * 1.2, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Figure
   let figCol;
   try { figCol = cssFromHex(fig.colorHex); }
   catch { figCol = 'rgba(32,32,32,1)'; }
 
   for (const it of items) {
     const n = it.node;
-    if (n.nodeType === -1) continue;
+    if (n.nodeType === -1) continue;   // skip root visual
+
     let col = figCol;
     if (n.useSegmentColor) {
       try { col = cssFromHex(n.colorHex); } catch {}
@@ -840,12 +602,12 @@ function render(fig) {
     ctx.lineJoin = 'round';
 
     const th = Math.max(0.5, Math.abs(n.thickness || 1));
-    const len = Math.abs(n.length || 0);
+    const ln = Math.max(0.5, Math.abs(n.length || 0));
     const angle = Math.atan2(it.ey - it.sy, it.ex - it.sx);
 
     switch (n.nodeType) {
-      case 1:
-      case 0:
+      case 1:   // Segment
+      case 0:   // RoundedSegment
         ctx.lineWidth = th;
         ctx.lineCap = n.nodeType === 0 ? 'round' : 'butt';
         ctx.beginPath();
@@ -853,52 +615,68 @@ function render(fig) {
         ctx.lineTo(it.ex, it.ey);
         ctx.stroke();
         break;
-      case 2:
-      case 4: {
-        const r = Math.max(1, len / 2);
+
+      case 2:   // Circle (hollow/outline)
+      case 4: { // FilledCircle
+        // Circle diameter comes from the larger of length/thickness so
+        // that presets using length=thickness render cleanly, and files
+        // using either value also render sensibly.
+        const d = Math.max(ln, th);
+        const r = d / 2;
         ctx.beginPath();
         ctx.arc(it.ex, it.ey, r, 0, Math.PI * 2);
         if (n.nodeType === 4) ctx.fill();
-        else { ctx.lineWidth = th; ctx.stroke(); }
+        else { ctx.lineWidth = Math.max(0.5, th); ctx.stroke(); }
         break;
       }
-      case 5:
+
+      case 5:   // Ellipse
         ctx.save();
         ctx.translate(it.ex, it.ey);
         ctx.rotate(angle);
         ctx.beginPath();
-        ctx.ellipse(0, 0, Math.max(1, len/2), Math.max(1, th/2), 0, 0, Math.PI*2);
+        ctx.ellipse(0, 0, ln / 2, Math.max(0.5, th / 2), 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
         break;
-      case 3: {
-        const r = Math.max(1, len), base = angle + Math.PI, side = 2*Math.PI/3;
+
+      case 3: { // Triangle
+        const r = ln;
+        const base = angle + Math.PI;
+        const side = 2 * Math.PI / 3;
         ctx.beginPath();
         ctx.moveTo(it.ex, it.ey);
-        ctx.lineTo(it.ex + r*Math.cos(base + side/2), it.ey + r*Math.sin(base + side/2));
-        ctx.lineTo(it.ex + r*Math.cos(base - side/2), it.ey + r*Math.sin(base - side/2));
+        ctx.lineTo(it.ex + r * Math.cos(base + side / 2),
+                   it.ey + r * Math.sin(base + side / 2));
+        ctx.lineTo(it.ex + r * Math.cos(base - side / 2),
+                   it.ey + r * Math.sin(base - side / 2));
         ctx.closePath();
         ctx.fill();
         break;
       }
-      case 6: {
-        const w1 = Math.abs(th), w2 = w1 * 0.5;
+
+      case 6: { // Trapezoid
+        const w1 = Math.abs(n.trapezoidThicknessStart ?? th) || th;
+        const w2 = Math.abs(n.trapezoidThicknessEnd   ?? th * 0.5) || th * 0.5;
         const nx = -Math.sin(angle), ny = Math.cos(angle);
         ctx.beginPath();
-        ctx.moveTo(it.sx + nx*w1/2, it.sy + ny*w1/2);
-        ctx.lineTo(it.ex + nx*w2/2, it.ey + ny*w2/2);
-        ctx.lineTo(it.ex - nx*w2/2, it.ey - ny*w2/2);
-        ctx.lineTo(it.sx - nx*w1/2, it.sy - ny*w1/2);
+        ctx.moveTo(it.sx + nx * w1 / 2, it.sy + ny * w1 / 2);
+        ctx.lineTo(it.ex + nx * w2 / 2, it.ey + ny * w2 / 2);
+        ctx.lineTo(it.ex - nx * w2 / 2, it.ey - ny * w2 / 2);
+        ctx.lineTo(it.sx - nx * w1 / 2, it.sy - ny * w1 / 2);
         ctx.closePath();
         ctx.fill();
         break;
       }
-      case 7: {
-        const sides = 5, r = Math.max(1, len);
+
+      case 7: { // Polygon
+        const sides = Math.max(3, n.numPolygonVertices || 5);
+        const r = ln;
         ctx.beginPath();
         for (let i = 0; i < sides; i++) {
-          const a = angle + (i/sides)*Math.PI*2;
-          const px = it.ex + r*Math.cos(a), py = it.ey + r*Math.sin(a);
+          const a = angle + (i / sides) * Math.PI * 2;
+          const px = it.ex + r * Math.cos(a);
+          const py = it.ey + r * Math.sin(a);
           i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
         }
         ctx.closePath();
@@ -909,12 +687,10 @@ function render(fig) {
   }
   ctx.restore();
 
-  previewMeta.textContent = '×' + fit.toFixed(2) + '  ' + items.length + ' nodes';
+  previewMeta.textContent = '×' + fit.toFixed(2) + '  ·  ' + items.length + ' nodes' +
+                            (flipY ? '  ·  flipped' : '');
 }
 
-/* ════════════════════════════════════════════════════════════════
-   Tree view
-   ════════════════════════════════════════════════════════════════ */
 function renderTree(fig) {
   treeEl.textContent = '';
   const visit = (node, depth) => {
@@ -932,12 +708,10 @@ function renderTree(fig) {
     const props = document.createElement('span');
     props.className = 'props';
     let s = '';
-    if (node.length)      s += 'len=' + node.length.toFixed(1) + ' ';
-    if (node.thickness)   s += 'th=' + node.thickness + ' ';
-    if (node.localAngle)  s += '∠' + node.localAngle.toFixed(1) + '° ';
-    if (node.useSegmentColor) {
-      try { s += node.colorHex; } catch {}
-    }
+    if (node.length)     s += 'len=' + node.length.toFixed(1) + ' ';
+    if (node.thickness)  s += 'th='  + node.thickness + ' ';
+    if (node.localAngle) s += '∠'    + node.localAngle.toFixed(1) + '° ';
+    if (node.useSegmentColor) { try { s += node.colorHex; } catch {} }
     props.textContent = s.trim();
     row.appendChild(branch);
     row.appendChild(idx);
@@ -949,23 +723,19 @@ function renderTree(fig) {
   visit(fig.rootNode(), 0);
 }
 
-/* ════════════════════════════════════════════════════════════════
-   Reverse export
-   ════════════════════════════════════════════════════════════════ */
 function figureToXml(fig) {
   const out = [];
   out.push('<?xml version="1.0"?>');
   out.push('<stickfigure version="' + fig.version + '" build="' + fig.build +
            '" scale="' + fig.scale + '" color="' + fig.colorHex + '">');
-
   const write = (node, depth) => {
     const pad = '  '.repeat(depth);
     const attrs = [];
     const t = NODE_TYPE_NAME[node.nodeType];
     if (t && t !== 'RootNode') attrs.push('type="' + t + '"');
-    if (node.length)      attrs.push('length="' + node.length + '"');
-    if (node.thickness)   attrs.push('thickness="' + node.thickness + '"');
-    if (node.localAngle)  attrs.push('angle="' + node.localAngle + '"');
+    if (node.length)     attrs.push('length="' + node.length + '"');
+    if (node.thickness)  attrs.push('thickness="' + node.thickness + '"');
+    if (node.localAngle) attrs.push('angle="' + node.localAngle + '"');
     if (node.useSegmentColor) {
       try {
         attrs.push('color="' + node.colorHex + '"');
@@ -973,7 +743,6 @@ function figureToXml(fig) {
       } catch {}
     }
     if (node.useSegmentScale) attrs.push('useSegmentScale="true"');
-
     const kids = node.children();
     const open = pad + '<node ' + attrs.join(' ');
     if (kids.length === 0) { out.push(open + '/>'); return; }
@@ -981,15 +750,17 @@ function figureToXml(fig) {
     for (const k of kids) write(k, depth + 1);
     out.push(pad + '</node>');
   };
-
   for (const k of fig.rootNode().children()) write(k, 1);
   out.push('</stickfigure>');
   return out.join('\n');
 }
 
-/* ════════════════════════════════════════════════════════════════
-   Presets
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   Presets — CORRECTED. angle=270 means "up" (canvas Y+ is down).
+   ══════════════════════════════════════════════════════════════════ */
+const BODY = '#42489DFF';
+const SKIN = '#FFCC99FF';
+
 const PRESETS = {
   empty: [
     '<?xml version="1.0"?>',
@@ -1001,16 +772,22 @@ const PRESETS = {
   standing: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <node type="RoundedSegment" length="70" thickness="20" angle="90" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="FilledCircle" length="34" thickness="34" angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="200" color="#42489DFF" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="340" color="#42489DFF" useSegmentColor="true"/>',
+    '  <!-- Torso goes UP: angle 270 (since +Y is down) -->',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
+    '    <!-- Head on top of torso -->',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
+    '    <!-- Right arm hanging down-right from shoulder -->',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="' + BODY + '" useSegmentColor="true"/>',
+    '    <!-- Left arm hanging down-left from shoulder -->',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <node type="RoundedSegment" length="65" thickness="16" angle="250" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="#42489DFF" useSegmentColor="true"/>',
+    '  <!-- Right leg from root, going down-right -->',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <node type="RoundedSegment" length="65" thickness="16" angle="290" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="#42489DFF" useSegmentColor="true"/>',
+    '  <!-- Left leg from root, going down-left -->',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
     '</stickfigure>'
   ].join('\n'),
@@ -1018,16 +795,16 @@ const PRESETS = {
   tpose: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <node type="RoundedSegment" length="70" thickness="20" angle="90" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="FilledCircle" length="34" thickness="34" angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="55" thickness="12" angle="90" color="#42489DFF" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="55" thickness="12" angle="-90" color="#42489DFF" useSegmentColor="true"/>',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="55" thickness="12" angle="90" color="' + BODY + '" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="55" thickness="12" angle="-90" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <node type="RoundedSegment" length="65" thickness="16" angle="250" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="#42489DFF" useSegmentColor="true"/>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <node type="RoundedSegment" length="65" thickness="16" angle="290" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="#42489DFF" useSegmentColor="true"/>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
     '</stickfigure>'
   ].join('\n'),
@@ -1035,20 +812,25 @@ const PRESETS = {
   running: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <node type="RoundedSegment" length="70" thickness="20" angle="80" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="FilledCircle" length="34" thickness="34" angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="40" thickness="12" angle="220" color="#42489DFF" useSegmentColor="true">',
-    '      <node type="RoundedSegment" length="35" thickness="11" angle="-60" color="#42489DFF" useSegmentColor="true"/>',
+    '  <!-- Torso leaning forward (top tilted right) -->',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="280" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
+    '    <!-- Forward arm bent up -->',
+    '    <node type="RoundedSegment" length="40" thickness="12" angle="130" color="' + BODY + '" useSegmentColor="true">',
+    '      <node type="RoundedSegment" length="35" thickness="11" angle="-50" color="' + BODY + '" useSegmentColor="true"/>',
     '    </node>',
-    '    <node type="RoundedSegment" length="40" thickness="12" angle="320" color="#42489DFF" useSegmentColor="true">',
-    '      <node type="RoundedSegment" length="35" thickness="11" angle="60" color="#42489DFF" useSegmentColor="true"/>',
+    '    <!-- Back arm bent back -->',
+    '    <node type="RoundedSegment" length="40" thickness="12" angle="210" color="' + BODY + '" useSegmentColor="true">',
+    '      <node type="RoundedSegment" length="35" thickness="11" angle="50" color="' + BODY + '" useSegmentColor="true"/>',
     '    </node>',
     '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="250" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="50" thickness="14" angle="60" color="#42489DFF" useSegmentColor="true"/>',
+    '  <!-- Front leg forward, knee bent -->',
+    '  <node type="RoundedSegment" length="55" thickness="16" angle="50" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="50" thickness="14" angle="40" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <node type="RoundedSegment" length="60" thickness="16" angle="290" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="50" thickness="14" angle="-90" color="#42489DFF" useSegmentColor="true"/>',
+    '  <!-- Back leg pushing off -->',
+    '  <node type="RoundedSegment" length="55" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="30" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
     '</stickfigure>'
   ].join('\n'),
@@ -1056,24 +838,46 @@ const PRESETS = {
   sitting: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <node type="RoundedSegment" length="70" thickness="20" angle="90" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="FilledCircle" length="34" thickness="34" angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="230" color="#42489DFF" useSegmentColor="true"/>',
-    '    <node type="RoundedSegment" length="45" thickness="12" angle="310" color="#42489DFF" useSegmentColor="true"/>',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="' + BODY + '" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <node type="RoundedSegment" length="65" thickness="16" angle="20" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="#42489DFF" useSegmentColor="true"/>',
+    '  <!-- Thighs horizontal -->',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <node type="RoundedSegment" length="65" thickness="16" angle="-20" color="#42489DFF" useSegmentColor="true">',
-    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="#42489DFF" useSegmentColor="true"/>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="' + BODY + '" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'
+  ].join('\n'),
+
+  waving: [
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
+    '    <!-- Right arm up, waving -->',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="70" color="' + BODY + '" useSegmentColor="true">',
+    '      <node type="RoundedSegment" length="40" thickness="11" angle="-40" color="' + BODY + '" useSegmentColor="true"/>',
+    '    </node>',
+    '    <!-- Left arm hanging -->',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="' + BODY + '" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="' + BODY + '" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
     '</stickfigure>'
   ].join('\n'),
 };
 
-/* ════════════════════════════════════════════════════════════════
-   UI wiring
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   UI
+   ══════════════════════════════════════════════════════════════════ */
 let currentFig = null;
 
 function updateXmlMeta() {
@@ -1082,7 +886,6 @@ function updateXmlMeta() {
   const bytes = new Blob([text]).size;
   xmlMeta.textContent = lines + ' lines · ' + bytes + ' B';
 }
-
 xmlEl.addEventListener('input', updateXmlMeta);
 
 function buildAndShow() {
@@ -1134,11 +937,9 @@ $('btnExport').addEventListener('click', () => {
     if (!currentFig) return;
     xmlEl.value = figureToXml(currentFig);
     updateXmlMeta();
-    logMsg('ok', 'XML written from current figure (partial — wrapper exposes a subset)');
+    logMsg('ok', 'XML written from figure');
     toast('XML exported');
-  } catch (e) {
-    logMsg('err', e.message || String(e));
-  }
+  } catch (e) { logMsg('err', e.message || String(e)); }
 });
 
 $('btnCopy').addEventListener('click', async () => {
@@ -1146,7 +947,6 @@ $('btnCopy').addEventListener('click', async () => {
     await navigator.clipboard.writeText(xmlEl.value);
     toast('Copied to clipboard');
   } catch (e) {
-    // Fallback: select all
     xmlEl.focus();
     xmlEl.select();
     toast('Select-all — press Ctrl/Cmd+C');
@@ -1167,14 +967,19 @@ fileInput.addEventListener('change', async () => {
     xmlEl.value = figureToXml(fig);
     updateXmlMeta();
     logMsg('ok', 'Loaded ' + file.name + ' · ' + buf.length.toLocaleString() +
-        ' bytes · version ' + fig.version + ' build ' + fig.build);
+        ' bytes · v' + fig.version + ' b' + fig.build);
     toast('Loaded ' + file.name);
   } catch (e) {
     logMsg('err', 'load: ' + (e.message || String(e)));
     toast('Load failed');
-  } finally {
-    fileInput.value = '';
-  }
+  } finally { fileInput.value = ''; }
+});
+
+$('btnFlip').addEventListener('click', () => {
+  flipY = !flipY;
+  $('btnFlip').classList.toggle('on', flipY);
+  if (currentFig) render(currentFig);
+  toast('Preview Y-flip: ' + (flipY ? 'ON' : 'OFF'));
 });
 
 $('preset').addEventListener('change', e => {
@@ -1186,7 +991,6 @@ $('preset').addEventListener('change', e => {
   e.target.value = '';
 });
 
-// Tabs
 document.querySelectorAll('.tabs button').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
@@ -1197,24 +1001,19 @@ document.querySelectorAll('.tabs button').forEach(btn => {
   });
 });
 
-/* ════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════
    Boot
-   ════════════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════════════ */
 (async () => {
   try {
     await loadLibrary();
     xmlEl.value = PRESETS.standing;
     updateXmlMeta();
     buildAndShow();
-  } catch (e) {
-    // already logged in loadLibrary
-  }
+  } catch (e) { /* logged already */ }
 })();
 
-// Prevent losing scroll position on mobile rotate
-window.addEventListener('resize', () => {
-  if (currentFig) render(currentFig);
-});
+window.addEventListener('resize', () => { if (currentFig) render(currentFig); });
 </script>
 </body>
 </html>
