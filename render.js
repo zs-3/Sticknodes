@@ -643,70 +643,50 @@ function drawPolyfillAA(batch, verts, col) {
 
 /* ───────────────────────── Camera (world→screen) ───────────────────────── */
 
-class Camera {
+ class Camera {
   constructor() {
     this.fit = 1;
-    this.cx = 0;   // world point at screen center
+    this.cx = 0;
     this.cy = 0;
     this.flipY = false;
-    this.W = 0;    // canvas pixel size
-    this.H = 0;
+    this.W = 1;
+    this.H = 1;
   }
 
-  /* Return a 3x3 column-major mat3 that maps world → NDC.
-   * NDC is [-1,1]; Y is up in NDC by default. If flipY is true, we keep Y down.
-   */
+  /* World → NDC. Canvas pixels are Y-down; NDC is Y-up.
+     If flipY is false, world Y-down maps to NDC -Y, giving a
+     "world Y up" appearance (like opening the file in StickNodes). */
   projMatrix() {
-    const s = this.fit * 2 / this.W;         // world units → NDC
-    const tx = -(this.cx) * s;
-    const ty = -(this.cy) * s;
-    const flip = this.flipY ? -1 : 1;        // if false, Y up in NDC
-
-    // Column-major: [m00,m10,m20, m01,m11,m21, m02,m12,m22]
-    // world→NDC: x' = s * (x - cx)
-    //            y' = s * (y - cy) * flipY_sign
-    // Canvas fills bottom-left = (0,0) of screen; we want
-    // world (cx,cy) at screen center, screen Y downward.
-    // The simplest is: y_ndc = -s * (y - cy) * sign
-    // where sign = -1 if world Y is down and screen Y is down too.
-    // Since world Y is DOWN and canvas pixels Y is DOWN, and NDC Y is UP:
-    //   y_ndc = -s * (y - cy)
-    // We'll flip for user-toggle.
-    const sy = -s * (this.flipY ? -1 : 1);
-
-    return new Float32Array([
-      s, 0, 0,
-      0, sy, 0,
-      tx, -sy * this.cy + (this.flipY ? 0 : 0) * 0, 1,
-    ]);
-  }
-
-  /* Simpler builder avoiding the mess above — build directly from parameters. */
-  projMatrix2() {
-    const s = this.fit * 2 / this.W;
-    const sy = (this.flipY ? 1 : -1) * this.fit * 2 / this.H;
-
-    // World→NDC:
-    //   ndc.x = (x - cx) * (fit*2/W)          (fit = pixels per world unit in min-dimension)
-    // Wait: fit is pixels per world unit. So to convert world to NDC we need
-    // world→pixel then pixel→NDC. To keep things simple we compute in world→NDC directly:
-    //   scaleX_ndc_per_world = 2 * fit / W
-    //   scaleY_ndc_per_world = ± 2 * fit / H
-    // Then
-    //   ndc.x = (x - cx) * scaleX_ndc_per_world
-    //   ndc.y = (y - cy) * scaleY_ndc_per_world
-    const sx = 2 * this.fit / this.W;
-    const syNdc = (this.flipY ? 1 : -1) * 2 * this.fit / this.H;
+    const w = this.W || 1;
+    const h = this.H || 1;
+    const sx = (2 * this.fit) / w;
+    const sy = (this.flipY ? 1 : -1) * (2 * this.fit) / h;
     const tx = -this.cx * sx;
-    const ty = -this.cy * syNdc;
-
+    const ty = -this.cy * sy;
+    // column-major 3x3
     return new Float32Array([
-      sx, 0, 0,
-      0, syNdc, 0,
+      sx,  0, 0,
+       0, sy, 0,
       tx, ty, 1,
     ]);
   }
-}
+
+  /* Inverse for pointer input. */
+  screenToWorld(px, py) {
+    const w = this.W || 1;
+    const h = this.H || 1;
+    const ndcX = (px / w) * 2 - 1;
+    const ndcY = 1 - (py / h) * 2;
+    const sx = (2 * this.fit) / w;
+    const sy = (this.flipY ? 1 : -1) * (2 * this.fit) / h;
+    const tx = -this.cx * sx;
+    const ty = -this.cy * sy;
+    return {
+      x: (ndcX - tx) / sx,
+      y: (ndcY - ty) / sy,
+    };
+  }
+}   
 
 /* ───────────────────────── Scene extraction ───────────────────────── */
 
@@ -755,7 +735,10 @@ export class StickNodesRenderer {
     canvas.addEventListener('pointercancel', this._onUp.bind(this));
   }
 
-  setFigure(fig) { this.fig = fig; }
+  setFigure(fig) {
+  this.fig = fig;
+  this._fitted = false;
+  }
 
   setFills(v) { this.showFills = !!v; }
 
@@ -812,6 +795,10 @@ export class StickNodesRenderer {
     if (!this.fig) return { fit: 1, nodeCount: 0, fillCount: 0 };
     this.resize();
 
+    if (!this._fitted) {          // ← then fit once per figure
+    this.fitToView();
+    this._fitted = true;
+  }
     const gl = this.gl;
     gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -850,7 +837,7 @@ export class StickNodesRenderer {
     }
 
     // One draw call, everything batched in order.
-    const proj = this.camera.projMatrix2();
+    const proj = this.camera.projMatrix();
     this.batcher.flush(proj, 1.0);
 
     return {
@@ -863,22 +850,12 @@ export class StickNodesRenderer {
   /* ───────── Drag handling ───────── */
 
   screenToWorld(clientX, clientY) {
-    const rect = this.canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    const px = (clientX - rect.left) * dpr;
-    const py = (clientY - rect.top) * dpr;
-    const W = this.camera.W, H = this.camera.H;
-    // Inverse of proj: ndc = proj * world → world = proj_inv * ndc
-    const ndcX = (px / W) * 2 - 1;
-    const ndcY = 1 - (py / H) * 2;      // canvas top is +1 in NDC
-    const sx = 2 * this.camera.fit / W;
-    const syNdc = (this.camera.flipY ? 1 : -1) * 2 * this.camera.fit / H;
-    const tx = -this.camera.cx * sx;
-    const ty = -this.camera.cy * syNdc;
-    const wx = (ndcX - tx) / sx;
-    const wy = (ndcY - ty) / syNdc;
-    return { x: wx, y: wy };
-  }
+  const rect = this.canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const px = (clientX - rect.left) * dpr;
+  const py = (clientY - rect.top) * dpr;
+  return this.camera.screenToWorld(px, py);
+}
 
   _onDown(ev) {
     if (!this.fig) return;
