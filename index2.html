@@ -209,13 +209,21 @@
       <span class="label">Load</span>
     </button>
     <div class="vbar"></div>
-    <button class="btn toggle on" id="btnDrag">
+    <button class="btn toggle on" id="btnDrag" title="Toggle node dragging">
       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
       <span class="label">Drag</span>
     </button>
-    <button class="btn toggle on" id="btnFills">
+    <button class="btn toggle on" id="btnFills" title="Render polyfills as solid fills">
       <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9-9 9z"/></svg>
       <span class="label">Fills</span>
+    </button>
+    <button class="btn toggle on" id="btnPoints" title="Show node points overlay">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="8" opacity="0.4"/></svg>
+      <span class="label">Points</span>
+    </button>
+    <button class="btn toggle" id="btnFlip" title="Flip Y in preview">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
+      <span class="label">Flip</span>
     </button>
     <div class="spacer"></div>
     <select class="preset" id="preset">
@@ -252,6 +260,7 @@
         <span class="chip">nodes <b id="nCount">0</b></span>
         <span class="chip">polyfills <b id="pfCount">0</b></span>
         <span class="chip">selected <b id="selIdx">-</b></span>
+        <span class="chip">stretchy <b id="stretchFlag">-</b></span>
       </div>
     </div>
 
@@ -317,7 +326,7 @@ function setStatus(s, t) {
   statusTextEl.textContent = t;
 }
 
-/* ───── Load WASM ───── */
+/* ───── Load WASM (MIME-bypass) ───── */
 let mod = null;
 try {
   const jsText = await (await fetch('./sticknodes_rs.js', { cache:'no-store' })).text();
@@ -338,12 +347,15 @@ try {
   const sv = mod.SUPPORTED_VERSION ? mod.SUPPORTED_VERSION() : '?';
   const sb = mod.SUPPORTED_BUILD ? mod.SUPPORTED_BUILD() : '?';
   $('wasmVer').textContent = sv + '/' + sb;
+  log('hi', 'SUPPORTED_VERSION=' + sv + ' SUPPORTED_BUILD=' + sb);
 } catch (_) {}
 
 /* ───── Renderer ───── */
 const renderer = new StickNodesRenderer(canvas);
 renderer.setFills(true);
 renderer.setDragEnabled(true);
+renderer.setShowPoints(true);
+renderer.setFlipY(false);
 
 let currentFig = null;
 
@@ -357,9 +369,13 @@ renderer.onNodeChanged(() => {
 renderer.onSelect((node) => {
   if (node) {
     $('selIdx').textContent = '[' + node.drawIndex + '] ' + (NODE_TYPE_NAME[node.nodeType] || node.nodeType);
+    let s = '-';
+    try { s = node.isStretchy ? 'yes (draggable length)' : 'no (rotate only)'; } catch (_) {}
+    $('stretchFlag').textContent = s;
     renderTree(currentFig);
   } else {
     $('selIdx').textContent = '-';
+    $('stretchFlag').textContent = '-';
   }
 });
 
@@ -593,6 +609,7 @@ function figureToXml(fig) {
     if (node.length) a.push('length="' + node.length + '"');
     if (node.thickness) a.push('thickness="' + node.thickness + '"');
     if (node.localAngle) a.push('angle="' + node.localAngle + '"');
+    if (node.isStretchy) a.push('stretchy="true"');
     if (node.useSegmentColor) {
       try { a.push('color="' + node.colorHex + '"'); a.push('useSegmentColor="true"'); } catch (_) {}
     }
@@ -642,6 +659,9 @@ function renderTree(fig) {
     row.addEventListener('click', () => {
       renderer.selectedIndex = node.drawIndex;
       $('selIdx').textContent = '[' + node.drawIndex + '] ' + (NODE_TYPE_NAME[node.nodeType] || node.nodeType);
+      let s = '-';
+      try { s = node.isStretchy ? 'yes (draggable length)' : 'no (rotate only)'; } catch (_) {}
+      $('stretchFlag').textContent = s;
       renderTree(fig);
       renderer.render();
     });
@@ -763,19 +783,25 @@ $('btnFills').addEventListener('click', () => {
   renderAll();
   toast('Fills: ' + (on ? 'ON' : 'OFF'));
 });
+$('btnPoints').addEventListener('click', () => {
+  const on = !$('btnPoints').classList.contains('on');
+  $('btnPoints').classList.toggle('on', on);
+  renderer.setShowPoints(on);
+  renderAll();
+  toast('Node points: ' + (on ? 'ON' : 'OFF'));
+});
+$('btnFlip').addEventListener('click', () => {
+  const on = !$('btnFlip').classList.contains('on');
+  $('btnFlip').classList.toggle('on', on);
+  renderer.setFlipY(on);
+  renderAll();
+  toast('Flip Y: ' + (on ? 'ON' : 'OFF'));
+});
 
-$('btnZoomIn').addEventListener('click', () => {
-  renderer.zoomBy(1.25); renderAll();
-});
-$('btnZoomOut').addEventListener('click', () => {
-  renderer.zoomBy(1 / 1.25); renderAll();
-});
-$('btnZoomFit').addEventListener('click', () => {
-  renderer.fitView(); renderAll();
-});
-$('btnZoomReset').addEventListener('click', () => {
-  renderer.resetView(); renderAll();
-});
+$('btnZoomIn').addEventListener('click', () => { renderer.zoomBy(1.25); renderAll(); });
+$('btnZoomOut').addEventListener('click', () => { renderer.zoomBy(1 / 1.25); renderAll(); });
+$('btnZoomFit').addEventListener('click', () => { renderer.fitView(); renderAll(); });
+$('btnZoomReset').addEventListener('click', () => { renderer.resetView(); renderAll(); });
 
 $('preset').addEventListener('change', e => {
   const k = e.target.value;
