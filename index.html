@@ -1,0 +1,653 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StickNodes XML</title>
+<style>
+  :root { color-scheme: dark; --bg:#0e0e10; --panel:#16161a; --line:#2a2a30;
+          --txt:#e6e6e6; --dim:#8a8a92; --accent:#4f8cff; --ok:#7ee787; --err:#ff7b72; }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { margin:0; height:100%; overflow:hidden; }
+  body { font:14px/1.4 system-ui,-apple-system,sans-serif;
+         background:var(--bg); color:var(--txt); }
+  .app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
+  .toolbar { display:flex; gap:5px; padding:6px; background:var(--panel);
+             border-bottom:1px solid var(--line); flex:0 0 auto; }
+  .toolbar button { flex:1 1 0; min-width:0; min-height:40px;
+                    background:#26262c; color:var(--txt); border:1px solid var(--line);
+                    border-radius:6px; font:inherit; font-weight:500;
+                    padding:6px 4px; cursor:pointer; white-space:nowrap;
+                    font-size:12px; overflow:hidden; text-overflow:ellipsis; }
+  .toolbar button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .toolbar button:active { transform:scale(0.97); }
+  .stage { flex:0 0 auto; background:#08080a; display:flex;
+           justify-content:center; align-items:center; padding:4px;
+           max-height:42vh; }
+  canvas { display:block; background:#141418; max-width:100%; max-height:42vh;
+           width:auto; height:auto; border-radius:4px; }
+  .tabs { display:flex; background:var(--panel); border-bottom:1px solid var(--line);
+          flex:0 0 auto; }
+  .tabs button { flex:1; background:transparent; color:var(--dim);
+                 border:0; border-bottom:2px solid transparent;
+                 padding:9px 6px; font:inherit; font-weight:600; font-size:12px;
+                 text-transform:uppercase; letter-spacing:.6px; cursor:pointer; }
+  .tabs button.active { color:var(--txt); border-bottom-color:var(--accent); }
+  .panel { flex:1 1 auto; min-height:0; display:none; overflow:auto; }
+  .panel.active { display:block; }
+  textarea { width:100%; height:100%; background:#0a0a0c; color:var(--txt);
+             border:0; padding:10px; resize:none; outline:none;
+             font:12px/1.55 ui-monospace,"SF Mono",Consolas,monospace;
+             tab-size:2; display:block; }
+  #log, #tree { padding:10px 12px; margin:0;
+                font:11.5px/1.6 ui-monospace,"SF Mono",Consolas,monospace;
+                white-space:pre-wrap; word-break:break-word; }
+  #log { color:var(--dim); }
+  #log div { padding:1px 0; }
+  #log .ok  { color:var(--ok); }
+  #log .err { color:var(--err); }
+  #log .hi  { color:var(--txt); font-weight:600; }
+  #tree .row { display:flex; gap:6px; white-space:nowrap; padding:1px 0; }
+  #tree .idx { color:#ffb86b; min-width:32px; text-align:right; }
+  #tree .type { color:#8be9fd; min-width:120px; }
+  #tree .props { color:var(--dim); overflow:hidden; text-overflow:ellipsis; }
+  .hint { padding:6px 10px; background:#1a1a1f; color:var(--dim);
+          font-size:10.5px; border-top:1px solid var(--line); }
+  .hint code { color:var(--txt); background:#26262c; padding:1px 3px;
+               border-radius:3px; font-size:10px; }
+  input[type=file] { display:none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="toolbar">
+    <button id="btnBuild" class="primary">Build</button>
+    <button id="btnDownload">Download</button>
+    <button id="btnExport">→ XML</button>
+    <button id="btnLoadNodes">Load</button>
+    <button id="btnHex">Hex</button>
+  </div>
+  <div class="stage"><canvas id="preview" width="640" height="420"></canvas></div>
+  <div class="tabs">
+    <button data-tab="xml" class="active">XML</button>
+    <button data-tab="log">Log</button>
+    <button data-tab="tree">Tree</button>
+  </div>
+  <div class="panel active" data-panel="xml"><textarea id="xml" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea></div>
+  <div class="panel" data-panel="log"><pre id="log">—</pre></div>
+  <div class="panel" data-panel="tree"><div id="tree"></div></div>
+  <div class="hint">
+    Angles in <b>degrees</b>. Colors: <code>#RGB</code> <code>#RGBA</code>
+    <code>#RRGGBB</code> <code>#RRGGBBAA</code>.
+    Top-level <code>&lt;node&gt;</code> attaches to the implicit root.
+  </div>
+</div>
+<input type="file" id="fileInput">
+
+<script type="module">
+/* ════════════════════════════════════════════════════════════════
+   Load the locally-built WASM (with tryreadanyway enabled).
+   The .js and _bg.wasm must be in the same folder as this HTML.
+   ════════════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const xmlEl = $('xml'), logEl = $('log'), treeEl = $('tree'),
+      canvas = $('preview'), fileInput = $('fileInput');
+
+const log = (msg, cls) => {
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = msg;
+  logEl.appendChild(d);
+  logEl.scrollTop = logEl.scrollHeight;
+};
+const clearLog = () => { logEl.textContent = ''; };
+const logErr = e => {
+  try { console.error(e); } catch (_) {}
+  log('✘ ' + (e && e.message ? e.message : String(e)), 'err');
+};
+
+let init, Stickfigure, Color;
+try {
+  const mod = await import('./sticknodes_rs.js');
+  init = mod.default;
+  Stickfigure = mod.Stickfigure;
+  Color = mod.Color;
+  log('module loaded', 'ok');
+} catch (e) {
+  log('Could not load ./sticknodes_rs.js — ' + (e.message || e), 'err');
+  log('Check that sticknodes_rs.js and sticknodes_rs_bg.wasm are in the same folder as this HTML, and that you opened the page over http:// not file://', 'err');
+  throw e;
+}
+
+try {
+  await init();
+  log('WASM ready (tryreadanyway enabled)', 'ok');
+} catch (e) {
+  log('WASM init failed: ' + (e.message || e), 'err');
+  throw e;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Constants — from the Rust source
+   ════════════════════════════════════════════════════════════════ */
+const NODE_TYPE_NAME = {
+  [-1]:'RootNode', 0:'RoundedSegment', 1:'Segment', 2:'Circle',
+  3:'Triangle', 4:'FilledCircle', 5:'Ellipse', 6:'Trapezoid', 7:'Polygon'
+};
+// Serde serializes Rust enums by variant name → JS passes strings.
+const NODE_TYPE_STR = {
+  RoundedSegment:1, Segment:1, Circle:1, Triangle:1,
+  FilledCircle:1, Ellipse:1, Trapezoid:1, Polygon:1
+};
+
+/* ════════════════════════════════════════════════════════════════
+   Colour helpers
+   ════════════════════════════════════════════════════════════════ */
+function parseHexObj(hex) {
+  let h = String(hex).trim().replace(/^#/, '');
+  if (h.length === 3) h = h.split('').map(c => c+c).join('') + 'FF';
+  else if (h.length === 4) h = h.split('').map(c => c+c).join('');
+  else if (h.length === 6) h += 'FF';
+  else if (h.length !== 8) throw new Error('bad hex: ' + hex);
+  const n = i => parseInt(h.slice(i, i+2), 16);
+  const c = { red:n(0), green:n(2), blue:n(4), alpha:n(6) };
+  if ([c.red,c.green,c.blue,c.alpha].some(v => Number.isNaN(v)))
+    throw new Error('bad hex: ' + hex);
+  return c;
+}
+const toHexFromObj = c => '#'
+  + [c.red, c.green, c.blue, c.alpha]
+      .map(v => v.toString(16).padStart(2,'0')).join('').toUpperCase();
+const cssColor = c => 'rgba(' + c.red + ',' + c.green + ',' + c.blue + ',' +
+                      (c.alpha/255).toFixed(3) + ')';
+const cssColorHex = hex => {
+  const c = parseHexObj(hex);
+  return cssColor(c);
+};
+
+/* ════════════════════════════════════════════════════════════════
+   Attribute maps — camelCase (because our Rust wrapper enabled
+   #[serde(rename_all = "camelCase")] on NodeOptions)
+   ════════════════════════════════════════════════════════════════ */
+const ATTR_NUM = {
+  length:'length', defaultLength:'defaultLength',
+  thickness:'thickness', defaultThickness:'defaultThickness',
+  scale:'scale',
+  angle:'localAngle', defaultAngle:'defaultAngle',
+  defaultLocalAngle:'defaultLocalAngle',
+  curveRadius:'segmentCurveRadiusAndDefaultCurveRadius',
+  curvePrecision:'segmentCurvePolyfillPrecision',
+  trapezoidStartThickness:'trapezoidThicknessStart',
+  trapezoidEndThickness:'trapezoidThicknessEnd',
+  polygonVertices:'numPolygonVertices',
+  angleLockRelativeMultiplier:'angleLockRelativeMultiplier',
+  dragLockAngle:'dragLockAngle',
+  smartStretchMultiplier:'smartStretchMultiplier',
+};
+const ATTR_BOOL = {
+  static:'isStatic', stretchy:'isStretchy', floaty:'isFloaty',
+  smartStretch:'isSmartStretch',
+  doNotApplySmartStretch:'doNotApplySmartStretch',
+  smartStretchResetImpulse:'smartStretchResetImpulse',
+  useSegmentColor:'useSegmentColor',
+  useCircleOutline:'useCircleOutline',
+  hollow:'circleIsHollow',
+  useGradient:'useGradient', reverseGradient:'reverseGradient',
+  useSegmentScale:'useSegmentScale',
+  curveCirculization:'curveCirculization',
+  halfArc:'halfArc',
+  triangleFlipped:'triangleFlipped',
+  triangleUpsideDown:'triangleUpsideDown',
+  useTrapezoidStart:'useTrapezoidThicknessStart',
+  useTrapezoidEnd:'useTrapezoidThicknessEnd',
+  trapezoidRoundedStart:'trapezoidIsRoundedStart',
+  trapezoidRoundedEnd:'trapezoidIsRoundedEnd',
+  dragLocked:'isDragLocked',
+};
+const ATTR_COLOR = {
+  color:'color',
+  gradientColor:'gradientColor',
+  outlineColor:'circleOutlineColor',
+};
+const asBool = v => !(v === 'false' || v === '0' || v === '');
+
+/* ════════════════════════════════════════════════════════════════
+   XML element → options object
+   ════════════════════════════════════════════════════════════════ */
+function nodeOptionsFromEl(el) {
+  const o = {};
+  if (el.hasAttribute('type')) {
+    const t = el.getAttribute('type');
+    if (!NODE_TYPE_STR[t]) throw new Error('unknown node type "' + t + '"');
+    o.nodeType = t;                              // string, serde enum variant
+  }
+  for (const a in ATTR_NUM) {
+    if (el.hasAttribute(a)) {
+      const v = parseFloat(el.getAttribute(a));
+      if (Number.isNaN(v)) throw new Error('<' + a + '> not a number');
+      o[ATTR_NUM[a]] = v;
+    }
+  }
+  for (const a in ATTR_BOOL)
+    if (el.hasAttribute(a)) o[ATTR_BOOL[a]] = asBool(el.getAttribute(a));
+  for (const a in ATTR_COLOR)
+    if (el.hasAttribute(a)) o[ATTR_COLOR[a]] = parseHexObj(el.getAttribute(a));
+
+  if (el.hasAttribute('gradientMode'))
+    o.gradientMode = el.getAttribute('gradientMode');    // "Sideways" | "Normal"
+  if (el.hasAttribute('triangleType'))
+    o.triangleType = el.getAttribute('triangleType');    // "Isosceles" | "RightTriangle"
+  if (el.hasAttribute('angleLock'))
+    o.angleLockMode = el.getAttribute('angleLock');      // "None" | "Absolute" | "Relative"
+
+  // <connector/> — nested child element
+  const connEl = Array.from(el.children).find(c => c.tagName.toLowerCase() === 'connector');
+  if (connEl) {
+    const cd = {};
+    const map = {
+      localX:'localX', localY:'localY', percent:'percent',
+      percentDefault:'percentDefault', value:'value',
+      ancestralValue:'smartStretchAncestralValue',
+      end:'endNodeDrawIndex'
+    };
+    for (const a in map)
+      if (connEl.hasAttribute(a)) cd[map[a]] = parseFloat(connEl.getAttribute(a));
+    if (connEl.hasAttribute('method'))
+      cd.method = connEl.getAttribute('method');          // "ByPercent" | "ByValue"
+    if (connEl.hasAttribute('reversed'))
+      cd.reversed = asBool(connEl.getAttribute('reversed'));
+    o.connectorData = cd;
+  }
+  return o;
+}
+
+function polyfillOptionsFromEl(el) {
+  return {
+    anchor: parseInt(el.getAttribute('anchor') || '0', 10),
+    colorHex: el.getAttribute('color') || '#000000FF',
+    useColor: el.hasAttribute('useColor')
+      ? asBool(el.getAttribute('useColor')) : true,
+    attached: (el.getAttribute('attached') || '')
+      .split(',').map(s => s.trim()).filter(Boolean).map(Number),
+  };
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Build figure from XML
+   ════════════════════════════════════════════════════════════════ */
+function buildFigure(xmlText) {
+  const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+  const perr = doc.querySelector('parsererror');
+  if (perr) throw new Error('XML parse error: ' + perr.textContent.trim());
+  const rootEl = doc.documentElement;
+  if (rootEl.tagName.toLowerCase() !== 'stickfigure')
+    throw new Error('root element must be <stickfigure>');
+
+  const fig = new Stickfigure();
+
+  if (rootEl.hasAttribute('version'))
+    fig.setVersion(parseInt(rootEl.getAttribute('version'), 10));
+  if (rootEl.hasAttribute('build'))
+    fig.build = parseInt(rootEl.getAttribute('build'), 10);
+  if (rootEl.hasAttribute('scale'))
+    fig.scale = parseFloat(rootEl.getAttribute('scale'));
+  if (rootEl.hasAttribute('color'))
+    fig.colorHex = rootEl.getAttribute('color');
+
+  const rootNode = fig.rootNode();
+  let added = 0;
+  const walk = (parent, containerEl) => {
+    for (const el of containerEl.children) {
+      if (el.tagName.toLowerCase() !== 'node') continue;
+      const opts = nodeOptionsFromEl(el);
+      const child = parent.addChild(opts);
+      added++;
+      walk(child, el);
+    }
+  };
+  walk(rootNode, rootEl);
+
+  let pfAdded = 0;
+  for (const el of rootEl.children) {
+    if (el.tagName.toLowerCase() !== 'polyfill') continue;
+    try { fig.addPolyfill(polyfillOptionsFromEl(el)); pfAdded++; }
+    catch (e) { log('polyfill skipped: ' + (e.message || e), 'err'); }
+  }
+  return { fig, added, pfAdded };
+}
+
+/* ════════════════════════════════════════════════════════════════
+   World walk — same math the Rust writer uses
+   ════════════════════════════════════════════════════════════════ */
+function walkWorld(fig) {
+  const out = [];
+  const visit = (node, sx, sy, parentAngle) => {
+    const ga = parentAngle + (node.localAngle || 0);
+    const rad = ga * Math.PI / 180;
+    const len = node.length || 0;
+    const sf = node.useSegmentScale ? (node.scale || 1) : 1;
+    const ex = sx + len * Math.cos(rad) * sf;
+    const ey = sy + len * Math.sin(rad) * sf;
+    out.push({ node, sx, sy, ex, ey, angle: ga });
+    for (const k of node.children()) visit(k, ex, ey, ga);
+  };
+  visit(fig.rootNode(), 0, 0, 0);
+  return out;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Canvas render
+   ════════════════════════════════════════════════════════════════ */
+function render(fig) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  const items = walkWorld(fig);
+
+  let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+  for (const it of items) {
+    const pad = Math.max(Math.abs(it.node.thickness || 0), Math.abs(it.node.length || 0));
+    for (const p of [[it.sx,it.sy],[it.ex,it.ey]]) {
+      if (p[0]-pad < minX) minX = p[0]-pad;
+      if (p[1]-pad < minY) minY = p[1]-pad;
+      if (p[0]+pad > maxX) maxX = p[0]+pad;
+      if (p[1]+pad > maxY) maxY = p[1]+pad;
+    }
+  }
+  if (!isFinite(minX)) { minX=minY=-50; maxX=maxY=50; }
+  const spanX = Math.max(maxX - minX, 60);
+  const spanY = Math.max(maxY - minY, 60);
+  const fit = Math.min((W - 40) / spanX, (H - 40) / spanY);
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+
+  ctx.save();
+  ctx.translate(W/2, H/2);
+  ctx.scale(fit, -fit);
+  ctx.translate(-cx, -cy);
+
+  let figCol;
+  try { figCol = cssColorHex(fig.colorHex); }
+  catch { figCol = 'rgba(32,32,32,1)'; }
+
+  for (const it of items) {
+    const n = it.node;
+    if (n.nodeType === -1) continue;                // skip root
+    let col = figCol;
+    if (n.useSegmentColor) {
+      try { col = cssColorHex(n.colorHex); } catch {}
+    }
+    ctx.strokeStyle = col;
+    ctx.fillStyle = col;
+    ctx.lineJoin = 'round';
+
+    const th = Math.max(0.5, Math.abs(n.thickness || 1));
+    const len = Math.abs(n.length || 0);
+    const angle = Math.atan2(it.ey - it.sy, it.ex - it.sx);
+
+    switch (n.nodeType) {
+      case 1:                                       // Segment
+      case 0:                                       // RoundedSegment
+        ctx.lineWidth = th;
+        ctx.lineCap = n.nodeType === 0 ? 'round' : 'butt';
+        ctx.beginPath();
+        ctx.moveTo(it.sx, it.sy); ctx.lineTo(it.ex, it.ey);
+        ctx.stroke();
+        break;
+      case 2:                                       // Circle (hollow)
+      case 4: {                                     // FilledCircle
+        const r = Math.max(1, len / 2);
+        ctx.beginPath();
+        ctx.arc(it.ex, it.ey, r, 0, Math.PI * 2);
+        if (n.nodeType === 4) ctx.fill();
+        else { ctx.lineWidth = th; ctx.stroke(); }
+        break;
+      }
+      case 5:                                       // Ellipse
+        ctx.save();
+        ctx.translate(it.ex, it.ey); ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, Math.max(1, len/2), Math.max(1, th/2), 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+        break;
+      case 3: {                                     // Triangle
+        const r = Math.max(1, len), base = angle + Math.PI, side = 2*Math.PI/3;
+        ctx.beginPath();
+        ctx.moveTo(it.ex, it.ey);
+        ctx.lineTo(it.ex + r*Math.cos(base + side/2), it.ey + r*Math.sin(base + side/2));
+        ctx.lineTo(it.ex + r*Math.cos(base - side/2), it.ey + r*Math.sin(base - side/2));
+        ctx.closePath(); ctx.fill();
+        break;
+      }
+      case 6:                                       // Trapezoid
+        // note: our wrapper doesn't expose trapezoid start/end thickness separately,
+        // so approximate using overall thickness as the base width
+        {
+          const w1 = Math.abs(th), w2 = w1 * 0.5;
+          const nx = -Math.sin(angle), ny = Math.cos(angle);
+          ctx.beginPath();
+          ctx.moveTo(it.sx + nx*w1/2, it.sy + ny*w1/2);
+          ctx.lineTo(it.ex + nx*w2/2, it.ey + ny*w2/2);
+          ctx.lineTo(it.ex - nx*w2/2, it.ey - ny*w2/2);
+          ctx.lineTo(it.sx - nx*w1/2, it.sy - ny*w1/2);
+          ctx.closePath(); ctx.fill();
+        }
+        break;
+      case 7:                                       // Polygon
+        // our wrapper doesn't expose numPolygonVertices; use 5 as default
+        {
+          const sides = 5, r = Math.max(1, len);
+          ctx.beginPath();
+          for (let i = 0; i < sides; i++) {
+            const a = angle + (i/sides)*Math.PI*2;
+            const px = it.ex + r*Math.cos(a), py = it.ey + r*Math.sin(a);
+            i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+          }
+          ctx.closePath(); ctx.fill();
+        }
+        break;
+    }
+  }
+  ctx.restore();
+  ctx.fillStyle = '#8a8a92';
+  ctx.font = '11px ui-monospace,monospace';
+  ctx.fillText('fit ×' + fit.toFixed(2), 8, 16);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Tree view (read-only)
+   ════════════════════════════════════════════════════════════════ */
+function renderTree(fig) {
+  treeEl.textContent = '';
+  const visit = (node, depth) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    let s = '';
+    if (node.length)      s += 'len=' + node.length + ' ';
+    if (node.thickness)   s += 'th=' + node.thickness + ' ';
+    if (node.localAngle)  s += '∠' + node.localAngle + '° ';
+    if (node.useSegmentColor) {
+      try { s += node.colorHex; } catch {}
+    }
+    row.innerHTML =
+      '<span style="color:#444">' + '│ '.repeat(depth) + '</span>' +
+      '<span class="idx">[' + node.drawIndex + ']</span>' +
+      '<span class="type">' + (NODE_TYPE_NAME[node.nodeType] || node.nodeType) + '</span>' +
+      '<span class="props">' + s + '</span>';
+    treeEl.appendChild(row);
+    for (const k of node.children()) visit(k, depth + 1);
+  };
+  visit(fig.rootNode(), 0);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Reverse export
+   ════════════════════════════════════════════════════════════════ */
+function figureToXml(fig) {
+  const out = [];
+  out.push('<?xml version="1.0"?>');
+  out.push('<stickfigure version="' + fig.version + '" build="' + fig.build +
+           '" scale="' + fig.scale + '" color="' + fig.colorHex + '">');
+
+  const write = (node, depth) => {
+    const pad = '  '.repeat(depth);
+    const attrs = [];
+    const t = NODE_TYPE_NAME[node.nodeType];
+    if (t && t !== 'RootNode') attrs.push('type="' + t + '"');
+    if (node.length)      attrs.push('length="' + node.length + '"');
+    if (node.thickness)   attrs.push('thickness="' + node.thickness + '"');
+    if (node.localAngle)  attrs.push('angle="' + node.localAngle + '"');
+    if (node.useSegmentColor) {
+      try { attrs.push('color="' + node.colorHex + '"'); attrs.push('useSegmentColor="true"'); } catch {}
+    }
+    if (node.useSegmentScale) attrs.push('useSegmentScale="true"');
+
+    const kids = node.children();
+    const open = pad + '<node ' + attrs.join(' ');
+    if (kids.length === 0) { out.push(open + '/>'); return; }
+    out.push(open + '>');
+    for (const k of kids) write(k, depth + 1);
+    out.push(pad + '</node>');
+  };
+
+  for (const k of fig.rootNode().children()) write(k, 1);
+  out.push('</stickfigure>');
+  return out.join('\n');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Tabs
+   ════════════════════════════════════════════════════════════════ */
+document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector('.panel[data-panel="' + btn.dataset.tab + '"]')
+            .classList.add('active');
+  });
+});
+
+/* ════════════════════════════════════════════════════════════════
+   Actions
+   ════════════════════════════════════════════════════════════════ */
+let currentFig = null;
+
+function buildAndShow() {
+  clearLog();
+  try {
+    const r = buildFigure(xmlEl.value);
+    currentFig = r.fig;
+    render(r.fig);
+    renderTree(r.fig);
+    log('✔ built: ' + r.added + ' node(s)' +
+        (r.pfAdded ? ', ' + r.pfAdded + ' polyfill(s)' : ''), 'ok');
+    log('version=' + r.fig.version + '  build=' + r.fig.build +
+        '  scale=' + r.fig.scale, 'ok');
+  } catch (e) {
+    logErr(e);
+    document.querySelector('.tabs button[data-tab="log"]').click();
+  }
+}
+
+$('btnBuild').addEventListener('click', buildAndShow);
+
+$('btnDownload').addEventListener('click', () => {
+  try {
+    if (!currentFig) buildAndShow();
+    if (!currentFig) return;
+    const bytes = currentFig.toBytes();
+    const blob = new Blob([bytes], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'figure.nodes';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    log('✔ exported ' + bytes.length + ' bytes', 'ok');
+    document.querySelector('.tabs button[data-tab="log"]').click();
+  } catch (e) { logErr(e); }
+});
+
+$('btnExport').addEventListener('click', () => {
+  try {
+    if (!currentFig) buildAndShow();
+    if (!currentFig) return;
+    xmlEl.value = figureToXml(currentFig);
+    log('✔ XML written back (limited — only a few fields exposed by the wrapper)', 'ok');
+    document.querySelector('.tabs button[data-tab="xml"]').click();
+  } catch (e) { logErr(e); }
+});
+
+$('btnLoadNodes').addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', async () => {
+  const file = fileInput.files && fileInput.files[0];
+  if (!file) return;
+  try {
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const fig = Stickfigure.fromBytes(buf);
+    currentFig = fig;
+    render(fig); renderTree(fig);
+    xmlEl.value = figureToXml(fig);
+    log('✔ loaded ' + file.name + ' (' + buf.length + ' bytes, version ' +
+        fig.version + ' build ' + fig.build + ')', 'ok');
+    document.querySelector('.tabs button[data-tab="xml"]').click();
+  } catch (e) { logErr(e); }
+  finally { fileInput.value = ''; }
+});
+
+$('btnHex').addEventListener('click', () => {
+  try {
+    if (!currentFig) buildAndShow();
+    if (!currentFig) return;
+    const bytes = currentFig.toBytes();
+    const lines = [];
+    for (let i = 0; i < bytes.length && i < 512; i += 16) {
+      const chunk = bytes.slice(i, i + 16);
+      const hex = Array.from(chunk).map(b => b.toString(16).padStart(2, '0')).join(' ');
+      const asc = Array.from(chunk).map(b => (b >= 32 && b < 127) ? String.fromCharCode(b) : '.').join('');
+      lines.push(i.toString(16).padStart(4, '0') + '  ' + hex.padEnd(48) + '  ' + asc);
+    }
+    if (bytes.length > 512) lines.push('… (' + (bytes.length - 512) + ' more bytes)');
+    log('hex dump — ' + bytes.length + ' bytes', 'hi');
+    log(lines.join('\n'), 'hi');
+    document.querySelector('.tabs button[data-tab="log"]').click();
+  } catch (e) { logErr(e); }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   Default XML — 425 / build 100
+   ════════════════════════════════════════════════════════════════ */
+xmlEl.value = [
+  '<?xml version="1.0"?>',
+  '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+  '',
+  '  <!-- Torso: points up (angle 90° = up) -->',
+  '  <node type="RoundedSegment" length="70" thickness="20"',
+  '        angle="90" color="#3366FFFF" useSegmentColor="true">',
+  '',
+  '    <!-- Head -->',
+  '    <node type="FilledCircle" length="36" thickness="36"',
+  '          angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
+  '',
+  '    <!-- Arms -->',
+  '    <node type="RoundedSegment" length="50" thickness="13"',
+  '          angle="200" color="#3366FFFF" useSegmentColor="true"/>',
+  '    <node type="RoundedSegment" length="50" thickness="13"',
+  '          angle="340" color="#3366FFFF" useSegmentColor="true"/>',
+  '  </node>',
+  '',
+  '  <!-- Legs -->',
+  '  <node type="RoundedSegment" length="65" thickness="16"',
+  '        angle="250" color="#3366FFFF" useSegmentColor="true"/>',
+  '  <node type="RoundedSegment" length="65" thickness="16"',
+  '        angle="290" color="#3366FFFF" useSegmentColor="true"/>',
+  '',
+  '</stickfigure>'
+].join('\n');
+
+log('ready', 'ok');
+buildAndShow();
+</script>
+</body>
+</html>

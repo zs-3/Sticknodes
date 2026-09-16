@@ -1,0 +1,191 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StickNodes diagnostic</title>
+<style>
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; background:#0e0e10; color:#e6e6e6;
+              font:13px/1.45 system-ui,sans-serif; }
+  h1 { font-size:16px; margin:8px 12px; }
+  #banner { background:#3a1010; color:#ffb0b0; padding:10px 12px;
+            font:12px/1.5 ui-monospace,monospace; white-space:pre-wrap;
+            border-bottom:1px solid #662020; display:none; word-break:break-word; }
+  #banner.show { display:block; }
+  #boot { background:#0a0a0c; padding:10px 12px; margin:0;
+          font:12px/1.6 ui-monospace,monospace; white-space:pre-wrap;
+          word-break:break-word; min-height:400px; }
+  #boot div { padding:1px 0; }
+  #boot .ok { color:#7ee787; }
+  #boot .err { color:#ff7b72; }
+  #boot .hi { color:#fff; font-weight:600; }
+  #boot .dim { color:#8a8a92; }
+  button { background:#26262c; color:#e6e6e6; border:1px solid #2a2a30;
+           padding:10px 14px; border-radius:6px; font:inherit; cursor:pointer;
+           margin:6px 4px; min-height:40px; }
+  button.primary { background:#4f8cff; border-color:#4f8cff; color:#fff; }
+</style>
+</head>
+<body>
+<h1>StickNodes — diagnostic mode</h1>
+<div id="banner"></div>
+<div>
+  <button id="btnTest">1. Test wasm fetch</button>
+  <button id="btnInit" class="primary">2. Init WASM</button>
+  <button id="btnMake">3. Create figure</button>
+</div>
+<pre id="boot"></pre>
+
+<script>
+/* Plain script — runs immediately, catches ALL errors */
+const boot = document.getElementById('boot');
+const banner = document.getElementById('banner');
+
+function emit(msg, cls) {
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = msg;
+  boot.appendChild(d);
+  boot.scrollTop = boot.scrollHeight;
+  try { console.log('[boot]', msg); } catch (_) {}
+}
+
+function fail(msg) {
+  banner.classList.add('show');
+  banner.textContent = 'ERROR: ' + msg;
+  emit('ERROR: ' + msg, 'err');
+}
+
+window.addEventListener('error', e => {
+  fail((e.message || String(e)) +
+       (e.filename ? '  @ ' + e.filename + ':' + e.lineno : ''));
+});
+window.addEventListener('unhandledrejection', e => {
+  const r = e.reason;
+  fail(r && r.message ? r.message : String(r));
+});
+
+emit('location: ' + location.href, 'dim');
+emit('protocol: ' + location.protocol, 'dim');
+if (location.protocol === 'file:') {
+  fail('Page opened as file:// — must be served over http://');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Manual test buttons
+   ══════════════════════════════════════════════════════════════ */
+let mod = null, inited = false;
+
+document.getElementById('btnTest').addEventListener('click', async () => {
+  emit('── wasm fetch test ──', 'hi');
+  const urls = ['./sticknodes_rs_bg.wasm', './sticknodes_rs.js'];
+  for (const u of urls) {
+    try {
+      const r = await fetch(u, { method: 'GET', cache: 'no-store' });
+      emit(u + ' → HTTP ' + r.status + ' ' + r.statusText + '  (' +
+           (r.headers.get('content-length') || '?') + ' bytes)', 'ok');
+      if (!r.ok) emit('  ⚠ file is missing or not served', 'err');
+    } catch (e) {
+      emit(u + ' → ' + e.message, 'err');
+    }
+  }
+  // Try listing what's actually in the folder — only works if directory listing is enabled
+  try {
+    const r = await fetch('./', { cache: 'no-store' });
+    const t = await r.text();
+    emit('── folder listing (first 400 chars) ──', 'hi');
+    emit(t.slice(0, 400), 'dim');
+  } catch (e) {
+    emit('folder listing unavailable: ' + e.message, 'dim');
+  }
+});
+
+document.getElementById('btnInit').addEventListener('click', async () => {
+  emit('── module import ──', 'hi');
+  try {
+    mod = await import('./sticknodes_rs.js');
+    emit('import OK', 'ok');
+    emit('exports: ' + Object.keys(mod).join(', '), 'dim');
+  } catch (e) {
+    fail('import failed: ' + (e.message || e));
+    return;
+  }
+  emit('── init() ──', 'hi');
+  try {
+    await mod.default();
+    inited = true;
+    emit('init OK — WASM ready', 'ok');
+  } catch (e) {
+    fail('init failed: ' + (e.message || e));
+    return;
+  }
+  emit('── class smoke test ──', 'hi');
+  try {
+    const Color = mod.Color;
+    const c = Color.fromHex('#FF000080');
+    emit('Color.fromHex("#FF000080") → alpha=' + c.alpha +
+         ' red=' + c.red + ' green=' + c.green + ' blue=' + c.blue, 'ok');
+    emit('Color.toHex() → ' + c.toHex(), 'ok');
+  } catch (e) {
+    fail('Color test: ' + (e.message || e));
+  }
+});
+
+document.getElementById('btnMake').addEventListener('click', () => {
+  if (!inited) { fail('init the WASM first (button 2)'); return; }
+  emit('── build figure ──', 'hi');
+  try {
+    const Stickfigure = mod.Stickfigure;
+    const fig = new Stickfigure();
+    emit('new Stickfigure() → version=' + fig.version +
+         ' build=' + fig.build + ' scale=' + fig.scale, 'ok');
+    emit('colorHex=' + fig.colorHex, 'ok');
+
+    fig.setVersion(425);
+    fig.build = 100;
+    fig.scale = 1.0;
+    fig.colorHex = '#202020FF';
+    emit('after header set → version=' + fig.version + ' build=' + fig.build, 'ok');
+
+    const root = fig.rootNode();
+    emit('rootNode → drawIndex=' + root.drawIndex +
+         ' nodeType=' + root.nodeType, 'ok');
+
+    const child = root.addChild({
+      nodeType: 'RoundedSegment',
+      length: 60,
+      thickness: 14,
+      localAngle: 90,
+      color: { red: 0x33, green: 0x66, blue: 0xFF, alpha: 0xFF },
+      useSegmentColor: true
+    });
+    emit('addChild OK → drawIndex=' + child.drawIndex +
+         ' length=' + child.length +
+         ' thickness=' + child.thickness +
+         ' localAngle=' + child.localAngle, 'ok');
+
+    const bytes = fig.toBytes();
+    emit('toBytes() → ' + bytes.length + ' bytes', 'ok');
+
+    const hex = Array.from(bytes.slice(0, 20))
+      .map(b => b.toString(16).padStart(2, '0')).join(' ');
+    emit('first 20 bytes: ' + hex, 'hi');
+    emit('expected header: 00 00 01 a9 00 00 00 64 3f 80 00 00 ff 20 20 20 ff 00 00 00', 'dim');
+
+    const blob = new Blob([bytes], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'figure.nodes';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    emit('download triggered', 'ok');
+  } catch (e) {
+    fail('build failed: ' + (e.message || e));
+  }
+});
+
+emit('ready — tap 1, then 2, then 3', 'hi');
+</script>
+</body>
+</html>

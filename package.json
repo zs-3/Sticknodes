@@ -1,0 +1,15 @@
+{
+  "name": "sticknodes-rs",
+  "type": "module",
+  "version": "4.0.0-alpha",
+  "files": [
+    "sticknodes_rs_bg.wasm",
+    "sticknodes_rs.js",
+    "sticknodes_rs.d.ts"
+  ],
+  "main": "sticknodes_rs.js",
+  "types": "sticknodes_rs.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

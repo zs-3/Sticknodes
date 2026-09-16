@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StickNodes diagnostic v2</title>
+<style>
+  * { box-sizing:border-box; }
+  html,body { margin:0; padding:0; background:#0e0e10; color:#e6e6e6;
+              font:13px/1.45 system-ui,sans-serif; }
+  h1 { font-size:15px; margin:8px 12px; }
+  #banner { background:#3a1010; color:#ffb0b0; padding:10px 12px;
+            font:12px/1.5 ui-monospace,monospace; white-space:pre-wrap;
+            border-bottom:1px solid #662020; display:none; word-break:break-word; }
+  #banner.show { display:block; }
+  #boot { background:#0a0a0c; padding:10px 12px; margin:0;
+          font:12px/1.6 ui-monospace,monospace; white-space:pre-wrap;
+          word-break:break-word; min-height:400px; }
+  #boot .ok { color:#7ee787; }
+  #boot .err { color:#ff7b72; }
+  #boot .hi { color:#fff; font-weight:600; }
+  #boot .dim { color:#8a8a92; }
+  button { background:#26262c; color:#e6e6e6; border:1px solid #2a2a30;
+           padding:10px 14px; border-radius:6px; font:inherit; cursor:pointer;
+           margin:6px 4px; min-height:40px; }
+  button.primary { background:#4f8cff; border-color:#4f8cff; color:#fff; }
+</style>
+</head>
+<body>
+<h1>StickNodes diagnostic v2 (blob URL loader)</h1>
+<div id="banner"></div>
+<div>
+  <button id="btnLoad" class="primary">1. Load module</button>
+  <button id="btnMake">2. Build figure</button>
+</div>
+<pre id="boot"></pre>
+
+<script>
+const boot = document.getElementById('boot');
+const banner = document.getElementById('banner');
+function emit(msg, cls) {
+  const d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = msg;
+  boot.appendChild(d);
+  boot.scrollTop = boot.scrollHeight;
+}
+function fail(msg) {
+  banner.classList.add('show');
+  banner.textContent = 'ERROR: ' + msg;
+  emit('ERROR: ' + msg, 'err');
+}
+window.addEventListener('error', e => fail((e.message||String(e))));
+window.addEventListener('unhandledrejection', e => {
+  const r = e.reason;
+  fail(r && r.message ? r.message : String(r));
+});
+
+let mod = null;
+
+document.getElementById('btnLoad').addEventListener('click', async () => {
+  emit('── loading sticknodes_rs.js as text ──', 'hi');
+  let jsText;
+  try {
+    const r = await fetch('./sticknodes_rs.js', { cache: 'no-store' });
+    if (!r.ok) { fail('fetch .js → HTTP ' + r.status); return; }
+    jsText = await r.text();
+    emit('got ' + jsText.length + ' chars', 'ok');
+  } catch (e) { fail('fetch .js: ' + e.message); return; }
+
+  // Blob URL carries our own MIME type — Chrome will accept this as a module.
+  const blobUrl = URL.createObjectURL(new Blob([jsText], { type: 'application/javascript' }));
+  emit('blob url: ' + blobUrl.slice(0, 50) + '…', 'dim');
+
+  emit('── importing blob module ──', 'hi');
+  try {
+    mod = await import(blobUrl);
+    emit('import OK', 'ok');
+    emit('exports: ' + Object.keys(mod).join(', '), 'dim');
+  } catch (e) { fail('import: ' + (e.message || e)); return; }
+
+  emit('── fetching wasm as ArrayBuffer ──', 'hi');
+  let wasmBytes;
+  try {
+    const r = await fetch('./sticknodes_rs_bg.wasm', { cache: 'no-store' });
+    if (!r.ok) { fail('fetch .wasm → HTTP ' + r.status); return; }
+    wasmBytes = await r.arrayBuffer();
+    emit('got ' + wasmBytes.byteLength + ' bytes', 'ok');
+  } catch (e) { fail('fetch .wasm: ' + e.message); return; }
+
+  emit('── init(wasmBytes) ──', 'hi');
+  try {
+    // Passing an ArrayBuffer bypasses WebAssembly.instantiateStreaming (which
+    // would require Content-Type: application/wasm).
+    await mod.default(wasmBytes);
+    emit('init OK — WASM ready', 'ok');
+  } catch (e) { fail('init: ' + (e.message || e)); return; }
+
+  emit('── Color smoke test ──', 'hi');
+  try {
+    const c = mod.Color.fromHex('#FF000080');
+    emit('Color.fromHex("#FF000080") → r=' + c.red + ' g=' + c.green +
+         ' b=' + c.blue + ' a=' + c.alpha, 'ok');
+    emit('Color.toHex() → ' + c.toHex(), 'ok');
+  } catch (e) { fail('Color test: ' + (e.message || e)); }
+});
+
+document.getElementById('btnMake').addEventListener('click', () => {
+  if (!mod) { fail('load the module first'); return; }
+  emit('── build figure ──', 'hi');
+  try {
+    const { Stickfigure } = mod;
+    const fig = new Stickfigure();
+    emit('new Stickfigure() → version=' + fig.version +
+         ' build=' + fig.build + ' scale=' + fig.scale, 'ok');
+    emit('colorHex = ' + fig.colorHex, 'ok');
+
+    fig.setVersion(425);
+    fig.build = 100;
+    fig.scale = 1.0;
+    fig.colorHex = '#202020FF';
+    emit('after header set: version=' + fig.version + ' build=' + fig.build, 'ok');
+
+    const root = fig.rootNode();
+    emit('rootNode → drawIndex=' + root.drawIndex +
+         ' nodeType=' + root.nodeType, 'ok');
+
+    const child = root.addChild({
+      nodeType: 'RoundedSegment',
+      length: 60, thickness: 14, localAngle: 90,
+      color: { red: 0x33, green: 0x66, blue: 0xFF, alpha: 0xFF },
+      useSegmentColor: true
+    });
+    emit('addChild OK → drawIndex=' + child.drawIndex +
+         ' length=' + child.length + ' thickness=' + child.thickness +
+         ' localAngle=' + child.localAngle, 'ok');
+
+    const bytes = fig.toBytes();
+    emit('toBytes() → ' + bytes.length + ' bytes', 'ok');
+
+    const hex = Array.from(bytes.slice(0, 20))
+      .map(b => b.toString(16).padStart(2, '0')).join(' ');
+    emit('first 20 bytes: ' + hex, 'hi');
+    emit('expected:       00 00 01 a9 00 00 00 64 3f 80 00 00 ff 20 20 20 ff 00 00 00', 'dim');
+
+    const blob = new Blob([bytes], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'figure.nodes';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    emit('download triggered', 'ok');
+  } catch (e) { fail('build: ' + (e.message || e)); }
+});
+
+emit('ready — tap 1, then 2', 'hi');
+</script>
+</body>
+</html>
