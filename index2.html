@@ -2,109 +2,224 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>StickNodes Studio</title>
 <style>
   :root {
     --bg:#f4f6fa; --panel:#fff; --border:#e3e6ec; --border-strong:#cfd4dd;
-    --text:#1a1d24; --muted:#6b7280;
+    --text:#1a1d24; --muted:#6b7280; --muted-2:#9ca3af;
     --accent:#4f46e5; --accent-hover:#4338ca; --accent-soft:#eef2ff;
-    --ok:#059669; --err:#dc2626;
+    --ok:#059669; --ok-soft:#ecfdf5; --err:#dc2626; --err-soft:#fef2f2;
+    --warn:#d97706; --warn-soft:#fffbeb;
+    --radius:10px; --radius-sm:6px;
+    --shadow-sm:0 1px 2px rgba(20,20,40,.05);
+    --shadow:0 1px 3px rgba(20,20,40,.08),0 4px 12px rgba(20,20,40,.04);
+    --shadow-lg:0 4px 12px rgba(20,20,40,.08),0 12px 32px rgba(20,20,40,.06);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;height:100%;overflow:hidden;
-    font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    background:var(--bg);color:var(--text)}
+  html,body{margin:0;padding:0;height:100%}
+  body{font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased}
   .app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
   header{display:flex;align-items:center;justify-content:space-between;
-    padding:9px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
-  header .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+    gap:12px;padding:10px 18px;background:var(--panel);
+    border-bottom:1px solid var(--border);flex:0 0 auto}
+  header .brand{display:flex;align-items:center;gap:10px;
+    font-weight:700;font-size:15px;letter-spacing:-.01em}
   header .brand .dot{width:9px;height:9px;border-radius:50%;
-    background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 0 0 3px var(--accent-soft)}
-  header .status{font-size:11px;color:var(--muted);
-    padding:4px 10px;background:var(--bg);border-radius:14px;border:1px solid var(--border)}
-  header .status.ready{color:var(--ok)}
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    box-shadow:0 0 0 3px var(--accent-soft)}
+  header .status{display:flex;align-items:center;gap:8px;font-size:12px;
+    color:var(--muted);padding:4px 11px;background:var(--bg);
+    border-radius:20px;border:1px solid var(--border)}
+  header .status .led{width:6px;height:6px;border-radius:50%;
+    background:var(--muted);transition:background .2s}
+  header .status.ready .led{background:var(--ok);box-shadow:0 0 6px rgba(5,150,105,.5)}
+  header .status.error .led{background:var(--err)}
 
-  .toolbar{display:flex;gap:6px;padding:8px 16px;background:var(--panel);
-    border-bottom:1px solid var(--border);overflow-x:auto}
+  .toolbar{display:flex;gap:6px;padding:8px 18px;background:var(--panel);
+    border-bottom:1px solid var(--border);flex:0 0 auto;
+    overflow-x:auto;scrollbar-width:none}
   .toolbar::-webkit-scrollbar{display:none}
-  .btn{padding:7px 12px;font:inherit;font-weight:500;font-size:12px;
-    color:var(--text);background:var(--panel);border:1px solid var(--border-strong);
-    border-radius:6px;cursor:pointer;white-space:nowrap;min-height:34px}
-  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-  .btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
-  select.preset{font:inherit;font-size:12px;padding:7px 10px;background:var(--panel);
-    border:1px solid var(--border-strong);border-radius:6px;cursor:pointer}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;
+    font:inherit;font-weight:500;font-size:12.5px;color:var(--text);
+    background:var(--panel);border:1px solid var(--border-strong);
+    border-radius:var(--radius-sm);cursor:pointer;white-space:nowrap;
+    min-height:36px;transition:all .12s ease;box-shadow:var(--shadow-sm)}
+  .btn:hover{background:#fafbfd;border-color:#b6bcc7}
+  .btn:active{transform:translateY(1px);box-shadow:none}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;
+    box-shadow:0 1px 3px rgba(79,70,229,.3),0 4px 12px rgba(79,70,229,.15)}
+  .btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+  .btn.toggle.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+  select.preset{font:inherit;font-size:12.5px;font-weight:500;padding:8px 10px;
+    background:var(--panel);border:1px solid var(--border-strong);
+    border-radius:var(--radius-sm);cursor:pointer;min-height:36px;
+    color:var(--text);box-shadow:var(--shadow-sm)}
   .spacer{flex:1}
+  .vbar{width:1px;background:var(--border);margin:0 2px;align-self:stretch}
 
-  .content{flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;
-    gap:10px;padding:10px 16px 14px;min-height:0}
-  @media(max-width:900px){.content{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
+  .content{flex:1 1 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:10px;padding:10px 18px 14px;min-height:0}
+  @media(max-width:900px){
+    .content{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+    header,.toolbar{padding-left:12px;padding-right:12px}
+    .content{padding:8px 12px 10px}
+  }
 
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  .card{background:var(--panel);border:1px solid var(--border);
+    border-radius:var(--radius);box-shadow:var(--shadow);
     display:flex;flex-direction:column;min-height:0;overflow:hidden}
   .card-head{display:flex;align-items:center;justify-content:space-between;
-    padding:8px 12px;border-bottom:1px solid var(--border);background:#fbfcfe}
-  .card-head h2{margin:0;font-size:11px;font-weight:600;text-transform:uppercase;
-    letter-spacing:.06em;color:var(--muted)}
-  .card-head .meta{font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+    padding:8px 12px;border-bottom:1px solid var(--border);
+    background:#fbfcfe;flex:0 0 auto;gap:10px;min-height:36px}
+  .card-head h2{margin:0;font-size:11px;font-weight:600;
+    text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .card-head .meta{font-size:11px;color:var(--muted);
+    font-variant-numeric:tabular-nums;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;max-width:60%}
 
-  .canvas-wrap{flex:1 1 auto;min-height:0;overflow:hidden;background:#fbfcfe;
-    touch-action:none;user-select:none;position:relative}
+  .preview-wrap{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;
+    background:#fbfcfe;touch-action:none;user-select:none;cursor:grab}
   canvas{display:block;width:100%;height:100%;background:#fff}
 
-  .tabs{display:flex;padding:5px 8px 0;background:#fbfcfe;border-bottom:1px solid var(--border)}
+  .zoom-overlay{position:absolute;top:10px;right:10px;
+    display:flex;flex-direction:column;gap:4px;
+    background:rgba(255,255,255,.94);border:1px solid var(--border);
+    border-radius:8px;padding:4px;box-shadow:var(--shadow)}
+  .zoom-overlay button{width:32px;height:32px;border:0;border-radius:6px;
+    background:transparent;color:var(--text);font-size:16px;font-weight:600;
+    cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .zoom-overlay button:hover{background:var(--accent-soft);color:var(--accent)}
+  .zoom-pct{font:600 10px/1 ui-monospace,Consolas,monospace;
+    color:var(--muted);text-align:center;padding:3px 0;
+    border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+
+  .hint-pill{position:absolute;left:10px;bottom:10px;
+    background:rgba(0,0,0,.72);color:#fff;font-size:11px;
+    padding:5px 10px;border-radius:14px;pointer-events:none;
+    opacity:1;transition:opacity .6s ease}
+  .hint-pill.hidden{opacity:0}
+
+  .info-bar{display:flex;flex-wrap:wrap;gap:5px 14px;
+    padding:6px 12px;background:#f7f8fb;border-top:1px solid var(--border);
+    font:11px/1.35 ui-monospace,Consolas,monospace;
+    color:var(--muted);flex:0 0 auto}
+  .info-bar b{color:var(--text);font-weight:600}
+  .info-bar .chip{display:inline-flex;align-items:center;gap:4px}
+  .info-bar .chip::before{content:"";display:inline-block;
+    width:6px;height:6px;border-radius:50%;background:var(--muted-2)}
+
+  .right-col{display:flex;flex-direction:column;min-height:0;gap:10px}
+
+  textarea{flex:1 1 auto;width:100%;min-height:0;border:0;outline:0;
+    resize:none;padding:12px 14px;
+    font:12px/1.6 ui-monospace,Consolas,monospace;color:var(--text);
+    background:var(--panel);tab-size:2;white-space:pre;overflow:auto}
+
+  .bottom{display:flex;flex-direction:column;min-height:0;flex:1 1 auto}
+  .tabs{display:flex;gap:2px;padding:5px 8px 0;background:#fbfcfe;
+    border-bottom:1px solid var(--border);flex:0 0 auto}
   .tabs button{padding:8px 12px;font:inherit;font-size:11.5px;font-weight:600;
-    color:var(--muted);background:transparent;border:0;border-bottom:2px solid transparent;
-    cursor:pointer;border-radius:4px 4px 0 0}
-  .tabs button.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--panel)}
-  .tab-content{flex:1 1 auto;min-height:0;overflow:auto;display:none;background:var(--panel)}
+    color:var(--muted);background:transparent;border:0;
+    border-bottom:2px solid transparent;cursor:pointer;
+    border-radius:5px 5px 0 0;transition:all .12s;
+    display:inline-flex;align-items:center;gap:5px}
+  .tabs button:hover{color:var(--text);background:#f3f5f9}
+  .tabs button.active{color:var(--accent);border-bottom-color:var(--accent);
+    background:var(--panel)}
+  .tabs .badge{background:var(--accent-soft);color:var(--accent);
+    font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:8px}
+  .tab-content{flex:1 1 auto;min-height:0;overflow:auto;display:none;
+    background:var(--panel)}
   .tab-content.active{display:block}
 
-  textarea{width:100%;height:100%;border:0;outline:0;resize:none;padding:12px;
-    font:12px/1.55 ui-monospace,Consolas,monospace;background:var(--panel);color:var(--text)}
-  #log,#tree{padding:10px 12px;margin:0;font:11px/1.55 ui-monospace,Consolas,monospace;
+  #log{padding:10px 14px;margin:0;font:11.5px/1.55 ui-monospace,Consolas,monospace;
     white-space:pre-wrap;word-break:break-word}
-  #log .ok{color:var(--ok)} #log .err{color:var(--err)} #log .hi{color:var(--accent)}
+  #log .line{padding:1.5px 0;display:flex;gap:8px;align-items:flex-start}
+  #log .line .badge{flex:0 0 auto;display:inline-flex;align-items:center;
+    justify-content:center;min-width:42px;padding:1px 6px;font-size:10px;
+    font-weight:700;letter-spacing:.04em;border-radius:4px;height:17px;margin-top:1px}
+  #log .ok .badge{background:var(--ok-soft);color:var(--ok)}
+  #log .err .badge{background:var(--err-soft);color:var(--err)}
+  #log .hi .badge{background:var(--accent-soft);color:var(--accent)}
+  #log .warn .badge{background:var(--warn-soft);color:var(--warn)}
   #log .dim{color:var(--muted)}
+  #log .dim .badge{background:#f3f4f6;color:var(--muted)}
+  #log .line .msg{flex:1;min-width:0}
 
-  #tree .row{display:grid;grid-template-columns:auto 40px 130px 14px 1fr;gap:6px;
-    padding:2px 4px;white-space:nowrap;border-radius:4px;cursor:pointer;align-items:center}
+  #tree{padding:6px 8px;font:11.5px/1.5 ui-monospace,Consolas,monospace}
+  #tree .row{display:grid;grid-template-columns:auto 42px 130px 14px 1fr;
+    gap:6px;padding:3px 6px;white-space:nowrap;border-radius:4px;
+    align-items:center;cursor:pointer}
   #tree .row:hover{background:#f7f8fb}
+  #tree .row.selected{background:var(--accent-soft)}
   #tree .branch{color:#d1d5db}
   #tree .idx{color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums}
   #tree .type{color:#b45309;font-weight:500}
   #tree .swatch{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.1)}
-  #tree .props{color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+  #tree .props{color:var(--muted);overflow:hidden;text-overflow:ellipsis;
+    display:flex;gap:6px;align-items:center;flex-wrap:nowrap}
+  #tree .props > span{overflow:hidden;text-overflow:ellipsis}
+
+  #toast{position:fixed;left:50%;bottom:24px;
+    transform:translateX(-50%) translateY(80px);
+    background:#1a1d24;color:#fff;padding:10px 18px;border-radius:24px;
+    font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);
+    opacity:0;pointer-events:none;transition:all .25s cubic-bezier(.2,.8,.2,1);
+    z-index:100;max-width:80vw;text-align:center}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
   input[type=file]{display:none}
-  #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(60px);
-    background:#1a1d24;color:#fff;padding:9px 16px;border-radius:20px;font-size:12.5px;
-    opacity:0;transition:all .22s;pointer-events:none;z-index:100}
-  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:560px){
+    .toolbar .btn .label{display:none}
+    .toolbar .btn{padding:8px 10px}
+  }
 </style>
 </head>
 <body>
 <div class="app">
-
   <header>
     <div class="brand"><span class="dot"></span>StickNodes Studio</div>
-    <div class="status" id="status">loading…</div>
+    <div class="status" id="status">
+      <span class="led"></span><span id="statusText">loading...</span>
+    </div>
   </header>
 
   <div class="toolbar">
-    <button class="btn primary" id="btnBuild">Build</button>
-    <button class="btn" id="btnDownload">Download</button>
-    <button class="btn" id="btnExport">→ XML</button>
-    <button class="btn" id="btnCopy">Copy</button>
-    <button class="btn" id="btnLoad">Load</button>
-    <button class="btn on" id="btnDrag" title="Toggle node dragging">Drag</button>
-    <button class="btn on" id="btnFills" title="Toggle polyfill fills">Fills</button>
+    <button class="btn primary" id="btnBuild">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 9-14 9V3z"/></svg>
+      <span class="label">Build</span>
+    </button>
+    <button class="btn" id="btnDownload">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+      <span class="label">Download</span>
+    </button>
+    <button class="btn" id="btnExport">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12l4 4v12H4z"/><path d="M8 10h8M8 14h5"/></svg>
+      <span class="label">→ XML</span>
+    </button>
+    <button class="btn" id="btnCopy">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg>
+      <span class="label">Copy</span>
+    </button>
+    <button class="btn" id="btnLoad">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12l4 4v12H4z"/><path d="M12 11v6m0 0l-3-3m3 3l3-3"/></svg>
+      <span class="label">Load</span>
+    </button>
+    <div class="vbar"></div>
+    <button class="btn toggle on" id="btnDrag">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
+      <span class="label">Drag</span>
+    </button>
+    <button class="btn toggle on" id="btnFills">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9-9 9z"/></svg>
+      <span class="label">Fills</span>
+    </button>
     <div class="spacer"></div>
     <select class="preset" id="preset">
-      <option value="">Preset…</option>
+      <option value="">Preset...</option>
       <option value="empty">Empty</option>
       <option value="standing">Standing</option>
       <option value="tpose">T-pose</option>
@@ -118,34 +233,49 @@
     <div class="card">
       <div class="card-head">
         <h2>Preview</h2>
-        <span class="meta" id="previewMeta">—</span>
+        <span class="meta" id="previewMeta">-</span>
       </div>
-      <div class="canvas-wrap" id="canvasWrap">
+      <div class="preview-wrap" id="previewWrap">
         <canvas id="preview"></canvas>
+        <div class="zoom-overlay">
+          <button id="btnZoomIn" title="Zoom in">+</button>
+          <div class="zoom-pct" id="zoomPct">-</div>
+          <button id="btnZoomOut" title="Zoom out">−</button>
+          <button id="btnZoomFit" title="Fit">⌂</button>
+          <button id="btnZoomReset" title="Reset">◎</button>
+        </div>
+        <div class="hint-pill" id="hintPill">Pinch to zoom · drag to pan · tap node to select · drag node tip to edit</div>
+      </div>
+      <div class="info-bar" id="infoBar">
+        <span class="chip">wasm <b id="wasmVer">?</b></span>
+        <span class="chip">fig <b id="figVer">-</b></span>
+        <span class="chip">nodes <b id="nCount">0</b></span>
+        <span class="chip">polyfills <b id="pfCount">0</b></span>
+        <span class="chip">selected <b id="selIdx">-</b></span>
       </div>
     </div>
 
-    <div style="display:flex;flex-direction:column;min-height:0;gap:10px">
-      <div class="card" style="flex:1 1 50%">
+    <div class="right-col">
+      <div class="card" style="flex:1 1 48%;">
         <div class="card-head">
           <h2>XML</h2>
-          <span class="meta" id="xmlMeta">—</span>
+          <span class="meta" id="xmlMeta">-</span>
         </div>
         <textarea id="xml" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
       </div>
-      <div class="card" style="flex:1 1 50%;display:flex;flex-direction:column;min-height:0">
+      <div class="card bottom" style="flex:1 1 52%;">
         <div class="tabs">
           <button data-tab="log" class="active">Log</button>
-          <button data-tab="tree">Tree</button>
+          <button data-tab="tree">Tree <span class="badge" id="treeBadge">0</span></button>
         </div>
         <div class="tab-content active" data-tab="log"><pre id="log"></pre></div>
         <div class="tab-content" data-tab="tree"><div id="tree"></div></div>
       </div>
     </div>
   </div>
-
 </div>
-<input type="file" id="fileInput">
+
+<input type="file" id="fileInput" accept=".nodes">
 <div id="toast"></div>
 
 <script type="module">
@@ -153,55 +283,91 @@ import { StickNodesRenderer } from './renderer.js';
 
 /* ───── DOM ───── */
 const $ = id => document.getElementById(id);
-const canvas = $('preview'), wrap = $('canvasWrap');
-const logEl = $('log'), treeEl = $('tree'), xmlEl = $('xml');
-const fileInput = $('fileInput'), toastEl = $('toast'), statusEl = $('status');
+const canvas = $('preview');
+const wrap = $('previewWrap');
+const xmlEl = $('xml');
+const logEl = $('log');
+const treeEl = $('tree');
+const fileInput = $('fileInput');
+const toastEl = $('toast');
+const statusEl = $('status');
+const statusTextEl = $('statusText');
 
-let toastTimer=null;
-function toast(m){toastEl.textContent=m;toastEl.classList.add('show');
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('show'),1800);}
-function log(kind,m){
-  const cls={ok:'ok',err:'err',hi:'hi',dim:'dim'}[kind]||'dim';
-  const line=document.createElement('div');line.className=cls;
-  line.textContent=(kind==='ok'?'✔ ':kind==='err'?'✘ ':'')+m;
-  logEl.appendChild(line);logEl.scrollTop=logEl.scrollHeight;
+let toastTimer = null;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2000);
 }
-const clearLog=()=>{logEl.textContent='';};
-function setStatus(s,t){statusEl.className='status '+(s||'');statusEl.textContent=t;}
+function log(kind, msg) {
+  const kc = { ok:'ok', err:'err', hi:'hi', dim:'dim', warn:'warn' }[kind] || 'dim';
+  const bt = { ok:'OK', err:'FAIL', hi:'INFO', dim:'···', warn:'WARN' }[kind] || '···';
+  const line = document.createElement('div');
+  line.className = 'line ' + kc;
+  const b = document.createElement('span'); b.className = 'badge'; b.textContent = bt;
+  const t = document.createElement('span'); t.className = 'msg'; t.textContent = msg;
+  line.appendChild(b); line.appendChild(t);
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+function clearLog() { logEl.textContent = ''; }
+function setStatus(s, t) {
+  statusEl.className = 'status ' + (s || '');
+  statusTextEl.textContent = t;
+}
 
-/* ───── WASM load (MIME bypass) ───── */
-let mod=null;
-try{
-  const jsText=await(await fetch('./sticknodes_rs.js',{cache:'no-store'})).text();
-  const blobUrl=URL.createObjectURL(new Blob([jsText],{type:'application/javascript'}));
-  mod=await import(blobUrl);
+/* ───── Load WASM ───── */
+let mod = null;
+try {
+  const jsText = await (await fetch('./sticknodes_rs.js', { cache:'no-store' })).text();
+  const blobUrl = URL.createObjectURL(new Blob([jsText], { type:'application/javascript' }));
+  mod = await import(blobUrl);
   URL.revokeObjectURL(blobUrl);
-  log('ok','module loaded');
-}catch(e){log('err','load module: '+e.message);throw e;}
+  log('ok', 'module loaded');
+} catch (e) { log('err', 'load module: ' + e.message); throw e; }
 
-try{
-  const wasmBytes=await(await fetch('./sticknodes_rs_bg.wasm',{cache:'no-store'})).arrayBuffer();
+try {
+  const wasmBytes = await (await fetch('./sticknodes_rs_bg.wasm', { cache:'no-store' })).arrayBuffer();
   await mod.default(wasmBytes);
-  log('ok','WASM ready');
-  setStatus('ready','ready');
-}catch(e){log('err','wasm init: '+e.message);setStatus('err','init failed');throw e;}
+  log('ok', 'WASM ready');
+  setStatus('ready', 'ready');
+} catch (e) { log('err', 'wasm init: ' + e.message); setStatus('error', 'init failed'); throw e; }
+
+try {
+  const sv = mod.SUPPORTED_VERSION ? mod.SUPPORTED_VERSION() : '?';
+  const sb = mod.SUPPORTED_BUILD ? mod.SUPPORTED_BUILD() : '?';
+  $('wasmVer').textContent = sv + '/' + sb;
+} catch (_) {}
 
 /* ───── Renderer ───── */
 const renderer = new StickNodesRenderer(canvas);
-renderer.onNodeChanged(()=>{
-  // When a node is dragged, refresh XML text and tree
-  if(currentFig){
-    xmlEl.value=figureToXml(currentFig);
-    updateXmlMeta();
+renderer.setFills(true);
+renderer.setDragEnabled(true);
+
+let currentFig = null;
+
+renderer.onNodeChanged(() => {
+  if (!currentFig) return;
+  xmlEl.value = figureToXml(currentFig);
+  updateXmlMeta();
+  renderTree(currentFig);
+});
+
+renderer.onSelect((node) => {
+  if (node) {
+    $('selIdx').textContent = '[' + node.drawIndex + '] ' + (NODE_TYPE_NAME[node.nodeType] || node.nodeType);
     renderTree(currentFig);
+  } else {
+    $('selIdx').textContent = '-';
   }
 });
 
 /* ───── Presets ───── */
-const BODY='#42489DFF',SKIN='#FFCC99FF';
-const PRESETS={
-  empty:['<?xml version="1.0"?>','<stickfigure version="425" build="100" scale="1.0" color="#202020FF">','  <!-- nodes here -->','</stickfigure>'].join('\n'),
-  standing:[
+const BODY = '#42489DFF', SKIN = '#FFCC99FF';
+const PRESETS = {
+  empty: '<?xml version="1.0"?>\n<stickfigure version="425" build="100" scale="1.0" color="#202020FF">\n  <!-- nodes here -->\n</stickfigure>',
+  standing: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
     '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="'+BODY+'" useSegmentColor="true">',
@@ -215,8 +381,9 @@ const PRESETS={
     '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="'+BODY+'" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="'+BODY+'" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'].join('\n'),
-  tpose:[
+    '</stickfigure>'
+  ].join('\n'),
+  tpose: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
     '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="'+BODY+'" useSegmentColor="true">',
@@ -230,8 +397,9 @@ const PRESETS={
     '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="'+BODY+'" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="'+BODY+'" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'].join('\n'),
-  running:[
+    '</stickfigure>'
+  ].join('\n'),
+  running: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
     '  <node type="RoundedSegment" length="65" thickness="20" angle="280" color="'+BODY+'" useSegmentColor="true">',
@@ -249,8 +417,9 @@ const PRESETS={
     '  <node type="RoundedSegment" length="55" thickness="16" angle="110" color="'+BODY+'" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="30" color="'+BODY+'" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'].join('\n'),
-  sitting:[
+    '</stickfigure>'
+  ].join('\n'),
+  sitting: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
     '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="'+BODY+'" useSegmentColor="true">',
@@ -264,8 +433,9 @@ const PRESETS={
     '  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="'+BODY+'" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="'+BODY+'" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'].join('\n'),
-  waving:[
+    '</stickfigure>'
+  ].join('\n'),
+  waving: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
     '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="'+BODY+'" useSegmentColor="true">',
@@ -281,32 +451,38 @@ const PRESETS={
     '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="'+BODY+'" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="'+BODY+'" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'].join('\n'),
+    '</stickfigure>'
+  ].join('\n'),
 };
 
-/* ───── XML parsing ───── */
-const NODE_TYPE_NAME={[-1]:'RootNode',0:'RoundedSegment',1:'Segment',2:'Circle',3:'Triangle',4:'FilledCircle',5:'Ellipse',6:'Trapezoid',7:'Polygon'};
-const NODE_TYPE_VALID={RoundedSegment:1,Segment:1,Circle:1,Triangle:1,FilledCircle:1,Ellipse:1,Trapezoid:1,Polygon:1};
+/* ───── XML → options ───── */
+const NODE_TYPE_NAME = { [-1]:'RootNode', 0:'RoundedSegment', 1:'Segment', 2:'Circle', 3:'Triangle', 4:'FilledCircle', 5:'Ellipse', 6:'Trapezoid', 7:'Polygon' };
+const NODE_TYPE_VALID = { RoundedSegment:1, Segment:1, Circle:1, Triangle:1, FilledCircle:1, Ellipse:1, Trapezoid:1, Polygon:1 };
 
-function colorToWasm(hex){
-  let h=String(hex).replace(/^#/,'');
-  if(h.length===3)h=h.split('').map(c=>c+c).join('')+'FF';
-  else if(h.length===4)h=h.split('').map(c=>c+c).join('');
-  else if(h.length===6)h+='FF';
-  return{red:parseInt(h.slice(0,2),16),green:parseInt(h.slice(2,4),16),
-         blue:parseInt(h.slice(4,6),16),alpha:parseInt(h.slice(6,8),16)};
+function colorToWasm(hex) {
+  let h = String(hex).replace(/^#/, '');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('') + 'FF';
+  else if (h.length === 4) h = h.split('').map(c => c + c).join('');
+  else if (h.length === 6) h += 'FF';
+  return {
+    red: parseInt(h.slice(0, 2), 16),
+    green: parseInt(h.slice(2, 4), 16),
+    blue: parseInt(h.slice(4, 6), 16),
+    alpha: parseInt(h.slice(6, 8), 16),
+  };
 }
 
-function nodeOptionsFromEl(el){
-  const o={};
-  if(el.hasAttribute('type')){
-    const t=el.getAttribute('type');
-    if(!NODE_TYPE_VALID[t])throw new Error('unknown type '+t);
-    o.nodeType=t;
+function nodeOptionsFromEl(el) {
+  const o = {};
+  if (el.hasAttribute('type')) {
+    const t = el.getAttribute('type');
+    if (!NODE_TYPE_VALID[t]) throw new Error('unknown node type: ' + t);
+    o.nodeType = t;
   }
-  const num={length:'length',defaultLength:'defaultLength',
-    thickness:'thickness',defaultThickness:'defaultThickness',
-    scale:'scale',angle:'localAngle',defaultAngle:'defaultAngle',
+  const numAttrs = {
+    length:'length', defaultLength:'defaultLength',
+    thickness:'thickness', defaultThickness:'defaultThickness',
+    scale:'scale', angle:'localAngle', defaultAngle:'defaultAngle',
     defaultLocalAngle:'defaultLocalAngle',
     curveRadius:'segmentCurveRadiusAndDefaultCurveRadius',
     curvePrecision:'segmentCurvePolyfillPrecision',
@@ -315,17 +491,24 @@ function nodeOptionsFromEl(el){
     polygonVertices:'numPolygonVertices',
     angleLockRelativeMultiplier:'angleLockRelativeMultiplier',
     dragLockAngle:'dragLockAngle',
-    smartStretchMultiplier:'smartStretchMultiplier'};
-  for(const a in num)
-    if(el.hasAttribute(a))o[num[a]]=parseFloat(el.getAttribute(a));
-  const bool={static:'isStatic',stretchy:'isStretchy',floaty:'isFloaty',
+    smartStretchMultiplier:'smartStretchMultiplier',
+  };
+  for (const a in numAttrs) {
+    if (el.hasAttribute(a)) {
+      const v = parseFloat(el.getAttribute(a));
+      if (Number.isNaN(v)) throw new Error('<' + a + '> not a number');
+      o[numAttrs[a]] = v;
+    }
+  }
+  const boolAttrs = {
+    static:'isStatic', stretchy:'isStretchy', floaty:'isFloaty',
     smartStretch:'isSmartStretch',
     doNotApplySmartStretch:'doNotApplySmartStretch',
     smartStretchResetImpulse:'smartStretchResetImpulse',
     useSegmentColor:'useSegmentColor',
     useCircleOutline:'useCircleOutline',
     hollow:'circleIsHollow',
-    useGradient:'useGradient',reverseGradient:'reverseGradient',
+    useGradient:'useGradient', reverseGradient:'reverseGradient',
     useSegmentScale:'useSegmentScale',
     curveCirculization:'curveCirculization',
     halfArc:'halfArc',
@@ -335,229 +518,288 @@ function nodeOptionsFromEl(el){
     useTrapezoidEnd:'useTrapezoidThicknessEnd',
     trapezoidRoundedStart:'trapezoidIsRoundedStart',
     trapezoidRoundedEnd:'trapezoidIsRoundedEnd',
-    dragLocked:'isDragLocked'};
-  for(const a in bool)
-    if(el.hasAttribute(a)){
-      const v=el.getAttribute(a);
-      o[bool[a]]=!(v==='false'||v==='0'||v==='');
+    dragLocked:'isDragLocked',
+  };
+  for (const a in boolAttrs) {
+    if (el.hasAttribute(a)) {
+      const v = el.getAttribute(a);
+      o[boolAttrs[a]] = !(v === 'false' || v === '0' || v === '');
     }
-  const cols={color:'color',gradientColor:'gradientColor',outlineColor:'circleOutlineColor'};
-  for(const a in cols)
-    if(el.hasAttribute(a))o[cols[a]]=colorToWasm(el.getAttribute(a));
-  if(el.hasAttribute('gradientMode'))o.gradientMode=el.getAttribute('gradientMode');
-  if(el.hasAttribute('triangleType'))o.triangleType=el.getAttribute('triangleType');
-  if(el.hasAttribute('angleLock'))o.angleLockMode=el.getAttribute('angleLock');
+  }
+  const colorAttrs = { color:'color', gradientColor:'gradientColor', outlineColor:'circleOutlineColor' };
+  for (const a in colorAttrs) {
+    if (el.hasAttribute(a)) o[colorAttrs[a]] = colorToWasm(el.getAttribute(a));
+  }
+  if (el.hasAttribute('gradientMode')) o.gradientMode = el.getAttribute('gradientMode');
+  if (el.hasAttribute('triangleType')) o.triangleType = el.getAttribute('triangleType');
+  if (el.hasAttribute('angleLock')) o.angleLockMode = el.getAttribute('angleLock');
   return o;
 }
 
-function buildFigure(xmlText){
-  const doc=new DOMParser().parseFromString(xmlText,'application/xml');
-  const perr=doc.querySelector('parsererror');
-  if(perr)throw new Error('XML parse error: '+perr.textContent.trim());
-  const rootEl=doc.documentElement;
-  if(rootEl.tagName.toLowerCase()!=='stickfigure')throw new Error('root must be <stickfigure>');
-
-  const fig=new mod.Stickfigure();
-  try{fig.setNodeLimitEnabled(false);}catch(_){}
-  if(rootEl.hasAttribute('version'))fig.setVersion(parseInt(rootEl.getAttribute('version'),10));
-  if(rootEl.hasAttribute('build'))fig.build=parseInt(rootEl.getAttribute('build'),10);
-  if(rootEl.hasAttribute('scale'))fig.scale=parseFloat(rootEl.getAttribute('scale'));
-  if(rootEl.hasAttribute('color'))fig.colorHex=rootEl.getAttribute('color');
-
-  const root=fig.rootNode();
-  let added=0;
-  const walk=(parent,containerEl)=>{
-    for(const el of containerEl.children){
-      if(el.tagName.toLowerCase()!=='node')continue;
-      const child=parent.addChild(nodeOptionsFromEl(el));
-      added++;
-      walk(child,el);
-    }
+function polyfillOptionsFromEl(el) {
+  return {
+    anchor: parseInt(el.getAttribute('anchor') || '0', 10),
+    colorHex: el.getAttribute('color') || '#000000FF',
+    useColor: el.getAttribute('useColor') !== 'false',
+    attached: (el.getAttribute('attached') || '').split(',').map(s => s.trim()).filter(Boolean).map(Number),
   };
-  walk(root,rootEl);
-
-  let pf=0;
-  for(const el of rootEl.children){
-    if(el.tagName.toLowerCase()!=='polyfill')continue;
-    try{
-      fig.addPolyfill({
-        anchor:parseInt(el.getAttribute('anchor')||'0',10),
-        colorHex:el.getAttribute('color')||'#000000FF',
-        useColor:el.getAttribute('useColor')!=='false',
-        attached:(el.getAttribute('attached')||'').split(',').filter(Boolean).map(Number),
-      });
-      pf++;
-    }catch(e){log('err','polyfill skipped: '+e.message);}
-  }
-  return{fig,added,pf};
 }
 
-/* ───── Tree ───── */
-function renderTree(fig){
-  treeEl.textContent='';
-  const visit=(node,depth)=>{
-    const row=document.createElement('div');row.className='row';
-    const branch=document.createElement('span');branch.className='branch';
-    branch.textContent='│ '.repeat(Math.min(depth,20));
-    const idx=document.createElement('span');idx.className='idx';
-    idx.textContent='['+node.drawIndex+']';
-    const type=document.createElement('span');type.className='type';
-    type.textContent=NODE_TYPE_NAME[node.nodeType]||node.nodeType;
-    const swatch=document.createElement('span');swatch.className='swatch';
-    try{swatch.style.background=node.colorHex;}catch(_){}
-    const props=document.createElement('span');props.className='props';
-    let p='';
-    if(node.length)p+='len='+node.length.toFixed(1)+' ';
-    if(node.thickness)p+='th='+node.thickness+' ';
-    if(node.localAngle)p+='∠'+node.localAngle.toFixed(1)+'°';
-    props.textContent=p;
-    row.appendChild(branch);row.appendChild(idx);row.appendChild(type);
-    row.appendChild(swatch);row.appendChild(props);
-    treeEl.appendChild(row);
-    for(const k of node.children())visit(k,depth+1);
+function buildFigure(xmlText) {
+  const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+  const perr = doc.querySelector('parsererror');
+  if (perr) throw new Error('XML parse error');
+  const rootEl = doc.documentElement;
+  if (rootEl.tagName.toLowerCase() !== 'stickfigure') throw new Error('root must be <stickfigure>');
+
+  const fig = new mod.Stickfigure();
+  try { fig.setNodeLimitEnabled(false); } catch (_) {}
+  if (rootEl.hasAttribute('version')) fig.setVersion(parseInt(rootEl.getAttribute('version'), 10));
+  if (rootEl.hasAttribute('build')) fig.build = parseInt(rootEl.getAttribute('build'), 10);
+  if (rootEl.hasAttribute('scale')) fig.scale = parseFloat(rootEl.getAttribute('scale'));
+  if (rootEl.hasAttribute('color')) fig.colorHex = rootEl.getAttribute('color');
+
+  const rootNode = fig.rootNode();
+  let added = 0;
+  const walk = (parent, containerEl) => {
+    for (const el of containerEl.children) {
+      if (el.tagName.toLowerCase() !== 'node') continue;
+      const child = parent.addChild(nodeOptionsFromEl(el));
+      added++;
+      walk(child, el);
+    }
   };
-  visit(fig.rootNode(),0);
+  walk(rootNode, rootEl);
+
+  let pfAdded = 0;
+  for (const el of rootEl.children) {
+    if (el.tagName.toLowerCase() !== 'polyfill') continue;
+    try { fig.addPolyfill(polyfillOptionsFromEl(el)); pfAdded++; }
+    catch (e) { log('err', 'polyfill skipped: ' + e.message); }
+  }
+  return { fig, added, pfAdded };
 }
 
 /* ───── XML export ───── */
-function figureToXml(fig){
-  const out=['<?xml version="1.0"?>'];
-  out.push('<stickfigure version="'+fig.version+'" build="'+fig.build+
-    '" scale="'+fig.scale+'" color="'+fig.colorHex+'">');
-  const write=(node,depth)=>{
-    const pad='  '.repeat(depth);
-    const a=[];
-    const t=NODE_TYPE_NAME[node.nodeType];
-    if(t&&t!=='RootNode')a.push('type="'+t+'"');
-    if(node.length)a.push('length="'+node.length+'"');
-    if(node.thickness)a.push('thickness="'+node.thickness+'"');
-    if(node.localAngle)a.push('angle="'+node.localAngle+'"');
-    if(node.useSegmentColor){
-      try{a.push('color="'+node.colorHex+'"');
-        a.push('useSegmentColor="true"');}catch(_){}
+function figureToXml(fig) {
+  const out = ['<?xml version="1.0"?>'];
+  out.push('<stickfigure version="' + fig.version + '" build="' + fig.build +
+    '" scale="' + fig.scale + '" color="' + fig.colorHex + '">');
+  const write = (node, depth) => {
+    const pad = '  '.repeat(depth);
+    const a = [];
+    const t = NODE_TYPE_NAME[node.nodeType];
+    if (t && t !== 'RootNode') a.push('type="' + t + '"');
+    if (node.length) a.push('length="' + node.length + '"');
+    if (node.thickness) a.push('thickness="' + node.thickness + '"');
+    if (node.localAngle) a.push('angle="' + node.localAngle + '"');
+    if (node.useSegmentColor) {
+      try { a.push('color="' + node.colorHex + '"'); a.push('useSegmentColor="true"'); } catch (_) {}
     }
-    if(node.useSegmentScale)a.push('useSegmentScale="true"');
-    const kids=node.children();
-    const open=pad+'<node '+a.join(' ');
-    if(!kids.length){out.push(open+'/>');return;}
-    out.push(open+'>');
-    for(const k of kids)write(k,depth+1);
-    out.push(pad+'</node>');
+    if (node.useSegmentScale) a.push('useSegmentScale="true"');
+    const kids = node.children();
+    const open = pad + '<node ' + a.join(' ');
+    if (!kids.length) { out.push(open + '/>'); return; }
+    out.push(open + '>');
+    for (const k of kids) write(k, depth + 1);
+    out.push(pad + '</node>');
   };
-  for(const k of fig.rootNode().children())write(k,1);
+  for (const k of fig.rootNode().children()) write(k, 1);
   out.push('</stickfigure>');
   return out.join('\n');
 }
 
-/* ───── UI ───── */
-let currentFig=null;
+/* ───── Tree ───── */
+function renderTree(fig) {
+  if (!fig) return;
+  treeEl.textContent = '';
+  const sel = renderer.getSelectedIndex();
+  let count = 0;
+  const visit = (node, depth) => {
+    count++;
+    const row = document.createElement('div');
+    row.className = 'row';
+    if (node.drawIndex === sel) row.classList.add('selected');
 
-function updateXmlMeta(){
-  const t=xmlEl.value;
-  $('xmlMeta').textContent=t.split('\n').length+' lines · '+new Blob([t]).size+' B';
+    const branch = document.createElement('span'); branch.className = 'branch';
+    branch.textContent = '│ '.repeat(Math.min(depth, 20));
+    const idx = document.createElement('span'); idx.className = 'idx';
+    idx.textContent = '[' + node.drawIndex + ']';
+    const type = document.createElement('span'); type.className = 'type';
+    type.textContent = NODE_TYPE_NAME[node.nodeType] || node.nodeType;
+    const swatch = document.createElement('span'); swatch.className = 'swatch';
+    try { swatch.style.background = node.colorHex; } catch (_) {}
+    const props = document.createElement('span'); props.className = 'props';
+    let p = '';
+    if (node.length) p += 'len=' + node.length.toFixed(1) + ' ';
+    if (node.thickness) p += 'th=' + node.thickness + ' ';
+    if (node.localAngle) p += '∠' + node.localAngle.toFixed(1) + '°';
+    props.textContent = p;
+
+    row.appendChild(branch); row.appendChild(idx); row.appendChild(type);
+    row.appendChild(swatch); row.appendChild(props);
+
+    row.addEventListener('click', () => {
+      renderer.selectedIndex = node.drawIndex;
+      $('selIdx').textContent = '[' + node.drawIndex + '] ' + (NODE_TYPE_NAME[node.nodeType] || node.nodeType);
+      renderTree(fig);
+      renderer.render();
+    });
+
+    treeEl.appendChild(row);
+    for (const k of node.children()) visit(k, depth + 1);
+  };
+  visit(fig.rootNode(), 0);
+  $('treeBadge').textContent = count;
 }
-xmlEl.addEventListener('input',updateXmlMeta);
 
-function buildAndShow(){
+/* ───── Info bar ───── */
+function updateInfoBar(fig, info) {
+  if (!info) return;
+  $('nCount').textContent = info.nodeCount;
+  $('pfCount').textContent = info.fillCount;
+  if (fig) {
+    try {
+      $('figVer').textContent = fig.version + '/' + fig.build + ' (s=' + (fig.scale || 1).toFixed(2) + ')';
+    } catch (_) {}
+  }
+  $('previewMeta').textContent =
+    '×' + info.zoom.toFixed(3) + '  ·  ' + info.nodeCount + ' nodes' +
+    (info.fillCount ? '  ·  ' + info.fillCount + ' fills' : '');
+  try { $('zoomPct').textContent = Math.round(info.zoom * 100) + '%'; } catch (_) {}
+}
+
+/* ───── Actions ───── */
+function updateXmlMeta() {
+  const t = xmlEl.value;
+  $('xmlMeta').textContent = t.split('\n').length + ' lines · ' + new Blob([t]).size + ' B';
+}
+xmlEl.addEventListener('input', updateXmlMeta);
+
+function renderAll() {
+  const info = renderer.render();
+  updateInfoBar(currentFig, info);
+}
+
+function buildAndShow() {
   clearLog();
-  try{
-    const r=buildFigure(xmlEl.value);
-    currentFig=r.fig;
+  try {
+    const r = buildFigure(xmlEl.value);
+    currentFig = r.fig;
     renderer.setFigure(r.fig);
-    const info=renderer.render();
+    const info = renderer.render();
     renderTree(r.fig);
-    log('ok','built '+r.added+' nodes'+(r.pf?', '+r.pf+' fills':''));
-    $('previewMeta').textContent='×'+info.fit.toFixed(3)+'  ·  '+info.nodeCount+
-      ' nodes'+(info.fillCount?'  ·  '+info.fillCount+' fills':'');
-  }catch(e){log('err',e.message);toast('Build failed: '+e.message);}
+    updateInfoBar(r.fig, info);
+    log('ok', 'built ' + r.added + ' nodes' + (r.pfAdded ? ', ' + r.pfAdded + ' polyfills' : ''));
+    log('dim', 'v' + r.fig.version + ' b' + r.fig.build + ' scale=' + r.fig.scale);
+  } catch (e) {
+    log('err', e.message);
+    toast('Build failed: ' + e.message);
+  }
 }
 
-$('btnBuild').addEventListener('click',buildAndShow);
+$('btnBuild').addEventListener('click', buildAndShow);
 
-$('btnDownload').addEventListener('click',()=>{
-  try{
-    if(!currentFig)buildAndShow();
-    if(!currentFig)return;
-    const bytes=currentFig.toBytes();
-    const blob=new Blob([bytes],{type:'application/octet-stream'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;a.download='figure.nodes';
-    document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),4000);
-    log('ok','exported '+bytes.length+' bytes');
+$('btnDownload').addEventListener('click', () => {
+  try {
+    if (!currentFig) return buildAndShow();
+    const bytes = currentFig.toBytes();
+    const blob = new Blob([bytes], { type:'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'figure.nodes';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    log('ok', 'exported ' + bytes.length + ' bytes');
     toast('Downloaded figure.nodes');
-  }catch(e){log('err',e.message);}
+  } catch (e) { log('err', e.message); toast('Export failed'); }
 });
 
-$('btnExport').addEventListener('click',()=>{
-  try{
-    if(!currentFig)buildAndShow();
-    if(!currentFig)return;
-    xmlEl.value=figureToXml(currentFig);
+$('btnExport').addEventListener('click', () => {
+  try {
+    if (!currentFig) return buildAndShow();
+    xmlEl.value = figureToXml(currentFig);
     updateXmlMeta();
-    log('ok','XML updated from current figure');
+    log('ok', 'XML updated from current figure');
     toast('XML written');
-  }catch(e){log('err',e.message);}
+  } catch (e) { log('err', e.message); }
 });
 
-$('btnCopy').addEventListener('click',async()=>{
-  try{await navigator.clipboard.writeText(xmlEl.value);toast('Copied');}
-  catch(_){xmlEl.focus();xmlEl.select();toast('Select-all — Ctrl+C');}
+$('btnCopy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(xmlEl.value); toast('Copied'); }
+  catch (_) { xmlEl.focus(); xmlEl.select(); toast('Select-all - Ctrl+C'); }
 });
 
-$('btnLoad').addEventListener('click',()=>fileInput.click());
-fileInput.addEventListener('change',async()=>{
-  const f=fileInput.files[0];if(!f)return;
-  try{
-    const buf=new Uint8Array(await f.arrayBuffer());
-    const fig=mod.Stickfigure.fromBytes(buf);
-    try{fig.setNodeLimitEnabled(false);}catch(_){}
-    currentFig=fig;
+$('btnLoad').addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', async () => {
+  const f = fileInput.files[0]; if (!f) return;
+  try {
+    const buf = new Uint8Array(await f.arrayBuffer());
+    const fig = mod.Stickfigure.fromBytes(buf);
+    try { fig.setNodeLimitEnabled(false); } catch (_) {}
+    currentFig = fig;
     renderer.setFigure(fig);
-    const info=renderer.render();
+    const info = renderer.render();
     renderTree(fig);
-    xmlEl.value=figureToXml(fig);updateXmlMeta();
-    log('ok','loaded '+f.name+' · '+buf.length+' bytes');
-    $('previewMeta').textContent='×'+info.fit.toFixed(3)+'  ·  '+info.nodeCount+
-      ' nodes'+(info.fillCount?'  ·  '+info.fillCount+' fills':'');
-    toast('Loaded '+f.name);
-  }catch(e){log('err','load: '+e.message);}
-  finally{fileInput.value='';}
+    xmlEl.value = figureToXml(fig);
+    updateXmlMeta();
+    updateInfoBar(fig, info);
+    log('ok', 'loaded ' + f.name + ' (' + buf.length + ' bytes)');
+  } catch (e) { log('err', 'load: ' + e.message); toast('Load failed'); }
+  finally { fileInput.value = ''; }
 });
 
-$('btnDrag').addEventListener('click',()=>{
-  const on=!$('btnDrag').classList.contains('on');
-  $('btnDrag').classList.toggle('on',on);
+$('btnDrag').addEventListener('click', () => {
+  const on = !$('btnDrag').classList.contains('on');
+  $('btnDrag').classList.toggle('on', on);
   renderer.setDragEnabled(on);
-  toast('Drag: '+(on?'ON — tap a node tip':'OFF'));
+  toast('Drag: ' + (on ? 'ON - tap node tip to edit' : 'OFF - tap to select'));
 });
-$('btnFills').addEventListener('click',()=>{
-  const on=!$('btnFills').classList.contains('on');
-  $('btnFills').classList.toggle('on',on);
+$('btnFills').addEventListener('click', () => {
+  const on = !$('btnFills').classList.contains('on');
+  $('btnFills').classList.toggle('on', on);
   renderer.setFills(on);
-  renderer.render();
-  toast('Fills: '+(on?'ON':'OFF'));
+  renderAll();
+  toast('Fills: ' + (on ? 'ON' : 'OFF'));
 });
 
-document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+$('btnZoomIn').addEventListener('click', () => {
+  renderer.zoomBy(1.25); renderAll();
+});
+$('btnZoomOut').addEventListener('click', () => {
+  renderer.zoomBy(1 / 1.25); renderAll();
+});
+$('btnZoomFit').addEventListener('click', () => {
+  renderer.fitView(); renderAll();
+});
+$('btnZoomReset').addEventListener('click', () => {
+  renderer.resetView(); renderAll();
+});
+
+$('preset').addEventListener('change', e => {
+  const k = e.target.value;
+  if (!k) return;
+  xmlEl.value = PRESETS[k];
+  updateXmlMeta();
+  buildAndShow();
+  e.target.value = '';
+});
+
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
   b.classList.add('active');
-  document.querySelector('.tab-content[data-tab="'+b.dataset.tab+'"]').classList.add('active');
+  document.querySelector('.tab-content[data-tab="' + b.dataset.tab + '"]').classList.add('active');
 }));
 
-$('preset').addEventListener('change',e=>{
-  const k=e.target.value;if(!k)return;
-  xmlEl.value=PRESETS[k];updateXmlMeta();buildAndShow();
-  e.target.value='';
-});
+window.addEventListener('resize', () => { renderAll(); });
 
 /* Init */
-xmlEl.value=PRESETS.standing;
+xmlEl.value = PRESETS.standing;
 updateXmlMeta();
 buildAndShow();
-window.addEventListener('resize',()=>{if(currentFig)renderer.render();});
+setTimeout(() => $('hintPill').classList.add('hidden'), 7000);
 </script>
 </body>
 </html>
