@@ -2,144 +2,182 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>StickNodes Studio</title>
 <style>
   :root {
     --bg:#f4f6fa; --panel:#fff; --border:#e3e6ec; --border-strong:#cfd4dd;
-    --text:#1a1d24; --muted:#6b7280;
+    --text:#1a1d24; --muted:#6b7280; --muted-2:#9ca3af;
     --accent:#4f46e5; --accent-hover:#4338ca; --accent-soft:#eef2ff;
     --ok:#059669; --ok-soft:#ecfdf5; --err:#dc2626; --err-soft:#fef2f2;
     --warn:#d97706; --warn-soft:#fffbeb;
     --radius:10px; --radius-sm:6px;
     --shadow-sm:0 1px 2px rgba(20,20,40,.05);
     --shadow:0 1px 3px rgba(20,20,40,.08),0 4px 12px rgba(20,20,40,.04);
-    --shadow-lg:0 4px 12px rgba(20,20,40,.08),0 12px 32px rgba(20,20,40,.06);
+    --shadow-lg:0 4px 12px rgba(20,20,40,.08), 0 12px 32px rgba(20,20,40,.06);
   }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { margin:0; padding:0; height:100%; }
   body {
-    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
-         "Helvetica Neue",Arial,sans-serif;
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     background:var(--bg); color:var(--text); overflow:hidden;
     -webkit-font-smoothing:antialiased;
   }
-  .app { display:flex; flex-direction:column; height:100vh; height:100dvh;
-         max-width:1500px; margin:0 auto; }
+  .app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
 
   /* Header */
   header { display:flex; align-items:center; justify-content:space-between;
-           gap:12px; padding:12px 20px; background:var(--panel);
+           gap:12px; padding:10px 18px; background:var(--panel);
            border-bottom:1px solid var(--border); flex:0 0 auto; }
   header .brand { display:flex; align-items:center; gap:10px;
-                  font-weight:700; font-size:16px; letter-spacing:-.01em; }
-  header .brand .dot { width:10px; height:10px; border-radius:50%;
+                  font-weight:700; font-size:15px; letter-spacing:-.01em; }
+  header .brand .dot { width:9px; height:9px; border-radius:50%;
                        background:linear-gradient(135deg,#6366f1,#8b5cf6);
                        box-shadow:0 0 0 3px var(--accent-soft); }
-  header .status { display:flex; align-items:center; gap:8px;
-                   font-size:12px; color:var(--muted);
-                   padding:5px 12px; background:var(--bg);
+  header .status { display:flex; align-items:center; gap:8px; font-size:12px;
+                   color:var(--muted); padding:4px 11px; background:var(--bg);
                    border-radius:20px; border:1px solid var(--border); }
-  header .status .led { width:7px; height:7px; border-radius:50%;
+  header .status .led { width:6px; height:6px; border-radius:50%;
                         background:var(--muted); transition:background .2s; }
   header .status.ready .led { background:var(--ok); box-shadow:0 0 6px rgba(5,150,105,.5); }
   header .status.error .led { background:var(--err); }
 
   /* Toolbar */
-  .toolbar { display:flex; gap:8px; padding:10px 20px;
-             background:var(--panel); border-bottom:1px solid var(--border);
-             flex:0 0 auto; overflow-x:auto; scrollbar-width:none; }
+  .toolbar { display:flex; gap:6px; padding:8px 18px; background:var(--panel);
+             border-bottom:1px solid var(--border); flex:0 0 auto;
+             overflow-x:auto; scrollbar-width:none; }
   .toolbar::-webkit-scrollbar { display:none; }
   .btn { display:inline-flex; align-items:center; gap:6px;
-         padding:9px 14px; font:inherit; font-weight:500; font-size:13px;
+         padding:8px 12px; font:inherit; font-weight:500; font-size:12.5px;
          color:var(--text); background:var(--panel);
          border:1px solid var(--border-strong); border-radius:var(--radius-sm);
-         cursor:pointer; white-space:nowrap; min-height:38px;
+         cursor:pointer; white-space:nowrap; min-height:36px;
          transition:all .12s ease; box-shadow:var(--shadow-sm); }
   .btn:hover { background:#fafbfd; border-color:#b6bcc7; }
   .btn:active { transform:translateY(1px); box-shadow:none; }
   .btn.primary { background:var(--accent); border-color:var(--accent);
                  color:#fff;
-                 box-shadow:0 1px 3px rgba(79,70,229,.3),0 4px 12px rgba(79,70,229,.15); }
+                 box-shadow:0 1px 3px rgba(79,70,229,.3), 0 4px 12px rgba(79,70,229,.15); }
   .btn.primary:hover { background:var(--accent-hover); border-color:var(--accent-hover); }
-  .btn svg { width:14px; height:14px; stroke-width:2; fill:none; stroke:currentColor; }
+  .btn svg { width:13px; height:13px; stroke-width:2; fill:none; stroke:currentColor; }
   .btn.toggle.on { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
-  select.preset { font:inherit; font-size:13px; font-weight:500;
-                  padding:9px 12px; background:var(--panel);
+  select.preset { font:inherit; font-size:12.5px; font-weight:500;
+                  padding:8px 10px; background:var(--panel);
                   border:1px solid var(--border-strong);
                   border-radius:var(--radius-sm); cursor:pointer;
-                  min-height:38px; color:var(--text); box-shadow:var(--shadow-sm); }
+                  min-height:36px; color:var(--text); box-shadow:var(--shadow-sm); }
   .spacer { flex:1; }
+  .vbar { width:1px; background:var(--border); margin:0 2px; align-self:stretch; }
 
-  /* Content */
-  .content { flex:1 1 auto; display:grid; grid-template-columns:1fr 1fr;
-             gap:12px; padding:12px 20px 16px; min-height:0; }
+  /* Content grid */
+  .content { flex:1 1 auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+             gap:10px; padding:10px 18px 14px; min-height:0; }
   @media (max-width:900px) {
     .content { grid-template-columns:1fr; grid-template-rows:auto 1fr; }
-    header { padding:10px 14px; } .toolbar { padding:8px 14px; }
-    .content { padding:10px 14px 12px; }
+    header, .toolbar { padding-left:12px; padding-right:12px; }
+    .content { padding:8px 12px 10px; }
   }
 
   .card { background:var(--panel); border:1px solid var(--border);
           border-radius:var(--radius); box-shadow:var(--shadow);
           display:flex; flex-direction:column; min-height:0; overflow:hidden; }
   .card-head { display:flex; align-items:center; justify-content:space-between;
-               padding:9px 14px; border-bottom:1px solid var(--border);
-               background:#fbfcfe; flex:0 0 auto; gap:12px; }
-  .card-head h2 { margin:0; font-size:12px; font-weight:600;
-                  text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+               padding:8px 12px; border-bottom:1px solid var(--border);
+               background:#fbfcfe; flex:0 0 auto; gap:10px; min-height:36px; }
+  .card-head h2 { margin:0; font-size:11px; font-weight:600;
+                  text-transform:uppercase; letter-spacing:.06em;
+                  color:var(--muted); }
   .card-head .meta { font-size:11px; color:var(--muted);
-                     font-variant-numeric:tabular-nums; white-space:nowrap; }
+                     font-variant-numeric:tabular-nums; white-space:nowrap;
+                     overflow:hidden; text-overflow:ellipsis; max-width:60%; }
 
   /* Preview */
   .preview-wrap { position:relative; flex:1 1 auto; min-height:0;
-                  display:flex; align-items:center; justify-content:center;
-                  padding:12px; overflow:hidden; background:#fbfcfe; }
-  canvas { display:block; max-width:100%; max-height:100%;
-           border-radius:var(--radius-sm); background:#fff;
-           box-shadow:inset 0 0 0 1px var(--border); }
+                  overflow:hidden; background:#fbfcfe;
+                  touch-action:none; user-select:none; cursor:grab; }
+  .preview-wrap.grabbing { cursor:grabbing; }
+  canvas { display:block; width:100%; height:100%; background:#fff; }
+
+  /* Zoom overlay */
+  .zoom-overlay { position:absolute; top:10px; right:10px;
+                  display:flex; flex-direction:column; gap:4px;
+                  background:rgba(255,255,255,.94);
+                  border:1px solid var(--border); border-radius:8px;
+                  padding:4px; box-shadow:var(--shadow); }
+  .zoom-overlay button { width:32px; height:32px; border:0; border-radius:6px;
+                         background:transparent; color:var(--text);
+                         font-size:16px; font-weight:600; cursor:pointer;
+                         display:flex; align-items:center; justify-content:center; }
+  .zoom-overlay button:hover { background:var(--accent-soft); color:var(--accent); }
+  .zoom-overlay button svg { width:16px; height:16px; fill:none;
+                             stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+  .zoom-pct { font:600 10px/1 ui-monospace,"SF Mono",Consolas,monospace;
+              color:var(--muted); text-align:center; padding:3px 0;
+              border-top:1px solid var(--border);
+              border-bottom:1px solid var(--border); }
+
+  .hint-pill { position:absolute; left:10px; bottom:10px;
+               background:rgba(0,0,0,.72); color:#fff;
+               font-size:11px; padding:5px 10px; border-radius:14px;
+               pointer-events:none; opacity:1;
+               transition:opacity .6s ease; }
+  .hint-pill.hidden { opacity:0; }
 
   /* Info bar */
-  .info-bar { display:flex; flex-wrap:wrap; gap:6px 16px;
-              padding:7px 14px; background:#f7f8fb;
+  .info-bar { display:flex; flex-wrap:wrap; gap:5px 14px;
+              padding:6px 12px; background:#f7f8fb;
               border-top:1px solid var(--border);
-              font:11px/1.4 ui-monospace,"SF Mono",Consolas,monospace;
+              font:11px/1.35 ui-monospace,"SF Mono",Consolas,monospace;
               color:var(--muted); flex:0 0 auto; }
   .info-bar b { color:var(--text); font-weight:600; }
+  .info-bar .chip { display:inline-flex; align-items:center; gap:4px; }
+  .info-bar .chip::before { content:""; display:inline-block;
+                            width:6px; height:6px; border-radius:50%;
+                            background:var(--muted-2); }
+  .info-bar .chip.ok::before { background:var(--ok); }
+  .info-bar .chip.warn::before { background:var(--warn); }
+  .info-bar .chip.err::before { background:var(--err); }
+
+  /* Right column stack */
+  .right-col { display:flex; flex-direction:column; min-height:0; gap:10px; }
 
   /* XML editor */
   textarea { flex:1 1 auto; width:100%; min-height:0; border:0; outline:0;
-             resize:none; padding:14px 16px;
-             font:12.5px/1.65 "SF Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
-             color:var(--text); background:var(--panel); tab-size:2; }
+             resize:none; padding:12px 14px;
+             font:12px/1.6 "SF Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+             color:var(--text); background:var(--panel); tab-size:2;
+             white-space:pre; overflow:auto; }
   textarea::selection { background:var(--accent-soft); }
 
   /* Bottom tabs */
   .bottom { display:flex; flex-direction:column; min-height:0; flex:1 1 auto; }
-  .tabs { display:flex; gap:2px; padding:6px 8px 0; background:#fbfcfe;
+  .tabs { display:flex; gap:2px; padding:5px 8px 0; background:#fbfcfe;
           border-bottom:1px solid var(--border); flex:0 0 auto; }
-  .tabs button { padding:9px 14px; font:inherit; font-size:12px; font-weight:600;
+  .tabs button { padding:8px 12px; font:inherit; font-size:11.5px; font-weight:600;
                  letter-spacing:.02em; color:var(--muted); background:transparent;
                  border:0; border-bottom:2px solid transparent; cursor:pointer;
-                 border-radius:var(--radius-sm) var(--radius-sm) 0 0;
-                 transition:all .12s; }
+                 border-radius:5px 5px 0 0; transition:all .12s;
+                 display:inline-flex; align-items:center; gap:5px; }
   .tabs button:hover { color:var(--text); background:#f3f5f9; }
   .tabs button.active { color:var(--accent); border-bottom-color:var(--accent);
                         background:var(--panel); }
+  .tabs .badge { background:var(--accent-soft); color:var(--accent);
+                 font-size:9.5px; font-weight:700; padding:1px 5px;
+                 border-radius:8px; letter-spacing:.02em; }
   .tab-content { flex:1 1 auto; min-height:0; overflow:auto; display:none;
                  background:var(--panel); }
   .tab-content.active { display:block; }
 
   /* Log */
-  #log { padding:12px 16px; margin:0;
-         font:11.5px/1.6 "SF Mono",ui-monospace,Consolas,monospace;
+  #log { padding:10px 14px; margin:0;
+         font:11.5px/1.55 "SF Mono",ui-monospace,Consolas,monospace;
          white-space:pre-wrap; word-break:break-word; color:var(--text); }
-  #log .line { padding:2px 0; display:flex; gap:8px; }
+  #log .line { padding:1.5px 0; display:flex; gap:8px; align-items:flex-start; }
   #log .line .badge { flex:0 0 auto; display:inline-flex;
                       align-items:center; justify-content:center;
-                      min-width:44px; padding:1px 6px; font-size:10px;
+                      min-width:42px; padding:1px 6px; font-size:10px;
                       font-weight:700; letter-spacing:.04em; border-radius:4px;
-                      height:18px; margin-top:1px; }
+                      height:17px; margin-top:1px; }
   #log .ok .badge  { background:var(--ok-soft); color:var(--ok); }
   #log .err .badge { background:var(--err-soft); color:var(--err); }
   #log .hi .badge  { background:var(--accent-soft); color:var(--accent); }
@@ -149,25 +187,57 @@
   #log .line .msg  { flex:1; min-width:0; }
 
   /* Tree */
-  #tree { padding:8px 12px;
-          font:12px/1.55 "SF Mono",ui-monospace,Consolas,monospace; }
+  #tree { padding:6px 8px;
+          font:11.5px/1.5 "SF Mono",ui-monospace,Consolas,monospace; }
   #tree .row { display:grid;
-               grid-template-columns:auto 42px 130px 18px 1fr;
-               gap:8px; padding:2px 4px; white-space:nowrap;
-               border-radius:4px; align-items:center; }
+               grid-template-columns:auto 42px 130px 14px 1fr;
+               gap:6px; padding:3px 6px; white-space:nowrap;
+               border-radius:4px; align-items:center;
+               cursor:pointer; }
   #tree .row:hover { background:#f7f8fb; }
-  #tree .branch { color:#d1d5db; }
+  #tree .row.selected { background:var(--accent-soft); }
+  #tree .row.selected .idx { color:var(--accent-hover); }
+  #tree .branch { color:#d1d5db; font-variant-ligatures:none; }
   #tree .idx { color:var(--accent); font-weight:700;
                font-variant-numeric:tabular-nums; }
   #tree .type { color:#b45309; font-weight:500; }
   #tree .swatch { width:14px; height:14px; border-radius:3px;
                   border:1px solid rgba(0,0,0,.1); }
-  #tree .props { color:var(--muted); overflow:hidden; text-overflow:ellipsis; }
+  #tree .props { color:var(--muted); overflow:hidden; text-overflow:ellipsis;
+                 display:flex; gap:6px; align-items:center; flex-wrap:nowrap; }
+  #tree .props > span { overflow:hidden; text-overflow:ellipsis; }
   #tree .tag { display:inline-block; padding:0 5px; font-size:9px;
-               font-weight:700; letter-spacing:.03em; border-radius:3px;
-               margin-left:6px; vertical-align:1px; }
+               font-weight:700; letter-spacing:.03em; border-radius:3px; }
   #tree .tag.pf  { background:#eef2ff; color:#4f46e5; }
   #tree .tag.conn { background:#fef3c7; color:#b45309; }
+  #tree .tag.anchor { background:#dcfce7; color:#15803d; }
+
+  /* Inspector */
+  #inspector { padding:10px 14px;
+               font:12px/1.55 "SF Mono",ui-monospace,Consolas,monospace; }
+  .insp-header { display:flex; align-items:center; gap:10px; margin-bottom:10px;
+                 padding-bottom:8px; border-bottom:1px solid var(--border); }
+  .insp-header .type { font-weight:700; color:#b45309; font-size:13px; }
+  .insp-header .idx { color:var(--accent); font-weight:700; }
+  .insp-header .swatch { width:22px; height:22px; border-radius:4px;
+                         border:1px solid rgba(0,0,0,.1); }
+  .insp-section { margin-bottom:14px; }
+  .insp-section h3 { font-size:10.5px; font-weight:700;
+                     text-transform:uppercase; letter-spacing:.05em;
+                     color:var(--muted); margin:0 0 6px 0; padding:0; }
+  .insp-grid { display:grid; grid-template-columns:minmax(140px,1fr) 1fr;
+               gap:2px 12px; }
+  .insp-grid .k { color:var(--muted); }
+  .insp-grid .v { color:var(--text); font-weight:500;
+                  font-variant-numeric:tabular-nums;
+                  overflow:hidden; text-overflow:ellipsis; }
+  .insp-grid .v.bool-true { color:var(--ok); }
+  .insp-grid .v.bool-false { color:var(--muted-2); }
+  .insp-empty { color:var(--muted); font-style:italic; padding:20px 0;
+                text-align:center; }
+  .insp-color-row { display:flex; align-items:center; gap:8px; }
+  .insp-color-row .chip { width:14px; height:14px; border-radius:3px;
+                          border:1px solid rgba(0,0,0,.1); }
 
   /* Toast */
   #toast { position:fixed; left:50%; bottom:24px;
@@ -175,14 +245,15 @@
            background:#1a1d24; color:#fff; padding:10px 18px;
            border-radius:24px; font-size:13px; font-weight:500;
            box-shadow:var(--shadow-lg); opacity:0; pointer-events:none;
-           transition:all .25s cubic-bezier(.2,.8,.2,1); z-index:100; }
+           transition:all .25s cubic-bezier(.2,.8,.2,1); z-index:100;
+           max-width:80vw; text-align:center; }
   #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
   input[type=file] { display:none; }
   @media (max-width:560px) {
     .toolbar .btn .label { display:none; }
-    .toolbar .btn { padding:9px 10px; }
-    #tree .row { grid-template-columns:auto 36px 100px 16px 1fr; }
+    .toolbar .btn { padding:8px 10px; }
+    #tree .row { grid-template-columns:auto 36px 100px 14px 1fr; gap:5px; }
   }
 </style>
 </head>
@@ -221,19 +292,34 @@
       <svg viewBox="0 0 24 24"><path d="M8 3H4v4M16 3h4v4M8 21H4v-4M16 21h4v-4"/></svg>
       <span class="label">JSON</span>
     </button>
+
+    <div class="vbar"></div>
+
+    <button class="btn toggle on" id="btnFills" title="Render polyfills as solid fills">
+      <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9-9 9z"/></svg>
+      <span class="label">Fills</span>
+    </button>
+    <button class="btn toggle on" id="btnFat" title="Fat strokes — merge thin lines into solid">
+      <svg viewBox="0 0 24 24"><path d="M4 12h16M4 8h16M4 16h16"/></svg>
+      <span class="label">Fat</span>
+    </button>
+    <button class="btn toggle on" id="btnGrid" title="Show grid">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 10h16M4 16h16M10 4v16M16 4v16"/></svg>
+      <span class="label">Grid</span>
+    </button>
     <button class="btn toggle" id="btnFlip" title="Flip Y in preview">
       <svg viewBox="0 0 24 24"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
       <span class="label">Flip</span>
     </button>
-    <button class="btn toggle on" id="btnFill" title="Draw polyfills">
-      <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9-9 9z"/></svg>
-      <span class="label">Fills</span>
+    <button class="btn toggle" id="btnSelect" title="Click canvas to select nodes">
+      <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+      <span class="label">Select</span>
     </button>
 
     <div class="spacer"></div>
 
     <select class="preset" id="preset">
-      <option value="">Load preset…</option>
+      <option value="">Preset…</option>
       <option value="empty">Empty</option>
       <option value="standing">Standing</option>
       <option value="tpose">T-pose</option>
@@ -244,40 +330,59 @@
   </div>
 
   <div class="content">
+
+    <!-- ─── Preview card ─── -->
     <div class="card">
       <div class="card-head">
         <h2>Preview</h2>
         <span class="meta" id="previewMeta">—</span>
       </div>
-      <div class="preview-wrap">
-        <canvas id="preview" width="800" height="700"></canvas>
+      <div class="preview-wrap" id="previewWrap">
+        <canvas id="preview"></canvas>
+        <div class="zoom-overlay">
+          <button id="btnZoomIn" title="Zoom in">+</button>
+          <div class="zoom-pct" id="zoomPct">—</div>
+          <button id="btnZoomOut" title="Zoom out">−</button>
+          <button id="btnZoomFit" title="Fit to view">
+            <svg viewBox="0 0 24 24"><path d="M4 4h5M4 4v5M20 4h-5M20 4v5M4 20h5M4 20v-5M20 20h-5M20 20v-5"/></svg>
+          </button>
+          <button id="btnZoomReset" title="Reset 1:1">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+          </button>
+        </div>
+        <div class="hint-pill" id="hintPill">Pinch to zoom · drag to pan · tap node to select</div>
       </div>
       <div class="info-bar" id="infoBar">
-        <span>wasm <b id="wasmVer">?</b></span>
-        <span>fig <b id="figVer">—</b></span>
-        <span>nodes <b id="nCount">0</b></span>
-        <span>polyfills <b id="pfCount">0</b></span>
-        <span>connectors <b id="cnCount">0</b></span>
+        <span class="chip" id="chipWasm">wasm <b id="wasmVer">?</b></span>
+        <span class="chip" id="chipFig">fig <b id="figVer">—</b></span>
+        <span class="chip">nodes <b id="nCount">0</b></span>
+        <span class="chip">polyfills <b id="pfCount">0</b></span>
+        <span class="chip">conn <b id="cnCount">0</b></span>
+        <span class="chip" id="chipSel">selected <b id="selIdx">—</b></span>
       </div>
     </div>
 
-    <div style="display:flex; flex-direction:column; min-height:0; gap:12px;">
-      <div class="card" style="flex:1 1 52%;">
+    <!-- ─── Right column ─── -->
+    <div class="right-col">
+
+      <div class="card" style="flex:1 1 48%;">
         <div class="card-head">
           <h2>XML</h2>
           <span class="meta" id="xmlMeta">—</span>
         </div>
         <textarea id="xml" spellcheck="false" autocapitalize="off"
-                  autocorrect="off" autocomplete="off"></textarea>
+                  autocorrect="off" autocomplete="off" wrap="off"></textarea>
       </div>
 
-      <div class="card bottom" style="flex:1 1 48%;">
+      <div class="card bottom" style="flex:1 1 52%;">
         <div class="tabs">
           <button data-tab="log" class="active">Log</button>
-          <button data-tab="tree">Tree</button>
+          <button data-tab="tree">Tree <span class="badge" id="treeBadge">0</span></button>
+          <button data-tab="inspector">Inspector</button>
         </div>
         <div class="tab-content active" data-tab="log"><pre id="log"></pre></div>
         <div class="tab-content" data-tab="tree"><div id="tree"></div></div>
+        <div class="tab-content" data-tab="inspector"><div id="inspector"></div></div>
       </div>
     </div>
   </div>
@@ -287,45 +392,53 @@
 <div id="toast"></div>
 
 <script type="module">
-/* ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   DOM refs + utilities
+   ══════════════════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
-const xmlEl = $('xml'), logEl = $('log'), treeEl = $('tree'),
-      canvas = $('preview'), fileInput = $('fileInput'),
-      statusEl = $('status'), statusTextEl = $('statusText'),
-      xmlMeta = $('xmlMeta'), previewMeta = $('previewMeta'),
-      toastEl = $('toast'), infoBar = $('infoBar');
+const xmlEl       = $('xml');
+const logEl       = $('log');
+const treeEl      = $('tree');
+const inspectorEl = $('inspector');
+const canvas      = $('preview');
+const previewWrap = $('previewWrap');
+const fileInput   = $('fileInput');
+const statusEl    = $('status');
+const statusTextEl= $('statusText');
+const xmlMeta     = $('xmlMeta');
+const previewMeta = $('previewMeta');
+const toastEl     = $('toast');
+const zoomPctEl   = $('zoomPct');
+const hintPill    = $('hintPill');
 
-let flipY = false;
-let showFills = true;
-
-let toastTimer = null;
-function toast(msg) {
+function toast(msg, ms) {
   toastEl.textContent = msg;
   toastEl.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toastEl.classList.remove('show'), ms || 2000);
 }
 function setStatus(state, text) {
   statusEl.className = 'status ' + (state || '');
   statusTextEl.textContent = text;
 }
 function logMsg(kind, msg) {
-  const kc = { ok:'ok', err:'err', hi:'hi', dim:'dim', warn:'warn' }[kind] || 'dim';
-  const bt = { ok:'OK', err:'FAIL', hi:'INFO', dim:'···', warn:'WARN' }[kind] || '···';
+  const kc = {ok:'ok',err:'err',hi:'hi',dim:'dim',warn:'warn'}[kind] || 'dim';
+  const bt = {ok:'OK',err:'FAIL',hi:'INFO',dim:'···',warn:'WARN'}[kind] || '···';
   const line = document.createElement('div');
   line.className = 'line ' + kc;
-  const b = document.createElement('span'); b.className = 'badge'; b.textContent = bt;
-  const t = document.createElement('span'); t.className = 'msg'; t.textContent = msg;
+  const b = document.createElement('span'); b.className='badge'; b.textContent=bt;
+  const t = document.createElement('span'); t.className='msg'; t.textContent=msg;
   line.appendChild(b); line.appendChild(t);
   logEl.appendChild(line);
   logEl.scrollTop = logEl.scrollHeight;
+  // mirror to real console for our own debugging — but UI does not depend on it
   try { console.log('[studio]', kind, msg); } catch (_) {}
 }
 function clearLog() { logEl.textContent = ''; }
 
-/* ════════════════════════════════════════════════════════════════
-   Load module (MIME-bypass) + WASM
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   Load module + WASM
+   ══════════════════════════════════════════════════════════════════════ */
 let mod = null;
 
 async function loadLibrary() {
@@ -376,7 +489,7 @@ async function loadLibrary() {
     throw e;
   }
 
-  // Report supported version/build
+  // Report version info
   try {
     const sv = mod.SUPPORTED_VERSION ? mod.SUPPORTED_VERSION() : '?';
     const sb = mod.SUPPORTED_BUILD   ? mod.SUPPORTED_BUILD()   : '?';
@@ -388,9 +501,9 @@ async function loadLibrary() {
   setStatus('ready', 'ready');
 }
 
-/* ════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════════
    Constants
-   ════════════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════════════════ */
 const NODE_TYPE_NAME = {
   [-1]:'RootNode', 0:'RoundedSegment', 1:'Segment', 2:'Circle',
   3:'Triangle', 4:'FilledCircle', 5:'Ellipse', 6:'Trapezoid', 7:'Polygon'
@@ -399,38 +512,37 @@ const NODE_TYPE_VALID = {
   RoundedSegment:1, Segment:1, Circle:1, Triangle:1,
   FilledCircle:1, Ellipse:1, Trapezoid:1, Polygon:1
 };
+const GRADIENT_MODE_NAMES = { 0:'Sideways', 1:'Normal' };
+const TRIANGLE_TYPE_NAMES = { 0:'Isosceles', 1:'RightTriangle' };
+const ANGLE_LOCK_NAMES    = { 0:'None', 1:'Absolute', 2:'Relative' };
+const CONNECTOR_METHOD_NAMES = { 0:'ByPercent', 1:'ByValue' };
 
-/* ════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════════
    Colors
-   ════════════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════════════════ */
 function parseHexObj(hex) {
   let h = String(hex).trim().replace(/^#/, '');
-  if (h.length === 3) h = h.split('').map(c=>c+c).join('') + 'FF';
-  else if (h.length === 4) h = h.split('').map(c=>c+c).join('');
+  if (h.length === 3) h = h.split('').map(c => c + c).join('') + 'FF';
+  else if (h.length === 4) h = h.split('').map(c => c + c).join('');
   else if (h.length === 6) h += 'FF';
   else if (h.length !== 8) throw new Error('bad hex: ' + hex);
-  const n = i => parseInt(h.slice(i, i+2), 16);
+  const n = i => parseInt(h.slice(i, i + 2), 16);
   const c = { red:n(0), green:n(2), blue:n(4), alpha:n(6) };
-  if ([c.red,c.green,c.blue,c.alpha].some(v => Number.isNaN(v)))
+  if ([c.red, c.green, c.blue, c.alpha].some(v => Number.isNaN(v)))
     throw new Error('bad hex: ' + hex);
   return c;
 }
 const cssFromHex = hex => {
   const c = parseHexObj(hex);
-  return 'rgba(' + c.red + ',' + c.green + ',' + c.blue + ',' +
-         (c.alpha/255).toFixed(3) + ')';
+  return `rgba(${c.red},${c.green},${c.blue},${(c.alpha / 255).toFixed(3)})`;
 };
-const toHexFromObj = c => '#'
-  + [c.red, c.green, c.blue, c.alpha]
-      .map(v => v.toString(16).padStart(2,'0')).join('').toUpperCase();
 
-/* ════════════════════════════════════════════════════════════════
-   XML → NodeOptions
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   XML parsing
+   ══════════════════════════════════════════════════════════════════════ */
 const ATTR_NUM = {
   length:'length', defaultLength:'defaultLength',
-  thickness:'thickness', defaultThickness:'defaultThickness',
-  scale:'scale',
+  thickness:'thickness', defaultThickness:'defaultThickness', scale:'scale',
   angle:'localAngle', defaultAngle:'defaultAngle',
   defaultLocalAngle:'defaultLocalAngle',
   curveRadius:'segmentCurveRadiusAndDefaultCurveRadius',
@@ -439,8 +551,7 @@ const ATTR_NUM = {
   trapezoidEndThickness:'trapezoidThicknessEnd',
   polygonVertices:'numPolygonVertices',
   angleLockRelativeMultiplier:'angleLockRelativeMultiplier',
-  dragLockAngle:'dragLockAngle',
-  smartStretchMultiplier:'smartStretchMultiplier',
+  dragLockAngle:'dragLockAngle', smartStretchMultiplier:'smartStretchMultiplier'
 };
 const ATTR_BOOL = {
   static:'isStatic', stretchy:'isStretchy', floaty:'isFloaty',
@@ -460,9 +571,13 @@ const ATTR_BOOL = {
   useTrapezoidEnd:'useTrapezoidThicknessEnd',
   trapezoidRoundedStart:'trapezoidIsRoundedStart',
   trapezoidRoundedEnd:'trapezoidIsRoundedEnd',
-  dragLocked:'isDragLocked',
+  dragLocked:'isDragLocked'
 };
-const ATTR_COLOR = { color:'color', gradientColor:'gradientColor', outlineColor:'circleOutlineColor' };
+const ATTR_COLOR = {
+  color:'color',
+  gradientColor:'gradientColor',
+  outlineColor:'circleOutlineColor'
+};
 const asBool = v => !(v === 'false' || v === '0' || v === '');
 
 function nodeOptionsFromEl(el) {
@@ -489,9 +604,11 @@ function nodeOptionsFromEl(el) {
   const connEl = Array.from(el.children).find(c => c.tagName.toLowerCase() === 'connector');
   if (connEl) {
     const cd = {};
-    const map = { localX:'localX', localY:'localY', percent:'percent',
+    const map = {
+      localX:'localX', localY:'localY', percent:'percent',
       percentDefault:'percentDefault', value:'value',
-      ancestralValue:'smartStretchAncestralValue', end:'endNodeDrawIndex' };
+      ancestralValue:'smartStretchAncestralValue', end:'endNodeDrawIndex'
+    };
     for (const a in map)
       if (connEl.hasAttribute(a)) cd[map[a]] = parseFloat(connEl.getAttribute(a));
     if (connEl.hasAttribute('method')) cd.method = connEl.getAttribute('method');
@@ -500,16 +617,13 @@ function nodeOptionsFromEl(el) {
   }
   return o;
 }
-
-function polyfillOptionsFromEl(el) {
-  return {
-    anchor: parseInt(el.getAttribute('anchor') || '0', 10),
-    colorHex: el.getAttribute('color') || '#000000FF',
-    useColor: el.hasAttribute('useColor') ? asBool(el.getAttribute('useColor')) : true,
-    attached: (el.getAttribute('attached') || '').split(',')
-      .map(s => s.trim()).filter(Boolean).map(Number),
-  };
-}
+const polyfillOptionsFromEl = el => ({
+  anchor: parseInt(el.getAttribute('anchor') || '0', 10),
+  colorHex: el.getAttribute('color') || '#000000FF',
+  useColor: el.hasAttribute('useColor') ? asBool(el.getAttribute('useColor')) : true,
+  attached: (el.getAttribute('attached') || '').split(',')
+    .map(s => s.trim()).filter(Boolean).map(Number)
+});
 
 function buildFigure(xmlText) {
   const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
@@ -520,6 +634,9 @@ function buildFigure(xmlText) {
     throw new Error('root element must be <stickfigure>');
 
   const fig = new mod.Stickfigure();
+  try { fig.setNodeLimitEnabled(false); logMsg('hi', 'node limit disabled (was 400)'); }
+  catch (e) { logMsg('warn', 'setNodeLimitEnabled: ' + e.message); }
+
   if (rootEl.hasAttribute('version')) fig.setVersion(parseInt(rootEl.getAttribute('version'), 10));
   if (rootEl.hasAttribute('build'))   fig.build = parseInt(rootEl.getAttribute('build'), 10);
   if (rootEl.hasAttribute('scale'))   fig.scale = parseFloat(rootEl.getAttribute('scale'));
@@ -546,9 +663,9 @@ function buildFigure(xmlText) {
   return { fig, added, pfAdded };
 }
 
-/* ════════════════════════════════════════════════════════════════
-   SCENE — reads positions and polyfills via WASM methods
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   Scene extraction (world coords)
+   ══════════════════════════════════════════════════════════════════════ */
 function computeScene(fig) {
   const figScale = fig.scale || 1;
   const nodes = [];
@@ -559,29 +676,26 @@ function computeScene(fig) {
   for (const node of nodeList) {
     let type;
     try { type = node.nodeType; } catch { continue; }
-    if (type === -1) continue;      // skip root
+    if (type === -1) continue;
 
     let s, e;
-    try {
-      s = node.getGlobalStart();
-      e = node.getGlobalEnd();
-    } catch (err) {
-      logMsg('warn', 'pos failed on [' + node.drawIndex + ']: ' + err.message);
-      continue;
-    }
+    try { s = node.getGlobalStart(); e = node.getGlobalEnd(); }
+    catch { continue; }
 
     let th = 1;
     try { th = node.getEffectiveThickness(); } catch {}
-    let colorHex = '#888';
+    let colorHex = '#888888FF';
     try { colorHex = node.getDisplayColorHex(); } catch {}
+
+    let anchor = false, conn = false;
+    try { conn = node.hasConnector; } catch {}
 
     nodes.push({
       node, type,
       drawIndex: node.drawIndex,
       sx: s[0] * figScale, sy: s[1] * figScale,
       ex: e[0] * figScale, ey: e[1] * figScale,
-      thickness: th,
-      colorHex,
+      thickness: th, colorHex, conn
     });
   }
   nodes.sort((a, b) => a.drawIndex - b.drawIndex);
@@ -592,196 +706,293 @@ function computeScene(fig) {
   try { pfData = fig.allPolyfills(); }
   catch (e) { logMsg('warn', 'allPolyfills: ' + e.message); }
 
+  const anchorSet = new Set();
   for (const pf of pfData) {
+    anchorSet.add(pf.anchorDrawIndex);
     try {
       const flat = fig.getPolyfillVertices(pf.anchorDrawIndex);
       const verts = [];
-      for (let i = 0; i + 1 < flat.length; i += 2) {
+      for (let i = 0; i + 1 < flat.length; i += 2)
         verts.push({ x: flat[i] * figScale, y: flat[i+1] * figScale });
-      }
       polyfills.push({
         anchor: pf.anchorDrawIndex,
         colorHex: pf.colorHex,
         useColor: pf.usePolyfillColor,
-        verts,
+        verts
       });
-    } catch (e) {
-      logMsg('warn', 'polyfill verts for anchor ' + pf.anchorDrawIndex + ': ' + e.message);
-    }
+    } catch (e) { logMsg('warn', 'polyfill ' + pf.anchorDrawIndex + ': ' + e.message); }
   }
+  // Mark anchors on nodes
+  for (const n of nodes) if (anchorSet.has(n.drawIndex)) n.anchor = true;
 
-  return { nodes, polyfills, figScale };
-}
-
-/* ════════════════════════════════════════════════════════════════
-   Renderer
-   ════════════════════════════════════════════════════════════════ */
-function render(fig) {
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
-
-  const scene = computeScene(fig);
-
-  // Bounding box
+  // Overall bbox
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   let maxTh = 0;
   const addPt = (x, y) => {
-    if (x < minX) minX = x;
-    if (y < minY) minY = y;
-    if (x > maxX) maxX = x;
-    if (y > maxY) maxY = y;
+    if (x < minX) minX = x; if (y < minY) minY = y;
+    if (x > maxX) maxX = x; if (y > maxY) maxY = y;
   };
-  for (const n of scene.nodes) {
+  for (const n of nodes) {
     maxTh = Math.max(maxTh, Math.abs(n.thickness || 0) / 2);
-    addPt(n.sx, n.sy);
-    addPt(n.ex, n.ey);
+    addPt(n.sx, n.sy); addPt(n.ex, n.ey);
   }
-  for (const pf of scene.polyfills) {
-    for (const v of pf.verts) addPt(v.x, v.y);
-  }
+  for (const pf of polyfills) for (const v of pf.verts) addPt(v.x, v.y);
   if (!isFinite(minX)) { minX = minY = -50; maxX = maxY = 50; }
-
-  const pad = Math.max(maxTh, 6) + 8;
+  const pad = Math.max(maxTh, 6) + 10;
   minX -= pad; minY -= pad; maxX += pad; maxY += pad;
-  const spanX = Math.max(maxX - minX, 40);
-  const spanY = Math.max(maxY - minY, 40);
-  const fit = Math.min((W - 40) / spanX, (H - 40) / spanY);
-  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
 
-  const minWorldW = 2 / fit;    // 2 screen pixels, in world units
+  return { nodes, polyfills, bbox: { minX, minY, maxX, maxY }, figScale };
+}
 
-  ctx.save();
-  ctx.translate(W/2, H/2);
-  ctx.scale(fit, flipY ? -fit : fit);
-  ctx.translate(-cx, -cy);
+/* ══════════════════════════════════════════════════════════════════════
+   View state (world → screen)
+     screen = (world - view.center) * view.scale + canvasCenter
+   ══════════════════════════════════════════════════════════════════════ */
+const view = {
+  cx: 0, cy: 0,       // world coordinate at canvas center
+  scale: 0,           // pixels per world unit (0 = not yet fitted)
+  fitted: false
+};
+
+function fitView(scene) {
+  const W = canvas.width / devicePixelRatio;
+  const H = canvas.height / devicePixelRatio;
+  const bb = scene.bbox;
+  const spanX = Math.max(bb.maxX - bb.minX, 40);
+  const spanY = Math.max(bb.maxY - bb.minY, 40);
+  view.scale = Math.min((W - 40) / spanX, (H - 40) / spanY);
+  view.cx = (bb.minX + bb.maxX) / 2;
+  view.cy = (bb.minY + bb.maxY) / 2;
+  view.fitted = true;
+  updateZoomPct();
+}
+
+function resetView() {
+  view.cx = 0; view.cy = 0; view.scale = 1;
+  updateZoomPct();
+}
+
+function updateZoomPct() {
+  zoomPctEl.textContent = Math.round((view.scale || 0) * 100) + '%';
+}
+
+function screenToWorld(sx, sy) {
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  return {
+    x: (sx - W / 2) / view.scale + view.cx,
+    y: (sy - H / 2) / view.scale + view.cy
+  };
+}
+function worldToScreen(wx, wy) {
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  return {
+    x: (wx - view.cx) * view.scale + W / 2,
+    y: (wy - view.cy) * view.scale + H / 2
+  };
+}
+function zoomAt(screenX, screenY, factor) {
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  const worldPt = screenToWorld(screenX, screenY);
+  const newScale = Math.max(0.001, Math.min(1000, view.scale * factor));
+  // Keep worldPt at same screen position:
+  // screenPt = (worldPt - newC) * newScale + center
+  // → newC = worldPt - (screenPt - center) / newScale
+  view.cx = worldPt.x - (screenX - W / 2) / newScale;
+  view.cy = worldPt.y - (screenY - H / 2) / newScale;
+  view.scale = newScale;
+  updateZoomPct();
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Canvas — size management + rendering
+   ══════════════════════════════════════════════════════════════════════ */
+let ctx = null;
+let cachedScene = null;
+let selectedDrawIndex = null;
+let showFills = true;
+let fatStrokes = true;
+let showGrid = true;
+let flipY = false;
+let selectMode = false;
+
+function resizeCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  const W = previewWrap.clientWidth;
+  const H = previewWrap.clientHeight;
+  canvas.width  = Math.max(1, Math.floor(W * dpr));
+  canvas.height = Math.max(1, Math.floor(H * dpr));
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx = canvas.getContext('2d');
+  if (cachedScene && !view.fitted) fitView(cachedScene);
+  drawCanvas();
+}
+window.addEventListener('resize', resizeCanvas);
+
+function capsulePath(c, sx, sy, ex, ey, r) {
+  const dx = ex - sx, dy = ey - sy;
+  const len = Math.hypot(dx, dy);
+  if (len < 1e-6) { c.beginPath(); c.arc(sx, sy, r, 0, Math.PI * 2); return; }
+  const ang = Math.atan2(dy, dx);
+  const nx = -Math.sin(ang), ny = Math.cos(ang);
+  c.beginPath();
+  c.moveTo(sx + nx * r, sy + ny * r);
+  c.lineTo(ex + nx * r, ey + ny * r);
+  c.arc(ex, ey, r, ang + Math.PI / 2, ang - Math.PI / 2, true);
+  c.lineTo(sx - nx * r, sy - ny * r);
+  c.arc(sx, sy, r, ang - Math.PI / 2, ang + Math.PI / 2, false);
+  c.closePath();
+}
+
+function drawCanvas() {
+  if (!ctx) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.width, H = canvas.height;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  const scene = cachedScene;
+  if (!scene) return;
+  if (!view.fitted) fitView(scene);
+  if (!isFinite(view.scale) || view.scale <= 0) return;
+
+  // Apply view transform
+  ctx.translate(W / 2, H / 2);
+  if (flipY) ctx.scale(view.scale, -view.scale);
+  else       ctx.scale(view.scale, view.scale);
+  ctx.translate(-view.cx, -view.cy);
 
   // Grid
-  ctx.strokeStyle = 'rgba(0,0,0,.045)';
-  ctx.lineWidth = 1 / fit;
-  const step = 50;
-  const gx0 = Math.floor(minX / step) * step, gx1 = Math.ceil(maxX / step) * step;
-  const gy0 = Math.floor(minY / step) * step, gy1 = Math.ceil(maxY / step) * step;
-  for (let gx = gx0; gx <= gx1; gx += step) {
-    ctx.beginPath(); ctx.moveTo(gx, gy0); ctx.lineTo(gx, gy1); ctx.stroke();
-  }
-  for (let gy = gy0; gy <= gy1; gy += step) {
-    ctx.beginPath(); ctx.moveTo(gx0, gy); ctx.lineTo(gx1, gy); ctx.stroke();
+  if (showGrid) {
+    const screenPxPerWorld = view.scale;
+    // Grid step scales with zoom — pick a nice step that keeps 40-120px between lines
+    let step = 50;
+    const targetPx = 70;
+    const rawStep = targetPx / screenPxPerWorld;
+    const mag = Math.pow(10, Math.floor(Math.log10(Math.max(rawStep, 0.0001))));
+    const norm = rawStep / mag;
+    if (norm < 1.5) step = mag;
+    else if (norm < 3.5) step = 2 * mag;
+    else if (norm < 7.5) step = 5 * mag;
+    else step = 10 * mag;
+
+    const viewTL = screenToWorld(0, 0);
+    const viewBR = screenToWorld(canvas.clientWidth, canvas.clientHeight);
+    const gx0 = Math.floor(Math.min(viewTL.x, viewBR.x) / step) * step;
+    const gx1 = Math.ceil(Math.max(viewTL.x, viewBR.x) / step) * step;
+    const gy0 = Math.floor(Math.min(viewTL.y, viewBR.y) / step) * step;
+    const gy1 = Math.ceil(Math.max(viewTL.y, viewBR.y) / step) * step;
+
+    ctx.lineWidth = 1 / (view.scale * dpr);
+    ctx.strokeStyle = 'rgba(0,0,0,.05)';
+    for (let gx = gx0; gx <= gx1; gx += step) {
+      ctx.beginPath(); ctx.moveTo(gx, gy0); ctx.lineTo(gx, gy1); ctx.stroke();
+    }
+    for (let gy = gy0; gy <= gy1; gy += step) {
+      ctx.beginPath(); ctx.moveTo(gx0, gy); ctx.lineTo(gx1, gy); ctx.stroke();
+    }
+
+    // Axes
+    ctx.strokeStyle = 'rgba(79,70,229,.15)';
+    ctx.lineWidth = 1.4 / (view.scale * dpr);
+    ctx.beginPath();
+    ctx.moveTo(gx0, 0); ctx.lineTo(gx1, 0);
+    ctx.moveTo(0, gy0); ctx.lineTo(0, gy1);
+    ctx.stroke();
+
+    const osz = 5 / view.scale;
+    ctx.fillStyle = 'rgba(79,70,229,.85)';
+    ctx.beginPath(); ctx.arc(0, 0, osz, 0, Math.PI * 2); ctx.fill();
   }
 
-  // Origin axes
-  ctx.strokeStyle = 'rgba(79,70,229,.14)';
-  ctx.lineWidth = 1.4 / fit;
-  ctx.beginPath();
-  ctx.moveTo(gx0, 0); ctx.lineTo(gx1, 0);
-  ctx.moveTo(0, gy0); ctx.lineTo(0, gy1);
-  ctx.stroke();
-  const osz = 5 / fit;
-  ctx.fillStyle = 'rgba(79,70,229,.85)';
-  ctx.beginPath(); ctx.arc(0, 0, osz, 0, Math.PI*2); ctx.fill();
+  // Min stroke width so thin details stay visible — convert screen px to world units
+  const minPx = fatStrokes ? 2.2 : 1.0;
+  const minW = minPx / view.scale;
 
-  // Figure default color (used when a node has useSegmentColor=false)
   let figColorCss = 'rgba(32,32,32,1)';
-  try { figColorCss = cssFromHex(fig.colorHex); } catch {}
+  try { figColorCss = cssFromHex(currentFig.colorHex); } catch {}
 
-  // Draw nodes in z-order
+  // Draw nodes as filled shapes
   for (const n of scene.nodes) {
     let col;
     try { col = cssFromHex(n.colorHex); } catch { col = figColorCss; }
-
-    ctx.strokeStyle = col;
-    ctx.fillStyle   = col;
-    ctx.lineJoin = 'round';
-    ctx.lineCap  = 'round';
+    ctx.fillStyle = col;
 
     const dx = n.ex - n.sx, dy = n.ey - n.sy;
-    const len = Math.sqrt(dx*dx + dy*dy);
+    const len = Math.hypot(dx, dy);
     const angle = Math.atan2(dy, dx);
     const th = Math.max(0.5, Math.abs(n.thickness) || 1);
-    const thW = Math.max(th, minWorldW);
+    const r = Math.max((th + (fatStrokes ? 1.5 : 0)) / 2, minW / 2);
 
     switch (n.type) {
-      case 0: // RoundedSegment
-      case 1: // Segment
-        ctx.lineWidth = thW;
-        ctx.lineCap = n.type === 0 ? 'round' : 'butt';
-        ctx.beginPath();
-        ctx.moveTo(n.sx, n.sy);
-        ctx.lineTo(n.ex, n.ey);
-        ctx.stroke();
-        if (n.type === 0) {
-          // Guarantee a solid joint
-          ctx.beginPath();
-          ctx.arc(n.ex, n.ey, thW/2, 0, Math.PI*2);
-          ctx.fill();
-        }
+      case 0: case 1:  // Segment / RoundedSegment
+        capsulePath(ctx, n.sx, n.sy, n.ex, n.ey, r);
+        ctx.fill();
         break;
-
-      case 2: // Circle (hollow outline)
-      case 4: { // FilledCircle
+      case 2:          // Hollow Circle
+      case 4: {        // FilledCircle
         const diam = Math.max(len, th);
-        const r = diam / 2;
-        ctx.beginPath();
-        ctx.arc(n.ex, n.ey, r, 0, Math.PI*2);
+        const rad = diam / 2;
         let hollow = false;
         try { hollow = n.node.circleIsHollow; } catch {}
-        if (n.type === 4 && !hollow) {
-          ctx.fill();
+        if (n.type === 2 || hollow) {
+          ctx.beginPath();
+          ctx.arc(n.ex, n.ey, rad + r * 0.3, 0, Math.PI * 2, false);
+          ctx.arc(n.ex, n.ey, Math.max(0, rad - r * 0.7), 0, Math.PI * 2, true);
+          ctx.fill('evenodd');
         } else {
-          ctx.lineWidth = thW;
-          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(n.ex, n.ey, rad, 0, Math.PI * 2);
+          ctx.fill();
         }
         break;
       }
-
-      case 5: { // Ellipse
+      case 5:          // Ellipse
         ctx.save();
         ctx.translate(n.ex, n.ey);
         ctx.rotate(angle);
         ctx.beginPath();
-        ctx.ellipse(0, 0, Math.max(0.5, len/2), Math.max(0.5, th/2), 0, 0, Math.PI*2);
+        ctx.ellipse(0, 0, Math.max(0.5, len / 2), Math.max(0.5, th / 2), 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
         break;
-      }
-
-      case 3: { // Triangle
-        const r = Math.max(1, len);
+      case 3: {        // Triangle
+        const tr = Math.max(1, len);
         const base = angle + Math.PI;
         const side = 2 * Math.PI / 3;
         ctx.beginPath();
         ctx.moveTo(n.ex, n.ey);
-        ctx.lineTo(n.ex + r * Math.cos(base + side/2), n.ey + r * Math.sin(base + side/2));
-        ctx.lineTo(n.ex + r * Math.cos(base - side/2), n.ey + r * Math.sin(base - side/2));
+        ctx.lineTo(n.ex + tr * Math.cos(base + side / 2), n.ey + tr * Math.sin(base + side / 2));
+        ctx.lineTo(n.ex + tr * Math.cos(base - side / 2), n.ey + tr * Math.sin(base - side / 2));
         ctx.closePath();
         ctx.fill();
         break;
       }
-
-      case 6: { // Trapezoid
+      case 6: {        // Trapezoid
         let w1 = th, w2 = th * 0.5;
         try { w1 = n.node.getTrapezoidThicknessStart() || th; } catch {}
         try { w2 = n.node.getTrapezoidThicknessEnd()   || th * 0.5; } catch {}
         const nx = -Math.sin(angle), ny = Math.cos(angle);
         ctx.beginPath();
-        ctx.moveTo(n.sx + nx*w1/2, n.sy + ny*w1/2);
-        ctx.lineTo(n.ex + nx*w2/2, n.ey + ny*w2/2);
-        ctx.lineTo(n.ex - nx*w2/2, n.ey - ny*w2/2);
-        ctx.lineTo(n.sx - nx*w1/2, n.sy - ny*w1/2);
+        ctx.moveTo(n.sx + nx * w1 / 2, n.sy + ny * w1 / 2);
+        ctx.lineTo(n.ex + nx * w2 / 2, n.ey + ny * w2 / 2);
+        ctx.lineTo(n.ex - nx * w2 / 2, n.ey - ny * w2 / 2);
+        ctx.lineTo(n.sx - nx * w1 / 2, n.sy - ny * w1 / 2);
         ctx.closePath();
         ctx.fill();
         break;
       }
-
-      case 7: { // Polygon
+      case 7: {        // Polygon
         let sides = 5;
         try { sides = Math.max(3, n.node.numPolygonVertices || 5); } catch {}
-        const r = Math.max(1, len);
+        const pr = Math.max(1, len);
         ctx.beginPath();
         for (let i = 0; i < sides; i++) {
           const a = angle + (i / sides) * Math.PI * 2;
-          const px = n.ex + r * Math.cos(a);
-          const py = n.ey + r * Math.sin(a);
+          const px = n.ex + pr * Math.cos(a), py = n.ey + pr * Math.sin(a);
           i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
         }
         ctx.closePath();
@@ -791,116 +1002,447 @@ function render(fig) {
     }
   }
 
-  // Draw polyfills (on top — the key visual fix)
+  // Polyfills on top
   if (showFills) {
     for (const pf of scene.polyfills) {
       if (pf.verts.length < 3) continue;
       let col = figColorCss;
-      if (pf.useColor) {
-        try { col = cssFromHex(pf.colorHex); } catch {}
-      }
+      if (pf.useColor) { try { col = cssFromHex(pf.colorHex); } catch {} }
       ctx.fillStyle = col;
       ctx.beginPath();
       ctx.moveTo(pf.verts[0].x, pf.verts[0].y);
-      for (let i = 1; i < pf.verts.length; i++) {
-        ctx.lineTo(pf.verts[i].x, pf.verts[i].y);
-      }
+      for (let i = 1; i < pf.verts.length; i++) ctx.lineTo(pf.verts[i].x, pf.verts[i].y);
       ctx.closePath();
       ctx.fill();
     }
   }
 
-  ctx.restore();
-
-  // Meta
-  previewMeta.textContent = '×' + fit.toFixed(2) +
-    '  ·  ' + scene.nodes.length + ' nodes' +
-    (scene.polyfills.length ? '  ·  ' + scene.polyfills.length + ' fills' : '');
-
-  // Info bar
-  try { $('figVer').textContent = fig.version + '/' + fig.build + ' (s=' + (fig.scale||1).toFixed(2) + ')'; }
-  catch {}
-  $('nCount').textContent = scene.nodes.length;
-  $('pfCount').textContent = scene.polyfills.length;
-
-  let connectorCount = 0;
-  for (const n of scene.nodes) {
-    try { if (n.node.hasConnector) connectorCount++; } catch {}
+  // Highlight selected node
+  if (selectedDrawIndex !== null) {
+    const sel = scene.nodes.find(n => n.drawIndex === selectedDrawIndex);
+    if (sel) {
+      ctx.strokeStyle = '#4f46e5';
+      ctx.lineWidth = 2 / view.scale;
+      ctx.setLineDash([4 / view.scale, 3 / view.scale]);
+      capsulePath(ctx, sel.sx, sel.sy, sel.ex, sel.ey, Math.max(sel.thickness / 2 + 4 / view.scale, 6 / view.scale));
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
   }
-  $('cnCount').textContent = connectorCount;
+
+  // Meta line
+  previewMeta.textContent =
+    '×' + view.scale.toFixed(3) + '  ·  ' + scene.nodes.length + ' nodes' +
+    (scene.polyfills.length ? '  ·  ' + scene.polyfills.length + ' fills' : '') +
+    (flipY ? '  ·  flip' : '') +
+    (fatStrokes ? '  ·  fat' : '') +
+    (selectMode ? '  ·  select' : '');
 }
 
-/* ════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════════
+   Pinch / pan / wheel interaction
+   ══════════════════════════════════════════════════════════════════════ */
+let isPanning = false;
+let panLast = { x:0, y:0 };
+let touchState = null;
+let lastTapTime = 0;
+
+previewWrap.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  previewWrap.setPointerCapture(e.pointerId);
+  if (e.pointerType === 'touch' && touchState && touchState.length > 0) {
+    // second touch — start pinch
+    touchState.push({ id: e.pointerId, x: e.clientX, y: e.clientY });
+    if (touchState.length === 2) {
+      const [a, b] = touchState;
+      touchState.pinchStartDist = Math.hypot(a.x - b.x, a.y - b.y);
+      touchState.pinchStartScale = view.scale;
+      touchState.pinchStartCenter = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      touchState.pinchStartView = { cx: view.cx, cy: view.cy };
+    }
+  } else if (e.pointerType === 'touch') {
+    touchState = [{ id: e.pointerId, x: e.clientX, y: e.clientY }];
+    // detect double tap
+    const now = Date.now();
+    if (now - lastTapTime < 300) { fitView(cachedScene); lastTapTime = 0; return; }
+    lastTapTime = now;
+  } else {
+    // Mouse
+    isPanning = true;
+    panLast = { x: e.clientX, y: e.clientY };
+    previewWrap.classList.add('grabbing');
+  }
+  hintPill.classList.add('hidden');
+});
+
+previewWrap.addEventListener('pointermove', e => {
+  if (e.pointerType === 'touch' && touchState) {
+    const idx = touchState.findIndex(t => t.id === e.pointerId);
+    if (idx >= 0) touchState[idx] = { id: e.pointerId, x: e.clientX, y: e.clientY };
+    if (touchState.length === 2 && touchState.pinchStartDist) {
+      const [a, b] = touchState;
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const centerX = (a.x + b.x) / 2 - previewWrap.getBoundingClientRect().left;
+      const centerY = (a.y + b.y) / 2 - previewWrap.getBoundingClientRect().top;
+      const newScale = touchState.pinchStartScale * (dist / touchState.pinchStartDist);
+      // Zoom about pinch center
+      const W = canvas.clientWidth, H = canvas.clientHeight;
+      const worldStart = {
+        x: (touchState.pinchStartCenter.x - previewWrap.getBoundingClientRect().left - W / 2) / touchState.pinchStartScale + touchState.pinchStartView.cx,
+        y: (touchState.pinchStartCenter.y - previewWrap.getBoundingClientRect().top - H / 2) / touchState.pinchStartScale + touchState.pinchStartView.cy
+      };
+      view.scale = Math.max(0.001, Math.min(1000, newScale));
+      view.cx = worldStart.x - (centerX - W / 2) / view.scale;
+      view.cy = worldStart.y - (centerY - H / 2) / view.scale;
+      updateZoomPct();
+      drawCanvas();
+    } else if (touchState.length === 1) {
+      const t = touchState[0];
+      // Pan with single finger
+      const rect = previewWrap.getBoundingClientRect();
+      const sx = t.x - rect.left, sy = t.y - rect.top;
+      if (t.lastX !== undefined) {
+        view.cx -= (sx - t.lastX) / view.scale;
+        view.cy -= (sy - t.lastY) / view.scale;
+        drawCanvas();
+      }
+      t.lastX = sx; t.lastY = sy;
+    }
+    return;
+  }
+  if (isPanning && e.pointerType === 'mouse') {
+    const dx = e.clientX - panLast.x;
+    const dy = e.clientY - panLast.y;
+    view.cx -= dx / view.scale;
+    view.cy -= dy / view.scale;
+    panLast = { x: e.clientX, y: e.clientY };
+    drawCanvas();
+  }
+});
+
+previewWrap.addEventListener('pointerup', e => {
+  if (e.pointerType === 'touch' && touchState) {
+    touchState = touchState.filter(t => t.id !== e.pointerId);
+    if (touchState.length === 0) {
+      // Tap detection for selection (if it was a quick tap, not a drag)
+      const rect = previewWrap.getBoundingClientRect();
+      const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+      if (selectMode) trySelect(sx, sy);
+    }
+  }
+  if (e.pointerType === 'mouse') {
+    isPanning = false;
+    previewWrap.classList.remove('grabbing');
+    const rect = previewWrap.getBoundingClientRect();
+    const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+    if (selectMode) trySelect(sx, sy);
+  }
+});
+
+previewWrap.addEventListener('pointercancel', () => {
+  touchState = null;
+  isPanning = false;
+  previewWrap.classList.remove('grabbing');
+});
+
+// Wheel zoom
+previewWrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = previewWrap.getBoundingClientRect();
+  const sx = e.clientX - rect.left, sy = e.clientY - rect.top;
+  const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+  zoomAt(sx, sy, factor);
+  drawCanvas();
+}, { passive: false });
+
+/* Hit-testing */
+function trySelect(sx, sy) {
+  if (!cachedScene) return;
+  const world = screenToWorld(sx, sy);
+  let best = null, bestDist = Infinity;
+  for (const n of cachedScene.nodes) {
+    // Distance to segment (sx,sy)-(ex,ey)
+    const dx = n.ex - n.sx, dy = n.ey - n.sy;
+    const len2 = dx * dx + dy * dy;
+    let t = 0;
+    if (len2 > 1e-6) {
+      t = ((world.x - n.sx) * dx + (world.y - n.sy) * dy) / len2;
+      t = Math.max(0, Math.min(1, t));
+    }
+    const px = n.sx + dx * t, py = n.sy + dy * t;
+    const dist = Math.hypot(world.x - px, world.y - py);
+    const tolerance = Math.max(Math.abs(n.thickness || 0) / 2, 8 / view.scale);
+    if (dist < tolerance && dist < bestDist) {
+      bestDist = dist; best = n;
+    }
+  }
+  if (best) {
+    selectedDrawIndex = best.drawIndex;
+    renderTree(currentFig);
+    renderInspector(best);
+    drawCanvas();
+    document.querySelector('.tabs button[data-tab="inspector"]').click();
+    $('selIdx').textContent = '[' + best.drawIndex + '] ' + (NODE_TYPE_NAME[best.type] || best.type);
+    toast('Selected node [' + best.drawIndex + ']');
+  } else {
+    selectedDrawIndex = null;
+    $('selIdx').textContent = '—';
+    drawCanvas();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
    Tree
-   ════════════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════════════════ */
 function renderTree(fig) {
   treeEl.textContent = '';
-  const pfAnchors = new Set();
-  try {
-    for (const pf of fig.allPolyfills()) pfAnchors.add(pf.anchorDrawIndex);
-  } catch {}
-
+  let count = 0;
   const visit = (node, depth) => {
+    count++;
     const row = document.createElement('div');
     row.className = 'row';
+    if (node.drawIndex === selectedDrawIndex) row.classList.add('selected');
 
-    const branch = document.createElement('span');
-    branch.className = 'branch';
-    branch.textContent = '│ '.repeat(Math.min(depth, 24));
+    const branch = document.createElement('span'); branch.className = 'branch';
+    branch.textContent = '│ '.repeat(Math.min(depth, 26));
 
-    const idx = document.createElement('span');
-    idx.className = 'idx';
+    const idx = document.createElement('span'); idx.className = 'idx';
     idx.textContent = '[' + node.drawIndex + ']';
 
-    const type = document.createElement('span');
-    type.className = 'type';
+    const type = document.createElement('span'); type.className = 'type';
     type.textContent = NODE_TYPE_NAME[node.nodeType] ?? ('Type' + node.nodeType);
 
-    const swatch = document.createElement('span');
-    swatch.className = 'swatch';
+    const swatch = document.createElement('span'); swatch.className = 'swatch';
     try { swatch.style.background = node.getDisplayColorHex(); } catch {}
 
-    const props = document.createElement('span');
-    props.className = 'props';
-    const bits = [];
-    if (node.length)     bits.push('len=' + node.length.toFixed(1));
-    if (node.thickness)  bits.push('th=' + node.thickness);
-    if (node.localAngle) bits.push('∠' + node.localAngle.toFixed(1) + '°');
-    props.textContent = bits.join(' ');
-    if (pfAnchors.has(node.drawIndex)) {
-      const tag = document.createElement('span');
-      tag.className = 'tag pf'; tag.textContent = 'FILL';
-      props.appendChild(tag);
-    }
-    try {
-      if (node.hasConnector) {
-        const tag = document.createElement('span');
-        tag.className = 'tag conn'; tag.textContent = 'CONN';
-        props.appendChild(tag);
-      }
-    } catch {}
+    const props = document.createElement('span'); props.className = 'props';
+    const infoBits = [];
+    if (node.length)     infoBits.push('len ' + node.length.toFixed(1));
+    if (node.thickness)  infoBits.push('th ' + node.thickness);
+    if (node.localAngle) infoBits.push('∠' + node.localAngle.toFixed(1) + '°');
 
-    row.appendChild(branch);
-    row.appendChild(idx);
-    row.appendChild(type);
-    row.appendChild(swatch);
-    row.appendChild(props);
+    const infoSpan = document.createElement('span');
+    infoSpan.textContent = infoBits.join(' · ');
+    props.appendChild(infoSpan);
+
+    try { if (node.hasConnector) {
+      const tag = document.createElement('span'); tag.className = 'tag conn';
+      tag.textContent = 'CONN'; props.appendChild(tag);
+    }} catch {}
+
+    row.appendChild(branch); row.appendChild(idx);
+    row.appendChild(type); row.appendChild(swatch); row.appendChild(props);
+
+    row.addEventListener('click', () => {
+      selectedDrawIndex = node.drawIndex;
+      renderTree(currentFig);
+      renderInspectorFromNode(node);
+      drawCanvas();
+      document.querySelector('.tabs button[data-tab="inspector"]').click();
+      $('selIdx').textContent = '[' + node.drawIndex + '] ' +
+        (NODE_TYPE_NAME[node.nodeType] || node.nodeType);
+    });
+
     treeEl.appendChild(row);
-
     for (const k of node.children()) visit(k, depth + 1);
   };
   visit(fig.rootNode(), 0);
+  $('treeBadge').textContent = count;
 }
 
-/* ════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════════
+   Inspector
+   ══════════════════════════════════════════════════════════════════════ */
+function renderInspector(sceneNode) {
+  if (!sceneNode || !sceneNode.node) {
+    inspectorEl.innerHTML = '<div class="insp-empty">Click a node in the tree or canvas to inspect it</div>';
+    return;
+  }
+  renderInspectorFromNode(sceneNode.node);
+}
+function renderInspectorFromNode(node) {
+  const rows = [];
+  const push = (k, v, cls) => rows.push({ k, v, cls });
+
+  // Header
+  let colorHex = '—', typeName = '—', idx = '—';
+  try { colorHex = node.getDisplayColorHex(); } catch {}
+  try { typeName = NODE_TYPE_NAME[node.nodeType] ?? ('Type' + node.nodeType); } catch {}
+  try { idx = '[' + node.drawIndex + ']'; } catch {}
+
+  const secs = [];
+
+  function section(title, build) {
+    const items = [];
+    const p = (k, v, cls) => items.push({ k, v, cls });
+    build(p);
+    if (items.length) secs.push({ title, items });
+  }
+
+  // — Identity & structure —
+  section('Identity', p => {
+    try { p('drawIndex', node.drawIndex); } catch {}
+    try { p('nodeType', typeName); } catch {}
+    try { p('parentIndex', node.getParentIndex() ?? '—'); } catch {}
+    try { p('children', Array.from(node.children()).length); } catch {}
+    try { p('siblingIndices', '[' + Array.from(node.getSiblingIndices()).join(', ') + ']'); } catch {}
+    try {
+      const anc = Array.from(node.getAncestorIndices());
+      p('ancestors', anc.length ? '[' + anc.join(', ') + ']' : '[]');
+    } catch {}
+    try {
+      const desc = Array.from(node.getDescendantIndices());
+      p('descendants', desc.length ? desc.length + ' nodes' : '0');
+    } catch {}
+  });
+
+  // — Flags —
+  section('Flags', p => {
+    const flag = v => v ? 'true' : 'false';
+    const cls = v => v ? 'bool-true' : 'bool-false';
+    const tryFlag = (name, getter) => {
+      try { const v = getter(); p(name, flag(v), cls(v)); } catch {}
+    };
+    tryFlag('isStatic',              () => node.isStatic);
+    tryFlag('isStretchy',            () => node.isStretchy);
+    tryFlag('isFloaty',              () => node.isFloaty);
+    tryFlag('isSmartStretch',        () => node.isSmartStretch);
+    tryFlag('doNotApplySmartStretch',() => node.doNotApplySmartStretch);
+    tryFlag('smartStretchResetImpulse', () => node.smartStretchResetImpulse);
+    tryFlag('useSegmentColor',       () => node.useSegmentColor);
+    tryFlag('useCircleOutline',      () => node.useCircleOutline);
+    tryFlag('circleIsHollow',        () => node.circleIsHollow);
+    tryFlag('useGradient',           () => node.useGradient);
+    tryFlag('reverseGradient',       () => node.reverseGradient);
+    tryFlag('useSegmentScale',       () => node.useSegmentScale);
+    tryFlag('curveCirculization',    () => node.curveCirculization);
+    tryFlag('halfArc',               () => node.halfArc);
+    tryFlag('triangleFlipped',       () => node.triangleFlipped);
+    tryFlag('triangleUpsideDown',    () => node.triangleUpsideDown);
+    tryFlag('trapezoidIsRoundedStart',() => node.trapezoidIsRoundedStart);
+    tryFlag('trapezoidIsRoundedEnd', () => node.trapezoidIsRoundedEnd);
+    tryFlag('isDragLocked',          () => node.isDragLocked);
+    tryFlag('isAngleLocked',         () => node.isAngleLocked);
+    tryFlag('angleLockIsMainNode',   () => node.angleLockIsMainNode);
+    tryFlag('hasConnector',          () => node.hasConnector);
+  });
+
+  // — Geometry —
+  section('Geometry', p => {
+    const num = v => typeof v === 'number' ? v.toFixed(3).replace(/\.?0+$/, '') : String(v);
+    const raw = (name, getter) => { try { p(name, num(getter())); } catch {} };
+    raw('length', node.length);
+    raw('defaultLength', node.defaultLength);
+    raw('thickness', node.thickness);
+    raw('defaultThickness', node.defaultThickness);
+    raw('scale', node.scale);
+    raw('localAngle', node.localAngle);
+    raw('defaultLocalAngle', node.defaultLocalAngle);
+    raw('defaultAngle', node.defaultAngle);
+    raw('effectiveThickness', node.getEffectiveThickness());
+  });
+
+  // — Curve / shape specific —
+  section('Shape details', p => {
+    const n = v => typeof v === 'number' ? v.toFixed(3).replace(/\.?0+$/, '') : String(v);
+    try { p('segmentCurveRadius…', n(node.segmentCurveRadiusAndDefaultCurveRadius)); } catch {}
+    try { p('curvePolyfillPrecision', n(node.segmentCurvePolyfillPrecision)); } catch {}
+    try { p('numPolygonVertices', n(node.numPolygonVertices)); } catch {}
+    try { p('trapezoidThicknessStart', n(node.trapezoidThicknessStart)); } catch {}
+    try { p('trapezoidThicknessEnd', n(node.trapezoidThicknessEnd)); } catch {}
+    try { p('trapezoidTopThicknessRatio', n(node.trapezoidTopThicknessRatio)); } catch {}
+    try { p('useTrapezoidThicknessStart', node.useTrapezoidThicknessStart ? 'true':'false', node.useTrapezoidThicknessStart ? 'bool-true':'bool-false'); } catch {}
+    try { p('useTrapezoidThicknessEnd', node.useTrapezoidThicknessEnd ? 'true':'false', node.useTrapezoidThicknessEnd ? 'bool-true':'bool-false'); } catch {}
+  });
+
+  // — Enums —
+  section('Enums', p => {
+    try { p('gradientMode', GRADIENT_MODE_NAMES[node.gradientMode] ?? node.gradientMode); } catch {}
+    try { p('triangleType', TRIANGLE_TYPE_NAMES[node.triangleType] ?? node.triangleType); } catch {}
+    try { p('angleLockMode', ANGLE_LOCK_NAMES[node.angleLockMode] ?? node.angleLockMode); } catch {}
+  });
+
+  // — Locking / stretch —
+  section('Locking & stretch', p => {
+    const n = v => typeof v === 'number' ? v.toFixed(3).replace(/\.?0+$/, '') : String(v);
+    try { p('angleLockOffset', n(node.angleLockOffset)); } catch {}
+    try { p('angleLockRelativeMultiplier', node.angleLockRelativeMultiplier); } catch {}
+    try { p('dragLockAngle', n(node.dragLockAngle)); } catch {}
+    try { p('smartStretchMultiplier', n(node.smartStretchMultiplier)); } catch {}
+  });
+
+  // — Colors —
+  section('Colors', p => {
+    try { p('colorHex', node.colorHex); } catch {}
+    try { p('gradientColorHex', node.gradientColorHex); } catch {}
+    try { p('circleOutlineColorHex', node.circleOutlineColorHex); } catch {}
+    try { p('displayColorHex', node.getDisplayColorHex()); } catch {}
+  });
+
+  // — Computed world coords —
+  section('World coordinates', p => {
+    const n = v => typeof v === 'number' ? v.toFixed(2) : String(v);
+    try {
+      const s = node.getGlobalStart();
+      p('globalStart', `(${n(s[0])}, ${n(s[1])})`);
+    } catch {}
+    try {
+      const e = node.getGlobalEnd();
+      p('globalEnd', `(${n(e[0])}, ${n(e[1])})`);
+    } catch {}
+    try { p('globalAngle', n(node.getGlobalAngle())); } catch {}
+    try { p('localX', n(node.getLocalX())); } catch {}
+    try { p('localY', n(node.getLocalY())); } catch {}
+  });
+
+  // — Connector —
+  try {
+    if (node.hasConnector) {
+      section('Connector', p => {
+        try { p('endDrawIndex', node.getConnectorEndIndex()); } catch {}
+        try { p('percent', node.getConnectorPercent()); } catch {}
+        try { p('percentDefault', node.getConnectorPercentDefault()); } catch {}
+        try { p('value', node.getConnectorValue()); } catch {}
+        try { p('method', CONNECTOR_METHOD_NAMES[node.getConnectorMethod()] ?? node.getConnectorMethod()); } catch {}
+        try { p('reversed', node.getConnectorReversed() ? 'true' : 'false'); } catch {}
+        try { p('localX', node.getConnectorLocalX()); } catch {}
+        try { p('localY', node.getConnectorLocalY()); } catch {}
+        try { p('smartStretchAncestralValue', node.getConnectorSmartStretchAncestralValue()); } catch {}
+      });
+    }
+  } catch {}
+
+  // Render
+  let html = '';
+  html += '<div class="insp-header">';
+  try { html += `<span class="swatch" style="background:${colorHex}"></span>`; } catch {}
+  html += `<span class="idx">${idx}</span>`;
+  html += `<span class="type">${typeName}</span>`;
+  html += '</div>';
+
+  if (secs.length === 0) {
+    html += '<div class="insp-empty">No properties available</div>';
+  } else {
+    for (const s of secs) {
+      html += `<div class="insp-section"><h3>${s.title}</h3><div class="insp-grid">`;
+      for (const it of s.items) {
+        const cls = it.cls ? ' ' + it.cls : '';
+        html += `<div class="k">${it.k}</div><div class="v${cls}">${String(it.v).replace(/</g,'&lt;')}</div>`;
+      }
+      html += '</div></div>';
+    }
+  }
+  inspectorEl.innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
    Reverse export
-   ════════════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════════════════ */
 function figureToXml(fig) {
   const out = [];
   out.push('<?xml version="1.0"?>');
   out.push('<stickfigure version="' + fig.version + '" build="' + fig.build +
            '" scale="' + fig.scale + '" color="' + fig.colorHex + '">');
-
   const write = (node, depth) => {
     const pad = '  '.repeat(depth);
     const attrs = [];
@@ -910,13 +1452,9 @@ function figureToXml(fig) {
     if (node.thickness)  attrs.push('thickness="' + node.thickness + '"');
     if (node.localAngle) attrs.push('angle="' + node.localAngle + '"');
     if (node.useSegmentColor) {
-      try {
-        attrs.push('color="' + node.colorHex + '"');
-        attrs.push('useSegmentColor="true"');
-      } catch {}
+      try { attrs.push('color="' + node.colorHex + '"'); attrs.push('useSegmentColor="true"'); } catch {}
     }
     if (node.useSegmentScale) attrs.push('useSegmentScale="true"');
-
     const kids = node.children();
     const open = pad + '<node ' + attrs.join(' ');
     if (kids.length === 0) { out.push(open + '/>'); return; }
@@ -929,18 +1467,15 @@ function figureToXml(fig) {
   return out.join('\n');
 }
 
-/* ════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════════
    Presets
-   ════════════════════════════════════════════════════════════════ */
-const BODY = '#42489DFF';
-const SKIN = '#FFCC99FF';
+   ══════════════════════════════════════════════════════════════════════ */
+const BODY = '#42489DFF', SKIN = '#FFCC99FF';
 const PRESETS = {
-  empty: [
-    '<?xml version="1.0"?>',
+  empty: ['<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <!-- add <node> elements here -->',
-    '</stickfigure>'
-  ].join('\n'),
+    '  <!-- add <node> here -->',
+    '</stickfigure>'].join('\n'),
   standing: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
@@ -955,8 +1490,7 @@ const PRESETS = {
     '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'
-  ].join('\n'),
+    '</stickfigure>'].join('\n'),
   tpose: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
@@ -971,8 +1505,7 @@ const PRESETS = {
     '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'
-  ].join('\n'),
+    '</stickfigure>'].join('\n'),
   running: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
@@ -991,8 +1524,7 @@ const PRESETS = {
     '  <node type="RoundedSegment" length="55" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="30" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'
-  ].join('\n'),
+    '</stickfigure>'].join('\n'),
   sitting: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
@@ -1007,8 +1539,7 @@ const PRESETS = {
     '  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'
-  ].join('\n'),
+    '</stickfigure>'].join('\n'),
   waving: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
@@ -1025,20 +1556,18 @@ const PRESETS = {
     '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '</stickfigure>'
-  ].join('\n'),
+    '</stickfigure>'].join('\n')
 };
 
-/* ════════════════════════════════════════════════════════════════
-   UI
-   ════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   UI wiring
+   ══════════════════════════════════════════════════════════════════════ */
 let currentFig = null;
 
 function updateXmlMeta() {
   const text = xmlEl.value;
-  const lines = text.split('\n').length;
-  const bytes = new Blob([text]).size;
-  xmlMeta.textContent = lines + ' lines · ' + bytes + ' B';
+  xmlMeta.textContent = text.split('\n').length + ' lines · ' +
+    new Blob([text]).size.toLocaleString() + ' B';
 }
 xmlEl.addEventListener('input', updateXmlMeta);
 
@@ -1047,13 +1576,23 @@ function buildAndShow() {
   try {
     const r = buildFigure(xmlEl.value);
     currentFig = r.fig;
-    render(r.fig);
-    renderTree(r.fig);
+    cachedScene = computeScene(currentFig);
+    selectedDrawIndex = null;
+    $('selIdx').textContent = '—';
+
+    view.fitted = false;
+    resizeCanvas();
+    drawCanvas();
+    renderTree(currentFig);
+    renderInspector(null);
+
     logMsg('ok', 'Built ' + r.added + ' node(s)' +
         (r.pfAdded ? ' · ' + r.pfAdded + ' polyfill(s)' : ''));
     logMsg('dim', 'v' + r.fig.version + ' · b' + r.fig.build +
-        ' · scale=' + r.fig.scale);
-    toast('Built ' + r.added + ' node' + (r.added === 1 ? '' : 's'));
+        ' · scale=' + r.fig.scale +
+        ' · ' + cachedScene.nodes.length + ' rendered nodes' +
+        ' · ' + cachedScene.polyfills.length + ' fills');
+    toast('Built ' + r.added + ' node(s)');
   } catch (e) {
     logMsg('err', e.message || String(e));
     document.querySelector('.tabs button[data-tab="log"]').click();
@@ -1085,7 +1624,7 @@ $('btnExport').addEventListener('click', () => {
     if (!currentFig) return;
     xmlEl.value = figureToXml(currentFig);
     updateXmlMeta();
-    logMsg('ok', 'XML written from figure (partial — polyfills not round-tripped)');
+    logMsg('ok', 'XML exported (polyfills not round-tripped)');
     toast('XML exported');
   } catch (e) { logMsg('err', e.message || String(e)); }
 });
@@ -1096,7 +1635,7 @@ $('btnCopy').addEventListener('click', async () => {
     toast('Copied to clipboard');
   } catch {
     xmlEl.focus(); xmlEl.select();
-    toast('Select-all — press Ctrl/Cmd+C');
+    toast('Select-all — Ctrl/Cmd+C');
   }
 });
 
@@ -1108,13 +1647,22 @@ fileInput.addEventListener('change', async () => {
   try {
     const buf = new Uint8Array(await file.arrayBuffer());
     const fig = mod.Stickfigure.fromBytes(buf);
+    try { fig.setNodeLimitEnabled(false); } catch {}
     currentFig = fig;
-    render(fig);
+    cachedScene = computeScene(fig);
+    selectedDrawIndex = null;
+    $('selIdx').textContent = '—';
+    view.fitted = false;
+    resizeCanvas();
+    drawCanvas();
     renderTree(fig);
+    renderInspector(null);
     xmlEl.value = figureToXml(fig);
     updateXmlMeta();
-    logMsg('ok', 'Loaded ' + file.name + ' · ' + buf.length.toLocaleString() +
-        ' bytes · v' + fig.version + ' b' + fig.build);
+    logMsg('ok', 'Loaded ' + file.name + ' · ' +
+      buf.length.toLocaleString() + ' bytes · v' + fig.version + ' b' + fig.build);
+    logMsg('dim', cachedScene.nodes.length + ' rendered nodes · ' +
+      cachedScene.polyfills.length + ' fills');
     toast('Loaded ' + file.name);
   } catch (e) {
     logMsg('err', 'load: ' + (e.message || String(e)));
@@ -1128,26 +1676,65 @@ $('btnJson').addEventListener('click', () => {
     if (!currentFig) return;
     const obj = currentFig.toJsObject();
     const text = JSON.stringify(obj, null, 2);
-    console.log('fig.toJsObject():', obj);
-    logMsg('hi', 'toJsObject dumped to console (' + text.length.toLocaleString() + ' chars)');
-    logMsg('dim', text.slice(0, 800) + (text.length > 800 ? '\n…' : ''));
+    logMsg('hi', 'toJsObject() — ' + text.length.toLocaleString() + ' chars');
+    logMsg('dim', text.slice(0, 1200) + (text.length > 1200 ? '\n… (truncated, full object available in DevTools console)' : ''));
+    try { console.log(obj); } catch {}
     document.querySelector('.tabs button[data-tab="log"]').click();
-    toast('JSON dumped to console');
+    toast('JSON in Log tab');
   } catch (e) { logMsg('err', 'json: ' + (e.message || String(e))); }
+});
+
+$('btnFills').addEventListener('click', () => {
+  showFills = !showFills;
+  $('btnFills').classList.toggle('on', showFills);
+  drawCanvas();
+  toast('Polyfills: ' + (showFills ? 'ON' : 'OFF'));
+});
+
+$('btnFat').addEventListener('click', () => {
+  fatStrokes = !fatStrokes;
+  $('btnFat').classList.toggle('on', fatStrokes);
+  drawCanvas();
+  toast('Fat strokes: ' + (fatStrokes ? 'ON' : 'OFF'));
+});
+
+$('btnGrid').addEventListener('click', () => {
+  showGrid = !showGrid;
+  $('btnGrid').classList.toggle('on', showGrid);
+  drawCanvas();
+  toast('Grid: ' + (showGrid ? 'ON' : 'OFF'));
 });
 
 $('btnFlip').addEventListener('click', () => {
   flipY = !flipY;
   $('btnFlip').classList.toggle('on', flipY);
-  if (currentFig) render(currentFig);
+  drawCanvas();
   toast('Flip Y: ' + (flipY ? 'ON' : 'OFF'));
 });
 
-$('btnFill').addEventListener('click', () => {
-  showFills = !showFills;
-  $('btnFill').classList.toggle('on', showFills);
-  if (currentFig) render(currentFig);
-  toast('Polyfill rendering: ' + (showFills ? 'ON' : 'OFF'));
+$('btnSelect').addEventListener('click', () => {
+  selectMode = !selectMode;
+  $('btnSelect').classList.toggle('on', selectMode);
+  toast('Click-to-select: ' + (selectMode ? 'ON' : 'OFF'));
+});
+
+$('btnZoomIn').addEventListener('click', () => {
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  zoomAt(W / 2, H / 2, 1.25);
+  drawCanvas();
+});
+$('btnZoomOut').addEventListener('click', () => {
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  zoomAt(W / 2, H / 2, 1 / 1.25);
+  drawCanvas();
+});
+$('btnZoomFit').addEventListener('click', () => {
+  if (cachedScene) fitView(cachedScene);
+  drawCanvas();
+});
+$('btnZoomReset').addEventListener('click', () => {
+  resetView();
+  drawCanvas();
 });
 
 $('preset').addEventListener('change', e => {
@@ -1169,22 +1756,27 @@ document.querySelectorAll('.tabs button').forEach(btn => {
   });
 });
 
-/* ════════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════════════
    Boot
-   ════════════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════════════════ */
 (async () => {
   try {
     await loadLibrary();
     xmlEl.value = PRESETS.standing;
     updateXmlMeta();
+    resizeCanvas();
     buildAndShow();
-    logMsg('hi', 'Ready. Load a real .nodes file to test polyfills and connectors.');
+    logMsg('hi', 'Ready. Load a real .nodes file — use pinch to zoom, drag to pan, tap to reset.');
+    setTimeout(() => hintPill.classList.add('hidden'), 6000);
   } catch (e) {
-    // already logged in loadLibrary
+    // logged in loadLibrary
   }
 })();
 
-window.addEventListener('resize', () => { if (currentFig) render(currentFig); });
+window.addEventListener('resize', () => { if (currentFig) { resizeCanvas(); } });
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => { if (currentFig) resizeCanvas(); }, 250);
+});
 </script>
 </body>
 </html>
