@@ -1,28 +1,47 @@
 <!doctype html>
 <html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<style>body{margin:0;background:#111}canvas{display:block;width:100vw;height:100vh}
-#log{position:fixed;bottom:0;left:0;right:0;background:#000a;color:#0f0;font:11px monospace;padding:6px;max-height:120px;overflow:auto}</style>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  html,body { margin:0; height:100%; background:#111; }
+  #c { display:block; width:100vw; height:100vh; }
+  #log { position:fixed; bottom:0; left:0; right:0; background:rgba(0,0,0,.7);
+         color:#0f0; font:11px ui-monospace,monospace; padding:6px;
+         max-height:110px; overflow:auto; white-space:pre-wrap; }
+</style>
 </head>
 <body>
 <canvas id="c"></canvas>
 <pre id="log"></pre>
 <script type="module">
 import { StickNodesRenderer } from './render.js';
-const log = m => document.getElementById('log').textContent = m + '\n' + document.getElementById('log').textContent;
+const logEl = document.getElementById('log');
+const log = m => { logEl.textContent = m + '\n' + logEl.textContent; };
 
-// Load WASM
+/* Load WASM */
 let mod;
 try {
   const t = await (await fetch('./sticknodes_rs.js')).text();
-  const u = URL.createObjectURL(new Blob([t], { type:'application/javascript' }));
+  const u = URL.createObjectURL(new Blob([t], { type: 'application/javascript' }));
   mod = await import(u);
   const bytes = await (await fetch('./sticknodes_rs_bg.wasm')).arrayBuffer();
   await mod.default(bytes);
   log('WASM OK');
-} catch(e) { log('wasm fail: ' + e.message); throw e; }
+} catch (e) { log('wasm fail: ' + e.message); throw e; }
 
-// Build a standing figure via XML
+/* Build figure from XML */
+function hexObj(h) {
+  h = h.replace('#', '');
+  if (h.length === 6) h += 'FF';
+  return {
+    red: parseInt(h.slice(0, 2), 16),
+    green: parseInt(h.slice(2, 4), 16),
+    blue: parseInt(h.slice(4, 6), 16),
+    alpha: parseInt(h.slice(6, 8), 16),
+  };
+}
+
 const xml = `<?xml version="1.0"?>
 <stickfigure version="425" build="100" scale="1.0" color="#202020FF">
   <node type="RoundedSegment" length="65" thickness="20" angle="270" color="#42489DFF" useSegmentColor="true">
@@ -36,36 +55,44 @@ const xml = `<?xml version="1.0"?>
 
 const doc = new DOMParser().parseFromString(xml, 'application/xml');
 const fig = new mod.Stickfigure();
-fig.setVersion(425); fig.build = 100; fig.scale = 1.0; fig.colorHex = '#202020FF';
+fig.setVersion(425);
+fig.build = 100;
+fig.scale = 1.0;
+fig.colorHex = '#202020FF';
 const root = fig.rootNode();
 const walk = (parent, el) => {
   for (const c of el.children) {
     if (c.tagName.toLowerCase() !== 'node') continue;
     const o = { nodeType: c.getAttribute('type') };
-    for (const a of ['length','thickness','angle']) if (c.hasAttribute(a))
-      o[a === 'angle' ? 'localAngle' : a] = parseFloat(c.getAttribute(a));
-    if (c.hasAttribute('color')) o.color = hexObj(c.getAttribute('color'));
-    if (c.hasAttribute('useSegmentColor')) o.useSegmentColor = c.getAttribute('useSegmentColor') === 'true';
+    if (c.hasAttribute('length'))    o.length = parseFloat(c.getAttribute('length'));
+    if (c.hasAttribute('thickness')) o.thickness = parseFloat(c.getAttribute('thickness'));
+    if (c.hasAttribute('angle'))     o.localAngle = parseFloat(c.getAttribute('angle'));
+    if (c.hasAttribute('color'))     o.color = hexObj(c.getAttribute('color'));
+    if (c.hasAttribute('useSegmentColor'))
+      o.useSegmentColor = c.getAttribute('useSegmentColor') === 'true';
     const child = parent.addChild(o);
     walk(child, c);
   }
 };
-function hexObj(h){h=h.replace('#','');if(h.length===6)h+='FF';return{
-  red:parseInt(h.slice(0,2),16),green:parseInt(h.slice(2,4),16),
-  blue:parseInt(h.slice(4,6),16),alpha:parseInt(h.slice(6,8),16)};}
 walk(root, doc.documentElement);
-log('figure built');
+log('figure built, root children: ' + root.children().length);
 
-// Render
+/* Render */
 const canvas = document.getElementById('c');
 const renderer = new StickNodesRenderer(canvas);
 renderer.setFigure(fig);
-renderer.fitToView();
-renderer.resize();
-const info = renderer.render();
-log('rendered ' + info.nodeCount + ' nodes, fit=' + info.fit.toFixed(3));
 
-window.addEventListener('resize', () => { renderer.resize(); renderer.render(); });
+/* Two-phase: resize first (so W/H are set), then fit, then render. */
+function draw() {
+  renderer.resize();
+  renderer.fitToView();
+  const info = renderer.render();
+  log('rendered ' + info.nodeCount + ' nodes, fit=' + info.fit.toFixed(4) +
+      ' canvas=' + renderer.camera.W + '×' + renderer.camera.H);
+}
+draw();
+
+window.addEventListener('resize', draw);
 </script>
 </body>
 </html>
