@@ -6,39 +6,23 @@
 <title>StickNodes Studio</title>
 <style>
   :root {
-    --bg: #f4f6fa;
-    --panel: #ffffff;
-    --border: #e3e6ec;
-    --border-strong: #cfd4dd;
-    --text: #1a1d24;
-    --muted: #6b7280;
-    --accent: #4f46e5;
-    --accent-hover: #4338ca;
-    --accent-soft: #eef2ff;
-    --ok: #059669;
-    --ok-soft: #ecfdf5;
-    --err: #dc2626;
-    --err-soft: #fef2f2;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --shadow-sm: 0 1px 2px rgba(20, 20, 40, .05);
-    --shadow: 0 1px 3px rgba(20, 20, 40, .08), 0 4px 12px rgba(20, 20, 40, .04);
-    --shadow-lg: 0 4px 12px rgba(20, 20, 40, .08), 0 12px 32px rgba(20, 20, 40, .06);
+    --bg: #f4f6fa; --panel: #ffffff; --border: #e3e6ec; --border-strong: #cfd4dd;
+    --text: #1a1d24; --muted: #6b7280;
+    --accent: #4f46e5; --accent-hover: #4338ca; --accent-soft: #eef2ff;
+    --ok: #059669; --ok-soft: #ecfdf5; --err: #dc2626; --err-soft: #fef2f2;
+    --radius: 10px; --radius-sm: 6px;
+    --shadow-sm: 0 1px 2px rgba(20,20,40,.05);
+    --shadow: 0 1px 3px rgba(20,20,40,.08), 0 4px 12px rgba(20,20,40,.04);
+    --shadow-lg: 0 4px 12px rgba(20,20,40,.08), 0 12px 32px rgba(20,20,40,.06);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; height: 100%; }
-  body {
-    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
+  body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+         "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: var(--text);
+         overflow: hidden; -webkit-font-smoothing: antialiased; }
   .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh;
          max-width: 1400px; margin: 0 auto; }
 
-  /* ─── Header ─── */
   header { display: flex; align-items: center; justify-content: space-between;
            gap: 12px; padding: 14px 20px; background: var(--panel);
            border-bottom: 1px solid var(--border); flex: 0 0 auto; }
@@ -47,43 +31,36 @@
   header .brand .dot { width: 10px; height: 10px; border-radius: 50%;
                        background: linear-gradient(135deg, #6366f1, #8b5cf6);
                        box-shadow: 0 0 0 3px var(--accent-soft); }
-  header .status { display: flex; align-items: center; gap: 6px;
-                   font-size: 12px; color: var(--muted);
-                   padding: 5px 10px; background: var(--bg);
+  header .status { display: flex; align-items: center; gap: 6px; font-size: 12px;
+                   color: var(--muted); padding: 5px 10px; background: var(--bg);
                    border-radius: 20px; border: 1px solid var(--border); }
   header .status .led { width: 7px; height: 7px; border-radius: 50%;
                         background: var(--muted); transition: background .2s; }
   header .status.ready .led { background: var(--ok); box-shadow: 0 0 6px rgba(5,150,105,.5); }
   header .status.error .led { background: var(--err); }
 
-  /* ─── Toolbar ─── */
-  .toolbar { display: flex; gap: 8px; padding: 12px 20px;
-             background: var(--panel); border-bottom: 1px solid var(--border);
-             flex: 0 0 auto; overflow-x: auto; scrollbar-width: none; }
+  .toolbar { display: flex; gap: 8px; padding: 12px 20px; background: var(--panel);
+             border-bottom: 1px solid var(--border); flex: 0 0 auto;
+             overflow-x: auto; scrollbar-width: none; }
   .toolbar::-webkit-scrollbar { display: none; }
-  .btn { display: inline-flex; align-items: center; gap: 6px;
-         padding: 9px 14px; font: inherit; font-weight: 500; font-size: 13px;
-         color: var(--text); background: var(--panel);
-         border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
-         cursor: pointer; white-space: nowrap; min-height: 38px;
-         transition: all .12s ease; box-shadow: var(--shadow-sm); }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px;
+         font: inherit; font-weight: 500; font-size: 13px; color: var(--text);
+         background: var(--panel); border: 1px solid var(--border-strong);
+         border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
+         min-height: 38px; transition: all .12s ease; box-shadow: var(--shadow-sm); }
   .btn:hover { background: #fafbfd; border-color: #b6bcc7; }
   .btn:active { transform: translateY(1px); box-shadow: none; }
-  .btn.primary { background: var(--accent); border-color: var(--accent);
-                 color: #fff;
-                 box-shadow: 0 1px 3px rgba(79, 70, 229, .3), 0 4px 12px rgba(79, 70, 229, .15); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff;
+                 box-shadow: 0 1px 3px rgba(79,70,229,.3), 0 4px 12px rgba(79,70,229,.15); }
   .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
   .btn svg { width: 14px; height: 14px; stroke-width: 2; fill: none; stroke: currentColor; }
-  .btn.toggle.on { background: var(--accent-soft); border-color: var(--accent);
-                   color: var(--accent); }
-  select.preset { font: inherit; font-size: 13px; font-weight: 500;
-                  padding: 9px 12px; background: var(--panel);
-                  border: 1px solid var(--border-strong);
-                  border-radius: var(--radius-sm); cursor: pointer;
-                  min-height: 38px; color: var(--text); box-shadow: var(--shadow-sm); }
+  .btn.toggle.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  select.preset { font: inherit; font-size: 13px; font-weight: 500; padding: 9px 12px;
+                  background: var(--panel); border: 1px solid var(--border-strong);
+                  border-radius: var(--radius-sm); cursor: pointer; min-height: 38px;
+                  color: var(--text); box-shadow: var(--shadow-sm); }
   .spacer { flex: 1; }
 
-  /* ─── Content ─── */
   .content { flex: 1 1 auto; display: grid; grid-template-columns: 1fr 1fr;
              gap: 12px; padding: 12px 20px 20px; min-height: 0; }
   @media (max-width: 900px) {
@@ -102,26 +79,22 @@
                   text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
   .card-head .meta { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-  /* ─── Preview ─── */
   .preview-wrap { position: relative; flex: 1 1 auto; min-height: 0;
                   display: flex; align-items: center; justify-content: center;
-                  padding: 12px; overflow: hidden;
-                  background: #fbfcfe; }
+                  padding: 12px; overflow: hidden; background: #fbfcfe; }
   canvas { display: block; max-width: 100%; max-height: 100%;
            border-radius: var(--radius-sm); background: #ffffff;
            box-shadow: inset 0 0 0 1px var(--border); }
 
-  /* ─── XML editor ─── */
   textarea { flex: 1 1 auto; width: 100%; min-height: 0; border: 0; outline: 0;
              resize: none; padding: 14px 16px;
              font: 12.5px/1.65 "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
              color: var(--text); background: var(--panel); tab-size: 2; }
   textarea::selection { background: var(--accent-soft); }
 
-  /* ─── Bottom tabs ─── */
   .bottom { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
-  .tabs { display: flex; gap: 2px; padding: 6px 8px 0;
-          background: #fbfcfe; border-bottom: 1px solid var(--border); flex: 0 0 auto; }
+  .tabs { display: flex; gap: 2px; padding: 6px 8px 0; background: #fbfcfe;
+          border-bottom: 1px solid var(--border); flex: 0 0 auto; }
   .tabs button { padding: 9px 14px; font: inherit; font-size: 12px; font-weight: 600;
                  letter-spacing: 0.02em; color: var(--muted); background: transparent;
                  border: 0; border-bottom: 2px solid transparent; cursor: pointer;
@@ -133,7 +106,6 @@
                  background: var(--panel); }
   .tab-content.active { display: block; }
 
-  /* ─── Log ─── */
   #log { padding: 12px 16px; margin: 0;
          font: 11.5px/1.6 "SF Mono", ui-monospace, Consolas, monospace;
          white-space: pre-wrap; word-break: break-word; color: var(--text); }
@@ -150,7 +122,6 @@
   #log .dim .badge { background: #f3f4f6; color: var(--muted); }
   #log .line .msg  { flex: 1; min-width: 0; }
 
-  /* ─── Tree ─── */
   #tree { padding: 10px 14px; font: 12px/1.7 "SF Mono", ui-monospace, Consolas, monospace; }
   #tree .row { display: grid; grid-template-columns: auto 44px 140px 1fr;
                gap: 10px; padding: 3px 0; white-space: nowrap; border-radius: 4px; }
@@ -160,7 +131,6 @@
   #tree .type { color: #b45309; font-weight: 500; }
   #tree .props { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
 
-  /* ─── Toast ─── */
   #toast { position: fixed; left: 50%; bottom: 24px;
            transform: translateX(-50%) translateY(80px);
            background: #1a1d24; color: #fff; padding: 10px 18px;
@@ -179,7 +149,6 @@
 </head>
 <body>
 <div class="app">
-
   <header>
     <div class="brand"><span class="dot"></span>StickNodes Studio</div>
     <div class="status" id="status">
@@ -211,6 +180,10 @@
     <button class="btn toggle" id="btnFlip" title="Flip Y axis in preview">
       <svg viewBox="0 0 24 24"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
       <span class="label">Flip Y</span>
+    </button>
+    <button class="btn toggle on" id="btnFit" title="Robust fit (trim outliers)">
+      <svg viewBox="0 0 24 24"><path d="M4 4h4M4 4v4M20 4h-4M20 4v4M4 20h4M4 20v-4M20 20h-4M20 20v-4"/></svg>
+      <span class="label">Trim</span>
     </button>
 
     <div class="spacer"></div>
@@ -262,13 +235,13 @@
 <div id="toast"></div>
 
 <script type="module">
-/* ══════════════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
 const xmlEl = $('xml'), logEl = $('log'), treeEl = $('tree'), canvas = $('preview');
 const fileInput = $('fileInput'), statusEl = $('status'), statusTextEl = $('statusText');
 const xmlMeta = $('xmlMeta'), previewMeta = $('previewMeta'), toastEl = $('toast');
 
-let flipY = false;   // if true, mirror vertical for preview
+let flipY = false;   // when true, mirror vertical
+let trimFit = true;  // when true, trim outliers from bbox
 
 let toastTimer = null;
 function toast(msg) {
@@ -282,27 +255,18 @@ function setStatus(state, text) {
   statusTextEl.textContent = text;
 }
 function logMsg(kind, msg) {
-  const kindClass = { ok: 'ok', err: 'err', hi: 'hi', dim: 'dim' }[kind] || 'dim';
-  const badgeText = { ok: 'OK', err: 'FAIL', hi: 'INFO', dim: '···' }[kind] || '···';
+  const kc = { ok:'ok', err:'err', hi:'hi', dim:'dim' }[kind] || 'dim';
+  const bt = { ok:'OK', err:'FAIL', hi:'INFO', dim:'···' }[kind] || '···';
   const line = document.createElement('div');
-  line.className = 'line ' + kindClass;
-  const badge = document.createElement('span');
-  badge.className = 'badge';
-  badge.textContent = badgeText;
-  const text = document.createElement('span');
-  text.className = 'msg';
-  text.textContent = msg;
-  line.appendChild(badge);
-  line.appendChild(text);
-  logEl.appendChild(line);
-  logEl.scrollTop = logEl.scrollHeight;
+  line.className = 'line ' + kc;
+  const b = document.createElement('span'); b.className = 'badge'; b.textContent = bt;
+  const t = document.createElement('span'); t.className = 'msg'; t.textContent = msg;
+  line.appendChild(b); line.appendChild(t);
+  logEl.appendChild(line); logEl.scrollTop = logEl.scrollHeight;
   try { console.log('[studio]', kind, msg); } catch (_) {}
 }
 function clearLog() { logEl.textContent = ''; }
 
-/* ══════════════════════════════════════════════════════════════════
-   Load module + WASM (MIME-bypass trick for Android file servers)
-   ══════════════════════════════════════════════════════════════════ */
 let mod = null;
 
 async function loadLibrary() {
@@ -353,7 +317,6 @@ async function loadLibrary() {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════ */
 const NODE_TYPE_NAME = {
   [-1]:'RootNode', 0:'RoundedSegment', 1:'Segment', 2:'Circle',
   3:'Triangle', 4:'FilledCircle', 5:'Ellipse', 6:'Trapezoid', 7:'Polygon'
@@ -498,17 +461,19 @@ function buildFigure(xmlText) {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   World walk — matches Rust writer: +Y is down (canvas default)
+   World walk. Applies figure.scale to each offset — matches how
+   StickNodes' renderer scales the whole figure.
    ══════════════════════════════════════════════════════════════════ */
 function walkWorld(fig) {
   const out = [];
+  const figScale = fig.scale || 1;
   const visit = (node, sx, sy, parentAngle) => {
     const ga = parentAngle + (node.localAngle || 0);
     const rad = ga * Math.PI / 180;
     const len = node.length || 0;
     const sf = node.useSegmentScale ? (node.scale || 1) : 1;
-    const ex = sx + len * Math.cos(rad) * sf;
-    const ey = sy + len * Math.sin(rad) * sf;
+    const ex = sx + len * Math.cos(rad) * sf * figScale;
+    const ey = sy + len * Math.sin(rad) * sf * figScale;
     out.push({ node, sx, sy, ex, ey, angle: ga });
     for (const k of node.children()) visit(k, ex, ey, ga);
   };
@@ -517,82 +482,96 @@ function walkWorld(fig) {
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   Canvas renderer
+   Robust bbox: collects all node endpoints, trims extreme 2% when
+   trimFit is on, then pads by half thickness (not length!).
    ══════════════════════════════════════════════════════════════════ */
+function computeBBox(items) {
+  if (items.length === 0) return { minX:-60, minY:-60, maxX:60, maxY:60 };
+  const pts = [];
+  let maxPad = 0;
+  for (const it of items) {
+    const th = Math.abs(it.node.thickness || 0);
+    const pad = th / 2;
+    if (pad > maxPad) maxPad = pad;
+    pts.push([it.sx, it.sy, pad]);
+    pts.push([it.ex, it.ey, pad]);
+  }
+  let minX, minY, maxX, maxY;
+  if (trimFit && pts.length >= 20) {
+    const xs = pts.map(p => p[0]).sort((a,b) => a-b);
+    const ys = pts.map(p => p[1]).sort((a,b) => a-b);
+    const trimFrac = 0.02;
+    const loX = Math.floor(xs.length * trimFrac);
+    const hiX = Math.ceil(xs.length * (1 - trimFrac)) - 1;
+    const loY = Math.floor(ys.length * trimFrac);
+    const hiY = Math.ceil(ys.length * (1 - trimFrac)) - 1;
+    minX = xs[loX]; maxX = xs[hiX];
+    minY = ys[loY]; maxY = ys[hiY];
+  } else {
+    minX = Infinity; minY = Infinity; maxX = -Infinity; maxY = -Infinity;
+    for (const p of pts) {
+      if (p[0] < minX) minX = p[0];
+      if (p[1] < minY) minY = p[1];
+      if (p[0] > maxX) maxX = p[0];
+      if (p[1] > maxY) maxY = p[1];
+    }
+  }
+  const pad = Math.max(maxPad, 6) + 6;
+  return { minX: minX - pad, minY: minY - pad, maxX: maxX + pad, maxY: maxY + pad };
+}
+
 function render(fig) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
 
   const items = walkWorld(fig);
+  const bb = computeBBox(items);
+  const spanX = Math.max(bb.maxX - bb.minX, 40);
+  const spanY = Math.max(bb.maxY - bb.minY, 40);
+  const fit = Math.min((W - 40) / spanX, (H - 40) / spanY);
+  const cx = (bb.minX + bb.maxX) / 2, cy = (bb.minY + bb.maxY) / 2;
 
-  // bbox
-  let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
-  for (const it of items) {
-    const th = Math.abs(it.node.thickness || 0);
-    const ln = Math.abs(it.node.length || 0);
-    const pad = Math.max(th, ln) / 2 + 20;
-    const pts = [[it.sx,it.sy],[it.ex,it.ey]];
-    for (const p of pts) {
-      if (p[0]-pad < minX) minX = p[0]-pad;
-      if (p[1]-pad < minY) minY = p[1]-pad;
-      if (p[0]+pad > maxX) maxX = p[0]+pad;
-      if (p[1]+pad > maxY) maxY = p[1]+pad;
-    }
-  }
-  if (!isFinite(minX)) { minX=minY=-60; maxX=maxY=60; }
-  const spanX = Math.max(maxX - minX, 60);
-  const spanY = Math.max(maxY - minY, 60);
-  const fit = Math.min((W - 60) / spanX, (H - 60) / spanY);
-  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
-
-  // Background (light grid)
+  // Light grid
   ctx.save();
   ctx.translate(W/2, H/2);
   ctx.scale(fit, flipY ? -fit : fit);
   ctx.translate(-cx, -cy);
 
-  // Very light grid lines every 50 world units
-  ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+  ctx.strokeStyle = 'rgba(0,0,0,0.045)';
   ctx.lineWidth = 1 / fit;
-  const gx0 = Math.floor(minX / 50) * 50, gx1 = Math.ceil(maxX / 50) * 50;
-  const gy0 = Math.floor(minY / 50) * 50, gy1 = Math.ceil(maxY / 50) * 50;
-  for (let gx = gx0; gx <= gx1; gx += 50) {
+  const step = 50;
+  const gx0 = Math.floor(bb.minX / step) * step, gx1 = Math.ceil(bb.maxX / step) * step;
+  const gy0 = Math.floor(bb.minY / step) * step, gy1 = Math.ceil(bb.maxY / step) * step;
+  for (let gx = gx0; gx <= gx1; gx += step) {
     ctx.beginPath(); ctx.moveTo(gx, gy0); ctx.lineTo(gx, gy1); ctx.stroke();
   }
-  for (let gy = gy0; gy <= gy1; gy += 50) {
+  for (let gy = gy0; gy <= gy1; gy += step) {
     ctx.beginPath(); ctx.moveTo(gx0, gy); ctx.lineTo(gx1, gy); ctx.stroke();
   }
 
-  // Axes
-  ctx.strokeStyle = 'rgba(79,70,229,0.15)';
+  // Origin cross
+  ctx.strokeStyle = 'rgba(79,70,229,0.14)';
   ctx.lineWidth = 1.4 / fit;
   ctx.beginPath();
-  ctx.moveTo(gx0, 0); ctx.lineTo(gx1, 0);   // X axis
-  ctx.moveTo(0, gy0); ctx.lineTo(0, gy1);   // Y axis
+  ctx.moveTo(gx0, 0); ctx.lineTo(gx1, 0);
+  ctx.moveTo(0, gy0); ctx.lineTo(0, gy1);
   ctx.stroke();
 
-  // Origin marker
-  const osz = 8 / fit;
-  ctx.fillStyle = 'rgba(79,70,229,0.9)';
-  ctx.beginPath();
-  ctx.arc(0, 0, osz * 0.5, 0, Math.PI * 2);
-  ctx.fill();
+  const osz = 6 / fit;
+  ctx.fillStyle = 'rgba(79,70,229,0.85)';
+  ctx.beginPath(); ctx.arc(0, 0, osz, 0, Math.PI * 2); ctx.fill();
   ctx.strokeStyle = 'rgba(79,70,229,0.3)';
   ctx.lineWidth = 1.2 / fit;
-  ctx.beginPath();
-  ctx.arc(0, 0, osz * 1.2, 0, Math.PI * 2);
-  ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, osz * 2.2, 0, Math.PI * 2); ctx.stroke();
 
   // Figure
   let figCol;
-  try { figCol = cssFromHex(fig.colorHex); }
-  catch { figCol = 'rgba(32,32,32,1)'; }
+  try { figCol = cssFromHex(fig.colorHex); } catch { figCol = 'rgba(32,32,32,1)'; }
 
   for (const it of items) {
     const n = it.node;
-    if (n.nodeType === -1) continue;   // skip root visual
-
+    if (n.nodeType === -1) continue;
     let col = figCol;
     if (n.useSegmentColor) {
       try { col = cssFromHex(n.colorHex); } catch {}
@@ -600,14 +579,15 @@ function render(fig) {
     ctx.strokeStyle = col;
     ctx.fillStyle = col;
     ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
 
-    const th = Math.max(0.5, Math.abs(n.thickness || 1));
-    const ln = Math.max(0.5, Math.abs(n.length || 0));
+    const th = Math.max(0.3, Math.abs(n.thickness || 1));
+    const ln = Math.max(0.3, Math.abs(n.length || 0));
     const angle = Math.atan2(it.ey - it.sy, it.ex - it.sx);
 
     switch (n.nodeType) {
-      case 1:   // Segment
-      case 0:   // RoundedSegment
+      case 1:
+      case 0:
         ctx.lineWidth = th;
         ctx.lineCap = n.nodeType === 0 ? 'round' : 'butt';
         ctx.beginPath();
@@ -615,32 +595,26 @@ function render(fig) {
         ctx.lineTo(it.ex, it.ey);
         ctx.stroke();
         break;
-
-      case 2:   // Circle (hollow/outline)
-      case 4: { // FilledCircle
-        // Circle diameter comes from the larger of length/thickness so
-        // that presets using length=thickness render cleanly, and files
-        // using either value also render sensibly.
+      case 2:
+      case 4: {
         const d = Math.max(ln, th);
         const r = d / 2;
         ctx.beginPath();
         ctx.arc(it.ex, it.ey, r, 0, Math.PI * 2);
         if (n.nodeType === 4) ctx.fill();
-        else { ctx.lineWidth = Math.max(0.5, th); ctx.stroke(); }
+        else { ctx.lineWidth = Math.max(0.4, th); ctx.stroke(); }
         break;
       }
-
-      case 5:   // Ellipse
+      case 5:
         ctx.save();
         ctx.translate(it.ex, it.ey);
         ctx.rotate(angle);
         ctx.beginPath();
-        ctx.ellipse(0, 0, ln / 2, Math.max(0.5, th / 2), 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, ln / 2, Math.max(0.3, th / 2), 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
         break;
-
-      case 3: { // Triangle
+      case 3: {
         const r = ln;
         const base = angle + Math.PI;
         const side = 2 * Math.PI / 3;
@@ -654,8 +628,7 @@ function render(fig) {
         ctx.fill();
         break;
       }
-
-      case 6: { // Trapezoid
+      case 6: {
         const w1 = Math.abs(n.trapezoidThicknessStart ?? th) || th;
         const w2 = Math.abs(n.trapezoidThicknessEnd   ?? th * 0.5) || th * 0.5;
         const nx = -Math.sin(angle), ny = Math.cos(angle);
@@ -668,8 +641,7 @@ function render(fig) {
         ctx.fill();
         break;
       }
-
-      case 7: { // Polygon
+      case 7: {
         const sides = Math.max(3, n.numPolygonVertices || 5);
         const r = ln;
         ctx.beginPath();
@@ -687,8 +659,10 @@ function render(fig) {
   }
   ctx.restore();
 
-  previewMeta.textContent = '×' + fit.toFixed(2) + '  ·  ' + items.length + ' nodes' +
-                            (flipY ? '  ·  flipped' : '');
+  previewMeta.textContent =
+    '×' + fit.toFixed(2) + '  ·  ' + items.length + ' nodes' +
+    (flipY ? '  ·  flipped' : '') +
+    (trimFit ? '  ·  trim' : '');
 }
 
 function renderTree(fig) {
@@ -698,7 +672,7 @@ function renderTree(fig) {
     row.className = 'row';
     const branch = document.createElement('span');
     branch.className = 'branch';
-    branch.textContent = '│ '.repeat(depth);
+    branch.textContent = '│ '.repeat(Math.min(depth, 20));
     const idx = document.createElement('span');
     idx.className = 'idx';
     idx.textContent = '[' + node.drawIndex + ']';
@@ -713,10 +687,8 @@ function renderTree(fig) {
     if (node.localAngle) s += '∠'    + node.localAngle.toFixed(1) + '° ';
     if (node.useSegmentColor) { try { s += node.colorHex; } catch {} }
     props.textContent = s.trim();
-    row.appendChild(branch);
-    row.appendChild(idx);
-    row.appendChild(type);
-    row.appendChild(props);
+    row.appendChild(branch); row.appendChild(idx);
+    row.appendChild(type); row.appendChild(props);
     treeEl.appendChild(row);
     for (const k of node.children()) visit(k, depth + 1);
   };
@@ -755,12 +727,8 @@ function figureToXml(fig) {
   return out.join('\n');
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   Presets — CORRECTED. angle=270 means "up" (canvas Y+ is down).
-   ══════════════════════════════════════════════════════════════════ */
 const BODY = '#42489DFF';
 const SKIN = '#FFCC99FF';
-
 const PRESETS = {
   empty: [
     '<?xml version="1.0"?>',
@@ -768,30 +736,22 @@ const PRESETS = {
     '  <!-- Add <node> elements here -->',
     '</stickfigure>'
   ].join('\n'),
-
   standing: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <!-- Torso goes UP: angle 270 (since +Y is down) -->',
     '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
-    '    <!-- Head on top of torso -->',
     '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
-    '    <!-- Right arm hanging down-right from shoulder -->',
     '    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="' + BODY + '" useSegmentColor="true"/>',
-    '    <!-- Left arm hanging down-left from shoulder -->',
     '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <!-- Right leg from root, going down-right -->',
     '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <!-- Left leg from root, going down-left -->',
     '  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
     '</stickfigure>'
   ].join('\n'),
-
   tpose: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
@@ -808,33 +768,26 @@ const PRESETS = {
     '  </node>',
     '</stickfigure>'
   ].join('\n'),
-
   running: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-    '  <!-- Torso leaning forward (top tilted right) -->',
     '  <node type="RoundedSegment" length="65" thickness="20" angle="280" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
-    '    <!-- Forward arm bent up -->',
     '    <node type="RoundedSegment" length="40" thickness="12" angle="130" color="' + BODY + '" useSegmentColor="true">',
     '      <node type="RoundedSegment" length="35" thickness="11" angle="-50" color="' + BODY + '" useSegmentColor="true"/>',
     '    </node>',
-    '    <!-- Back arm bent back -->',
     '    <node type="RoundedSegment" length="40" thickness="12" angle="210" color="' + BODY + '" useSegmentColor="true">',
     '      <node type="RoundedSegment" length="35" thickness="11" angle="50" color="' + BODY + '" useSegmentColor="true"/>',
     '    </node>',
     '  </node>',
-    '  <!-- Front leg forward, knee bent -->',
     '  <node type="RoundedSegment" length="55" thickness="16" angle="50" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="50" thickness="14" angle="40" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <!-- Back leg pushing off -->',
     '  <node type="RoundedSegment" length="55" thickness="16" angle="110" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="30" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
     '</stickfigure>'
   ].join('\n'),
-
   sitting: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
@@ -843,7 +796,6 @@ const PRESETS = {
     '    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="' + BODY + '" useSegmentColor="true"/>',
     '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
-    '  <!-- Thighs horizontal -->',
     '  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
@@ -852,17 +804,14 @@ const PRESETS = {
     '  </node>',
     '</stickfigure>'
   ].join('\n'),
-
   waving: [
     '<?xml version="1.0"?>',
     '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
     '  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="' + BODY + '" useSegmentColor="true">',
     '    <node type="FilledCircle" length="20" thickness="40" angle="0" color="' + SKIN + '" useSegmentColor="true"/>',
-    '    <!-- Right arm up, waving -->',
     '    <node type="RoundedSegment" length="45" thickness="12" angle="70" color="' + BODY + '" useSegmentColor="true">',
     '      <node type="RoundedSegment" length="40" thickness="11" angle="-40" color="' + BODY + '" useSegmentColor="true"/>',
     '    </node>',
-    '    <!-- Left arm hanging -->',
     '    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="' + BODY + '" useSegmentColor="true"/>',
     '  </node>',
     '  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="' + BODY + '" useSegmentColor="true">',
@@ -875,9 +824,6 @@ const PRESETS = {
   ].join('\n'),
 };
 
-/* ══════════════════════════════════════════════════════════════════
-   UI
-   ══════════════════════════════════════════════════════════════════ */
 let currentFig = null;
 
 function updateXmlMeta() {
@@ -982,6 +928,13 @@ $('btnFlip').addEventListener('click', () => {
   toast('Preview Y-flip: ' + (flipY ? 'ON' : 'OFF'));
 });
 
+$('btnFit').addEventListener('click', () => {
+  trimFit = !trimFit;
+  $('btnFit').classList.toggle('on', trimFit);
+  if (currentFig) render(currentFig);
+  toast('Trim outliers: ' + (trimFit ? 'ON' : 'OFF'));
+});
+
 $('preset').addEventListener('change', e => {
   const key = e.target.value;
   if (!key) return;
@@ -1001,16 +954,13 @@ document.querySelectorAll('.tabs button').forEach(btn => {
   });
 });
 
-/* ══════════════════════════════════════════════════════════════════
-   Boot
-   ══════════════════════════════════════════════════════════════════ */
 (async () => {
   try {
     await loadLibrary();
     xmlEl.value = PRESETS.standing;
     updateXmlMeta();
     buildAndShow();
-  } catch (e) { /* logged already */ }
+  } catch (e) {}
 })();
 
 window.addEventListener('resize', () => { if (currentFig) render(currentFig); });
