@@ -270,20 +270,20 @@ function extractScene(fig, showFills) {
     let start, end;
     try { start = n.getGlobalStart(); end = n.getGlobalEnd(); } catch (_) { continue; }
     let hollow = false, trapStart = 0, trapEnd = 0, numPoly = 5, curveRadius = 0;
+    let stretchy = false;
     try { hollow = n.circleIsHollow; } catch (_) {}
     try { trapStart = n.getTrapezoidThicknessStart(); } catch (_) {}
     try { trapEnd = n.getTrapezoidThicknessEnd(); } catch (_) {}
     try { numPoly = n.numPolygonVertices; } catch (_) {}
     try { curveRadius = n.segmentCurveRadiusAndDefaultCurveRadius; } catch (_) {}
+    try { stretchy = !!n.isStretchy; } catch (_) {}
     scene.push({
       node: n, type: n.nodeType, drawIndex: n.drawIndex,
       sx: start[0] * figScale, sy: start[1] * figScale,
       ex: end[0] * figScale,   ey: end[1] * figScale,
       thickness: Math.abs(n.getEffectiveThickness() || 1) * figScale,
       color: hexToRgba(n.getDisplayColorHex()),
-      hollow, trapStart, trapEnd, numPoly, curveRadius,
-      useSegmentScale: (() => { try { return n.useSegmentScale; } catch (_) { return false; } })(),
-      segScale: (() => { try { return n.scale || 1; } catch (_) { return 1; } })(),
+      hollow, trapStart, trapEnd, numPoly, curveRadius, stretchy,
     });
   }
 
@@ -316,6 +316,8 @@ export class StickNodesRenderer {
     this.ctx = canvas.getContext('2d');
     this.fig = null;
     this.showFills = true;
+    this.showPoints = true;
+    this.flipY = false;
     this.dragEnabled = true;
     this.view = { cx: 0, cy: 0, zoom: 0, fitted: false };
     this.sceneCache = null;
@@ -324,9 +326,9 @@ export class StickNodesRenderer {
     this._onSelect = null;
 
     this.pointers = new Map();
-    this.activeDrag = null;   // { node, pivot:[x,y], parentAngle }
-    this.activePan = null;    // { lastX, lastY }
-    this.pinch = null;        // { startDist, startZoom, worldPt }
+    this.activeDrag = null;
+    this.activePan = null;
+    this.pinch = null;
     this.lastTap = 0;
     this.selectedIndex = null;
 
@@ -350,6 +352,8 @@ export class StickNodesRenderer {
     this.selectedIndex = null;
   }
   setFills(v) { this.showFills = v; this.sceneCache = null; }
+  setShowPoints(v) { this.showPoints = !!v; }
+  setFlipY(v) { this.flipY = !!v; }
   setDragEnabled(v) { this.dragEnabled = v; }
   onNodeChanged(fn) { this._onNodeChanged = fn; }
   onSelect(fn) { this._onSelect = fn; }
@@ -431,7 +435,8 @@ export class StickNodesRenderer {
 
     ctx.save();
     ctx.translate(W / 2, H / 2);
-    ctx.scale(zoom, zoom);
+    if (this.flipY) ctx.scale(zoom, -zoom);
+    else            ctx.scale(zoom, zoom);
     ctx.translate(-cx, -cy);
 
     for (const n of scene) drawNode(ctx, n);
@@ -443,6 +448,34 @@ export class StickNodesRenderer {
       aPolyfill(ctx, pf.verts, c);
     }
 
+    /* ── Node points overlay ── */
+    if (this.showPoints) {
+      const rPx = 7;                 // screen radius in device pixels
+      const rW = rPx / zoom;         // world radius (constant screen size)
+      const ringW = 1.6 / zoom;      // ring width in world units
+      const selIdx = this.selectedIndex;
+      for (const s of scene) {
+        // White ring
+        ctx.beginPath();
+        ctx.arc(s.ex, s.ey, rW, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.fill();
+        // Colored center (node color, or accent if selected)
+        ctx.beginPath();
+        ctx.arc(s.ex, s.ey, Math.max(0.5, rW - ringW), 0, Math.PI * 2);
+        ctx.fillStyle = (s.drawIndex === selIdx) ? '#4f46e5' : css(s.color);
+        ctx.fill();
+        // Selected: extra outer ring
+        if (s.drawIndex === selIdx) {
+          ctx.beginPath();
+          ctx.arc(s.ex, s.ey, rW + 2.5 / zoom, 0, Math.PI * 2);
+          ctx.strokeStyle = '#4f46e5';
+          ctx.lineWidth = 2 / zoom;
+          ctx.stroke();
+        }
+      }
+    }
+
     ctx.restore();
 
     return { zoom, nodeCount: scene.length, fillCount: polyfills.length };
@@ -451,9 +484,10 @@ export class StickNodesRenderer {
   /* ───── screen ↔ world ───── */
   _screenToWorld(px, py) {
     const W = this.canvas.width, H = this.canvas.height;
+    const flip = this.flipY ? -1 : 1;
     return {
       x: (px - W / 2) / this.view.zoom + this.view.cx,
-      y: (py - H / 2) / this.view.zoom + this.view.cy,
+      y: ((py - H / 2) / this.view.zoom + this.view.cy) * flip,
     };
   }
   _eventPos(ev) {
@@ -472,7 +506,6 @@ export class StickNodesRenderer {
     this.canvas.setPointerCapture(ev.pointerId);
 
     if (this.pointers.size === 1) {
-      // Try to hit a node tip for drag
       const hit = this._hitNode(p.x, p.y);
       if (this.dragEnabled && hit) {
         const figScale = this.fig.scale || 1;
@@ -484,16 +517,18 @@ export class StickNodesRenderer {
             parentAngle = this.fig.getNode(pi).getGlobalAngle();
           }
         } catch (_) {}
+        let stretchy = true;
+        try { stretchy = !!hit.isStretchy; } catch (_) {}
         this.activeDrag = {
           node: hit,
           pivot: [start[0] * figScale, start[1] * figScale],
           parentAngle,
           figScale,
+          stretchy,
         };
       } else {
-        // Check double-tap → fit
         const now = Date.now();
-        if (now - this.lastTap < 320 && !this.pointers.has(-1)) {
+        if (now - this.lastTap < 320) {
           this.lastTap = 0;
           this.fitView();
           this.render();
@@ -505,7 +540,6 @@ export class StickNodesRenderer {
       }
       ev.preventDefault();
     } else if (this.pointers.size === 2) {
-      // Start pinch
       const pts = Array.from(this.pointers.values());
       const dx = pts[0].x - pts[1].x, dy = pts[0].y - pts[1].y;
       this.pinch = {
@@ -532,7 +566,6 @@ export class StickNodesRenderer {
       const midY = (pts[0].y + pts[1].y) / 2;
       const factor = dist / this.pinch.startDist;
       const newZoom = Math.max(0.001, Math.min(1000, this.pinch.startZoom * factor));
-      // Keep the world point under the pinch center fixed
       const W = this.canvas.width, H = this.canvas.height;
       const worldX = (midX - W / 2) / this.pinch.startZoom + this.pinch.startCx;
       const worldY = (midY - H / 2) / this.pinch.startZoom + this.pinch.startCy;
@@ -555,7 +588,9 @@ export class StickNodesRenderer {
       const segScale = node.useSegmentScale ? (node.scale || 1) : 1;
       try {
         node.localAngle = globalAngleDeg - this.activeDrag.parentAngle;
-        node.length = len / figScale / segScale;
+        if (this.activeDrag.stretchy) {
+          node.length = len / figScale / segScale;
+        }
       } catch (_) { return; }
       this.sceneCache = null;
       this.render();
@@ -566,8 +601,9 @@ export class StickNodesRenderer {
     if (this.activePan) {
       const dx = p.x - this.activePan.lastX;
       const dy = p.y - this.activePan.lastY;
+      const flip = this.flipY ? -1 : 1;
       this.view.cx -= dx / this.view.zoom;
-      this.view.cy -= dy / this.view.zoom;
+      this.view.cy -= (dy / this.view.zoom) * flip;
       this.activePan.lastX = p.x;
       this.activePan.lastY = p.y;
       this.render();
@@ -579,7 +615,6 @@ export class StickNodesRenderer {
     this.pointers.delete(ev.pointerId);
     try { this.canvas.releasePointerCapture(ev.pointerId); } catch (_) {}
 
-    // Was this a clean tap (no drag / no pan) on a node?
     if (had && !this.activeDrag && !this.activePan && this.pointers.size === 0) {
       const p = this._eventPos(ev);
       const hit = this._hitNode(p.x, p.y);
@@ -609,7 +644,6 @@ export class StickNodesRenderer {
   _hitNode(px, py) {
     if (!this.fig) return null;
     const world = this._screenToWorld(px, py);
-    const figScale = this.fig.scale || 1;
     const { scene } = this._getScene();
     let best = null, bestDist = Infinity;
     for (const s of scene) {
