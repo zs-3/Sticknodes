@@ -45,6 +45,16 @@ export class Color {
         return Color.__wrap(ret[0]);
     }
     /**
+     * @param {number} red
+     * @param {number} green
+     * @param {number} blue
+     * @returns {Color}
+     */
+    static fromRgb(red, green, blue) {
+        const ret = wasm.color_fromRgb(red, green, blue);
+        return Color.__wrap(ret);
+    }
+    /**
      * @returns {number}
      */
     get green() {
@@ -117,6 +127,45 @@ export class Node {
         return Node.__wrap(ret[0]);
     }
     /**
+     * @param {any} options
+     * @returns {Node}
+     */
+    addSibling(options) {
+        const ret = wasm.node_addSibling(this.__wbg_ptr, options);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return Node.__wrap(ret[0]);
+    }
+    /**
+     * @returns {boolean}
+     */
+    get angleLockIsMainNode() {
+        const ret = wasm.node_angleLockIsMainNode(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get angleLockMode() {
+        const ret = wasm.node_angleLockMode(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get angleLockOffset() {
+        const ret = wasm.node_angleLockOffset(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get angleLockRelativeMultiplier() {
+        const ret = wasm.node_angleLockRelativeMultiplier(this.__wbg_ptr);
+        return ret;
+    }
+    /**
      * @returns {Node[]}
      */
     children() {
@@ -124,6 +173,28 @@ export class Node {
         var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]);
         wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
         return v1;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get circleIsHollow() {
+        const ret = wasm.node_circleIsHollow(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {string}
+     */
+    get circleOutlineColorHex() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.node_circleOutlineColorHex(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
     }
     /**
      * @returns {string}
@@ -141,11 +212,326 @@ export class Node {
         }
     }
     /**
+     * @returns {boolean}
+     */
+    get curveCirculization() {
+        const ret = wasm.node_curveCirculization(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get defaultAngle() {
+        const ret = wasm.node_defaultAngle(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get defaultLength() {
+        const ret = wasm.node_defaultLength(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get defaultLocalAngle() {
+        const ret = wasm.node_defaultLocalAngle(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get defaultThickness() {
+        const ret = wasm.node_defaultThickness(this.__wbg_ptr);
+        return ret;
+    }
+    delete() {
+        const ret = wasm.node_delete(this.__wbg_ptr);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @returns {boolean}
+     */
+    get doNotApplySmartStretch() {
+        const ret = wasm.node_doNotApplySmartStretch(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get dragLockAngle() {
+        const ret = wasm.node_dragLockAngle(this.__wbg_ptr);
+        return ret;
+    }
+    /**
      * @returns {number}
      */
     get drawIndex() {
         const ret = wasm.node_drawIndex(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * @returns {Int32Array}
+     */
+    getAncestorIndices() {
+        const ret = wasm.node_getAncestorIndices(this.__wbg_ptr);
+        var v1 = getArrayI32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @returns {number | undefined}
+     */
+    getConnectorEndIndex() {
+        const ret = wasm.node_getConnectorEndIndex(this.__wbg_ptr);
+        return ret === Number.MAX_SAFE_INTEGER ? undefined : ret;
+    }
+    /**
+     * @returns {number | undefined}
+     */
+    getConnectorLocalX() {
+        const ret = wasm.node_getConnectorLocalX(this.__wbg_ptr);
+        return ret === Number.MAX_SAFE_INTEGER ? undefined : ret;
+    }
+    /**
+     * @returns {number | undefined}
+     */
+    getConnectorLocalY() {
+        const ret = wasm.node_getConnectorLocalY(this.__wbg_ptr);
+        return ret === Number.MAX_SAFE_INTEGER ? undefined : ret;
+    }
+    /**
+     * @returns {number | undefined}
+     */
+    getConnectorMethod() {
+        const ret = wasm.node_getConnectorMethod(this.__wbg_ptr);
+        return ret === 0xFFFFFF ? undefined : ret;
+    }
+    /**
+     * @returns {number | undefined}
+     */
+    getConnectorPercentDefault() {
+        const ret = wasm.node_getConnectorPercentDefault(this.__wbg_ptr);
+        return ret === Number.MAX_SAFE_INTEGER ? undefined : ret;
+    }
+    /**
+     * @returns {number | undefined}
+     */
+    getConnectorPercent() {
+        const ret = wasm.node_getConnectorPercent(this.__wbg_ptr);
+        return ret === Number.MAX_SAFE_INTEGER ? undefined : ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    getConnectorReversed() {
+        const ret = wasm.node_getConnectorReversed(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number | undefined}
+     */
+    getConnectorSmartStretchAncestralValue() {
+        const ret = wasm.node_getConnectorSmartStretchAncestralValue(this.__wbg_ptr);
+        return ret === Number.MAX_SAFE_INTEGER ? undefined : ret;
+    }
+    /**
+     * @returns {number | undefined}
+     */
+    getConnectorValue() {
+        const ret = wasm.node_getConnectorValue(this.__wbg_ptr);
+        return ret === Number.MAX_SAFE_INTEGER ? undefined : ret;
+    }
+    /**
+     * @returns {Int32Array}
+     */
+    getDescendantIndices() {
+        const ret = wasm.node_getDescendantIndices(this.__wbg_ptr);
+        var v1 = getArrayI32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    getDisplayColorHex() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.node_getDisplayColorHex(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * @returns {number}
+     */
+    getEffectiveThickness() {
+        const ret = wasm.node_getEffectiveThickness(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    getGlobalAngle() {
+        const ret = wasm.node_getGlobalAngle(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {Float32Array}
+     */
+    getGlobalEnd() {
+        const ret = wasm.node_getGlobalEnd(this.__wbg_ptr);
+        var v1 = getArrayF32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @returns {Float32Array}
+     */
+    getGlobalStart() {
+        const ret = wasm.node_getGlobalStart(this.__wbg_ptr);
+        var v1 = getArrayF32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @returns {number}
+     */
+    getLocalX() {
+        const ret = wasm.node_getLocalX(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    getLocalY() {
+        const ret = wasm.node_getLocalY(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {any}
+     */
+    getNodeOptions() {
+        const ret = wasm.node_getNodeOptions(this.__wbg_ptr);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
+     * @returns {number | undefined}
+     */
+    getParentIndex() {
+        const ret = wasm.node_getParentIndex(this.__wbg_ptr);
+        return ret === Number.MAX_SAFE_INTEGER ? undefined : ret;
+    }
+    /**
+     * @returns {Int32Array}
+     */
+    getSiblingIndices() {
+        const ret = wasm.node_getSiblingIndices(this.__wbg_ptr);
+        var v1 = getArrayI32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @returns {number}
+     */
+    getTrapezoidThicknessEnd() {
+        const ret = wasm.node_getTrapezoidThicknessEnd(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    getTrapezoidThicknessStart() {
+        const ret = wasm.node_getTrapezoidThicknessStart(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {string}
+     */
+    get gradientColorHex() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.node_gradientColorHex(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * @returns {number}
+     */
+    get gradientMode() {
+        const ret = wasm.node_gradientMode(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get halfArc() {
+        const ret = wasm.node_halfArc(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get hasConnector() {
+        const ret = wasm.node_hasConnector(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get isAngleLocked() {
+        const ret = wasm.node_isAngleLocked(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get isDragLocked() {
+        const ret = wasm.node_isDragLocked(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get isFloaty() {
+        const ret = wasm.node_isFloaty(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get isSmartStretch() {
+        const ret = wasm.node_isSmartStretch(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get isStatic() {
+        const ret = wasm.node_isStatic(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get isStretchy() {
+        const ret = wasm.node_isStretchy(this.__wbg_ptr);
+        return ret !== 0;
     }
     /**
      * @returns {number}
@@ -171,6 +557,20 @@ export class Node {
     /**
      * @returns {number}
      */
+    get numPolygonVertices() {
+        const ret = wasm.node_numPolygonVertices(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get reverseGradient() {
+        const ret = wasm.node_reverseGradient(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
     get scale() {
         const ret = wasm.node_scale(this.__wbg_ptr);
         return ret;
@@ -178,9 +578,308 @@ export class Node {
     /**
      * @returns {number}
      */
+    get segmentCurvePolyfillPrecision() {
+        const ret = wasm.node_segmentCurvePolyfillPrecision(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get segmentCurveRadiusAndDefaultCurveRadius() {
+        const ret = wasm.node_segmentCurveRadiusAndDefaultCurveRadius(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @param {boolean} v
+     */
+    set circleIsHollow(v) {
+        wasm.node_set_circleIsHollow(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {string} hex
+     */
+    set circleOutlineColorHex(hex) {
+        const ptr0 = passStringToWasm0(hex, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.node_set_circleOutlineColorHex(this.__wbg_ptr, ptr0, len0);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @param {string} hex
+     */
+    set colorHex(hex) {
+        const ptr0 = passStringToWasm0(hex, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.node_set_colorHex(this.__wbg_ptr, ptr0, len0);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @param {boolean} v
+     */
+    set curveCirculization(v) {
+        wasm.node_set_curveCirculization(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {number} v
+     */
+    set defaultAngle(v) {
+        wasm.node_set_defaultAngle(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {number} v
+     */
+    set defaultLength(v) {
+        wasm.node_set_defaultLength(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {number} v
+     */
+    set defaultLocalAngle(v) {
+        wasm.node_set_defaultLocalAngle(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {number} v
+     */
+    set defaultThickness(v) {
+        wasm.node_set_defaultThickness(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set doNotApplySmartStretch(v) {
+        wasm.node_set_doNotApplySmartStretch(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {string} hex
+     */
+    set gradientColorHex(hex) {
+        const ptr0 = passStringToWasm0(hex, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.node_set_gradientColorHex(this.__wbg_ptr, ptr0, len0);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @param {boolean} v
+     */
+    set halfArc(v) {
+        wasm.node_set_halfArc(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set isDragLocked(v) {
+        wasm.node_set_isDragLocked(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set isFloaty(v) {
+        wasm.node_set_isFloaty(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set isSmartStretch(v) {
+        wasm.node_set_isSmartStretch(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set isStatic(v) {
+        wasm.node_set_isStatic(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set isStretchy(v) {
+        wasm.node_set_isStretchy(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {number} v
+     */
+    set length(v) {
+        wasm.node_set_length(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {number} v
+     */
+    set localAngle(v) {
+        wasm.node_set_localAngle(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {number} v
+     */
+    set nodeType(v) {
+        wasm.node_set_nodeType(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set reverseGradient(v) {
+        wasm.node_set_reverseGradient(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {number} v
+     */
+    set scale(v) {
+        wasm.node_set_scale(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set smartStretchResetImpulse(v) {
+        wasm.node_set_smartStretchResetImpulse(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {number} v
+     */
+    set thickness(v) {
+        wasm.node_set_thickness(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set trapezoidIsRoundedEnd(v) {
+        wasm.node_set_trapezoidIsRoundedEnd(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set trapezoidIsRoundedStart(v) {
+        wasm.node_set_trapezoidIsRoundedStart(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set triangleFlipped(v) {
+        wasm.node_set_triangleFlipped(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set triangleUpsideDown(v) {
+        wasm.node_set_triangleUpsideDown(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set useCircleOutline(v) {
+        wasm.node_set_useCircleOutline(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set useGradient(v) {
+        wasm.node_set_useGradient(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set useSegmentColor(v) {
+        wasm.node_set_useSegmentColor(this.__wbg_ptr, v);
+    }
+    /**
+     * @param {boolean} v
+     */
+    set useSegmentScale(v) {
+        wasm.node_set_useSegmentScale(this.__wbg_ptr, v);
+    }
+    /**
+     * @returns {number}
+     */
+    get smartStretchMultiplier() {
+        const ret = wasm.node_smartStretchMultiplier(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get smartStretchResetImpulse() {
+        const ret = wasm.node_smartStretchResetImpulse(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
     get thickness() {
         const ret = wasm.node_thickness(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get trapezoidIsRoundedEnd() {
+        const ret = wasm.node_trapezoidIsRoundedEnd(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get trapezoidIsRoundedStart() {
+        const ret = wasm.node_trapezoidIsRoundedStart(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get trapezoidThicknessEnd() {
+        const ret = wasm.node_trapezoidThicknessEnd(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get trapezoidThicknessStart() {
+        const ret = wasm.node_trapezoidThicknessStart(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get trapezoidTopThicknessRatio() {
+        const ret = wasm.node_trapezoidTopThicknessRatio(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get triangleFlipped() {
+        const ret = wasm.node_triangleFlipped(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get triangleType() {
+        const ret = wasm.node_triangleType(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get triangleUpsideDown() {
+        const ret = wasm.node_triangleUpsideDown(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get useCircleOutline() {
+        const ret = wasm.node_useCircleOutline(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get useGradient() {
+        const ret = wasm.node_useGradient(this.__wbg_ptr);
+        return ret !== 0;
     }
     /**
      * @returns {boolean}
@@ -196,8 +895,96 @@ export class Node {
         const ret = wasm.node_useSegmentScale(this.__wbg_ptr);
         return ret !== 0;
     }
+    /**
+     * @returns {boolean}
+     */
+    get useTrapezoidThicknessEnd() {
+        const ret = wasm.node_useTrapezoidThicknessEnd(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {boolean}
+     */
+    get useTrapezoidThicknessStart() {
+        const ret = wasm.node_useTrapezoidThicknessStart(this.__wbg_ptr);
+        return ret !== 0;
+    }
 }
 if (Symbol.dispose) Node.prototype[Symbol.dispose] = Node.prototype.free;
+
+export class PolyfillData {
+    static __wrap(ptr) {
+        const obj = Object.create(PolyfillData.prototype);
+        obj.__wbg_ptr = ptr;
+        PolyfillDataFinalization.register(obj, obj.__wbg_ptr, obj);
+        return obj;
+    }
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        PolyfillDataFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_polyfilldata_free(ptr, 0);
+    }
+    /**
+     * @returns {number}
+     */
+    get anchorDrawIndex() {
+        const ret = wasm.polyfilldata_anchorDrawIndex(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {Int32Array}
+     */
+    get attached() {
+        const ret = wasm.polyfilldata_attached(this.__wbg_ptr);
+        var v1 = getArrayI32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @returns {string}
+     */
+    get colorHex() {
+        let deferred1_0;
+        let deferred1_1;
+        try {
+            const ret = wasm.polyfilldata_colorHex(this.__wbg_ptr);
+            deferred1_0 = ret[0];
+            deferred1_1 = ret[1];
+            return getStringFromWasm0(ret[0], ret[1]);
+        } finally {
+            wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+        }
+    }
+    /**
+     * @returns {boolean}
+     */
+    get usePolyfillColor() {
+        const ret = wasm.polyfilldata_usePolyfillColor(this.__wbg_ptr);
+        return ret !== 0;
+    }
+}
+if (Symbol.dispose) PolyfillData.prototype[Symbol.dispose] = PolyfillData.prototype.free;
+
+/**
+ * @returns {number}
+ */
+export function SUPPORTED_BUILD() {
+    const ret = wasm.SUPPORTED_BUILD();
+    return ret;
+}
+
+/**
+ * @returns {number}
+ */
+export function SUPPORTED_VERSION() {
+    const ret = wasm.SUPPORTED_VERSION();
+    return ret;
+}
 
 export class Stickfigure {
     static __wrap(ptr) {
@@ -235,11 +1022,39 @@ export class Stickfigure {
         return v1;
     }
     /**
+     * @returns {Node[]}
+     */
+    allNodes() {
+        const ret = wasm.stickfigure_allNodes(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]);
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @returns {PolyfillData[]}
+     */
+    allPolyfills() {
+        const ret = wasm.stickfigure_allPolyfills(this.__wbg_ptr);
+        var v1 = getArrayJsValueFromWasm0(ret[0], ret[1]);
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
      * @returns {number}
      */
     get build() {
         const ret = wasm.stickfigure_build(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * @param {number} from
+     * @param {number} to
+     */
+    changeDrawIndex(from, to) {
+        const ret = wasm.stickfigure_changeDrawIndex(this.__wbg_ptr, from, to);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
     }
     /**
      * @returns {string}
@@ -257,6 +1072,22 @@ export class Stickfigure {
         }
     }
     /**
+     * @param {number} idx
+     * @returns {boolean}
+     */
+    drawIndexExists(idx) {
+        const ret = wasm.stickfigure_drawIndexExists(this.__wbg_ptr, idx);
+        return ret !== 0;
+    }
+    /**
+     * @param {number} idx
+     * @returns {boolean}
+     */
+    drawIndexIsPolyfillAnchor(idx) {
+        const ret = wasm.stickfigure_drawIndexIsPolyfillAnchor(this.__wbg_ptr, idx);
+        return ret !== 0;
+    }
+    /**
      * @param {Uint8Array} bytes
      * @returns {Stickfigure}
      */
@@ -270,6 +1101,38 @@ export class Stickfigure {
         return Stickfigure.__wrap(ret[0]);
     }
     /**
+     * @param {number} version
+     * @param {number} build
+     * @returns {Stickfigure}
+     */
+    static fromVersionAndBuild(version, build) {
+        const ret = wasm.stickfigure_fromVersionAndBuild(version, build);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return Stickfigure.__wrap(ret[0]);
+    }
+    /**
+     * @param {number} idx
+     * @returns {Int32Array}
+     */
+    getChildrenRecursive(idx) {
+        const ret = wasm.stickfigure_getChildrenRecursive(this.__wbg_ptr, idx);
+        var v1 = getArrayI32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {number} idx
+     * @returns {Int32Array}
+     */
+    getChildren(idx) {
+        const ret = wasm.stickfigure_getChildren(this.__wbg_ptr, idx);
+        var v1 = getArrayI32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
      * @param {number} idx
      * @returns {Node}
      */
@@ -280,11 +1143,82 @@ export class Stickfigure {
         }
         return Node.__wrap(ret[0]);
     }
+    /**
+     * @param {number} idx
+     * @returns {number | undefined}
+     */
+    getParent(idx) {
+        const ret = wasm.stickfigure_getParent(this.__wbg_ptr, idx);
+        return ret === Number.MAX_SAFE_INTEGER ? undefined : ret;
+    }
+    /**
+     * @param {number} idx
+     * @returns {Int32Array}
+     */
+    getParentsRecursive(idx) {
+        const ret = wasm.stickfigure_getParentsRecursive(this.__wbg_ptr, idx);
+        var v1 = getArrayI32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {number} anchor
+     * @returns {Float32Array}
+     */
+    getPolyfillVertices(anchor) {
+        const ret = wasm.stickfigure_getPolyfillVertices(this.__wbg_ptr, anchor);
+        if (ret[3]) {
+            throw takeFromExternrefTable0(ret[2]);
+        }
+        var v1 = getArrayF32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {number} idx
+     * @returns {Int32Array}
+     */
+    getSiblings(idx) {
+        const ret = wasm.stickfigure_getSiblings(this.__wbg_ptr, idx);
+        var v1 = getArrayI32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @param {Int32Array} indices
+     * @returns {Int32Array}
+     */
+    missingDrawIndices(indices) {
+        const ptr0 = passArray32ToWasm0(indices, wasm.__wbindgen_malloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ret = wasm.stickfigure_missingDrawIndices(this.__wbg_ptr, ptr0, len0);
+        var v2 = getArrayI32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v2;
+    }
     constructor() {
         const ret = wasm.stickfigure_new();
         this.__wbg_ptr = ret;
         StickfigureFinalization.register(this, this.__wbg_ptr, this);
         return this;
+    }
+    /**
+     * @param {number} idx
+     */
+    removeNode(idx) {
+        const ret = wasm.stickfigure_removeNode(this.__wbg_ptr, idx);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
+    }
+    /**
+     * @param {number} anchor
+     */
+    removePolyfill(anchor) {
+        const ret = wasm.stickfigure_removePolyfill(this.__wbg_ptr, anchor);
+        if (ret[1]) {
+            throw takeFromExternrefTable0(ret[0]);
+        }
     }
     /**
      * @returns {Node}
@@ -299,6 +1233,12 @@ export class Stickfigure {
     get scale() {
         const ret = wasm.stickfigure_scale(this.__wbg_ptr);
         return ret;
+    }
+    /**
+     * @param {boolean} enabled
+     */
+    setNodeLimitEnabled(enabled) {
+        wasm.stickfigure_setNodeLimitEnabled(this.__wbg_ptr, enabled);
     }
     /**
      * @param {number} v
@@ -342,6 +1282,16 @@ export class Stickfigure {
         return v1;
     }
     /**
+     * @returns {any}
+     */
+    toJsObject() {
+        const ret = wasm.stickfigure_toJsObject(this.__wbg_ptr);
+        if (ret[2]) {
+            throw takeFromExternrefTable0(ret[1]);
+        }
+        return takeFromExternrefTable0(ret[0]);
+    }
+    /**
      * @returns {number}
      */
     get version() {
@@ -350,6 +1300,23 @@ export class Stickfigure {
     }
 }
 if (Symbol.dispose) Stickfigure.prototype[Symbol.dispose] = Stickfigure.prototype.free;
+
+/**
+ * @param {number} v
+ * @returns {string}
+ */
+export function nodeTypeFromInt(v) {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const ret = wasm.nodeTypeFromInt(v);
+        deferred1_0 = ret[0];
+        deferred1_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred1_0, deferred1_1, 1);
+    }
+}
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,
@@ -494,6 +1461,14 @@ function __wbg_get_imports() {
             const ret = new Uint8Array(arg0);
             return ret;
         },
+        __wbg_new_bebc3f4757acf305: function() {
+            const ret = new Object();
+            return ret;
+        },
+        __wbg_new_ffa92086ea89f79c: function() {
+            const ret = new Array();
+            return ret;
+        },
         __wbg_next_95053e306b1c3aed: function(arg0) {
             const ret = arg0.next;
             return ret;
@@ -506,14 +1481,29 @@ function __wbg_get_imports() {
             const ret = Node.__wrap(arg0);
             return ret;
         },
+        __wbg_polyfilldata_new: function(arg0) {
+            const ret = PolyfillData.__wrap(arg0);
+            return ret;
+        },
         __wbg_prototypesetcall_ae9f5e7459250748: function(arg0, arg1, arg2) {
             Uint8Array.prototype.set.call(getArrayU8FromWasm0(arg0, arg1), arg2);
+        },
+        __wbg_set_13d25b81ab403f5e: function(arg0, arg1, arg2) {
+            arg0[arg1 >>> 0] = arg2;
+        },
+        __wbg_set_6be42768c690e380: function(arg0, arg1, arg2) {
+            arg0[arg1] = arg2;
         },
         __wbg_value_c227f843d21da141: function(arg0) {
             const ret = arg0.value;
             return ret;
         },
-        __wbindgen_generic_0000000000000001: function(arg0, arg1) {
+        __wbindgen_generic_0000000000000001: function(arg0) {
+            // Cast intrinsic for `F64 -> Externref`.
+            const ret = arg0;
+            return ret;
+        },
+        __wbindgen_generic_0000000000000002: function(arg0, arg1) {
             // Cast intrinsic for `Ref(String) -> Externref`.
             const ret = getStringFromWasm0(arg0, arg1);
             return ret;
@@ -540,6 +1530,9 @@ const ColorFinalization = (typeof FinalizationRegistry === 'undefined')
 const NodeFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_node_free(ptr, 1));
+const PolyfillDataFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_polyfilldata_free(ptr, 1));
 const StickfigureFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_stickfigure_free(ptr, 1));
@@ -615,6 +1608,11 @@ function debugString(val) {
     return className;
 }
 
+function getArrayF32FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getFloat32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
+}
+
 function getArrayI32FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return getInt32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
@@ -644,6 +1642,14 @@ function getDataViewMemory0() {
     return cachedDataViewMemory0;
 }
 
+let cachedFloat32ArrayMemory0 = null;
+function getFloat32ArrayMemory0() {
+    if (cachedFloat32ArrayMemory0 === null || cachedFloat32ArrayMemory0.byteLength === 0) {
+        cachedFloat32ArrayMemory0 = new Float32Array(wasm.memory.buffer);
+    }
+    return cachedFloat32ArrayMemory0;
+}
+
 let cachedInt32ArrayMemory0 = null;
 function getInt32ArrayMemory0() {
     if (cachedInt32ArrayMemory0 === null || cachedInt32ArrayMemory0.byteLength === 0) {
@@ -654,6 +1660,14 @@ function getInt32ArrayMemory0() {
 
 function getStringFromWasm0(ptr, len) {
     return decodeText(ptr >>> 0, len);
+}
+
+let cachedUint32ArrayMemory0 = null;
+function getUint32ArrayMemory0() {
+    if (cachedUint32ArrayMemory0 === null || cachedUint32ArrayMemory0.byteLength === 0) {
+        cachedUint32ArrayMemory0 = new Uint32Array(wasm.memory.buffer);
+    }
+    return cachedUint32ArrayMemory0;
 }
 
 let cachedUint8ArrayMemory0 = null;
@@ -675,6 +1689,13 @@ function handleError(f, args) {
 
 function isLikeNone(x) {
     return x === undefined || x === null;
+}
+
+function passArray32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4, 4) >>> 0;
+    getUint32ArrayMemory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
 }
 
 function passArray8ToWasm0(arg, malloc) {
@@ -762,7 +1783,9 @@ function __wbg_finalize_init(instance, module) {
     wasm = instance.exports;
     wasmModule = module;
     cachedDataViewMemory0 = null;
+    cachedFloat32ArrayMemory0 = null;
     cachedInt32ArrayMemory0 = null;
+    cachedUint32ArrayMemory0 = null;
     cachedUint8ArrayMemory0 = null;
     wasm.__wbindgen_start();
     return wasm;
