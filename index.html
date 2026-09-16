@@ -1,147 +1,605 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>StickNodes XML</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>StickNodes Studio</title>
 <style>
-  :root { color-scheme: dark; --bg:#0e0e10; --panel:#16161a; --line:#2a2a30;
-          --txt:#e6e6e6; --dim:#8a8a92; --accent:#4f8cff; --ok:#7ee787; --err:#ff7b72; }
-  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { margin:0; height:100%; overflow:hidden; }
-  body { font:14px/1.4 system-ui,-apple-system,sans-serif;
-         background:var(--bg); color:var(--txt); }
-  .app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
-  .toolbar { display:flex; gap:5px; padding:6px; background:var(--panel);
-             border-bottom:1px solid var(--line); flex:0 0 auto; }
-  .toolbar button { flex:1 1 0; min-width:0; min-height:40px;
-                    background:#26262c; color:var(--txt); border:1px solid var(--line);
-                    border-radius:6px; font:inherit; font-weight:500;
-                    padding:6px 4px; cursor:pointer; white-space:nowrap;
-                    font-size:12px; overflow:hidden; text-overflow:ellipsis; }
-  .toolbar button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
-  .toolbar button:active { transform:scale(0.97); }
-  .stage { flex:0 0 auto; background:#08080a; display:flex;
-           justify-content:center; align-items:center; padding:4px;
-           max-height:42vh; }
-  canvas { display:block; background:#141418; max-width:100%; max-height:42vh;
-           width:auto; height:auto; border-radius:4px; }
-  .tabs { display:flex; background:var(--panel); border-bottom:1px solid var(--line);
-          flex:0 0 auto; }
-  .tabs button { flex:1; background:transparent; color:var(--dim);
-                 border:0; border-bottom:2px solid transparent;
-                 padding:9px 6px; font:inherit; font-weight:600; font-size:12px;
-                 text-transform:uppercase; letter-spacing:.6px; cursor:pointer; }
-  .tabs button.active { color:var(--txt); border-bottom-color:var(--accent); }
-  .panel { flex:1 1 auto; min-height:0; display:none; overflow:auto; }
-  .panel.active { display:block; }
-  textarea { width:100%; height:100%; background:#0a0a0c; color:var(--txt);
-             border:0; padding:10px; resize:none; outline:none;
-             font:12px/1.55 ui-monospace,"SF Mono",Consolas,monospace;
-             tab-size:2; display:block; }
-  #log, #tree { padding:10px 12px; margin:0;
-                font:11.5px/1.6 ui-monospace,"SF Mono",Consolas,monospace;
-                white-space:pre-wrap; word-break:break-word; }
-  #log { color:var(--dim); }
-  #log div { padding:1px 0; }
-  #log .ok  { color:var(--ok); }
-  #log .err { color:var(--err); }
-  #log .hi  { color:var(--txt); font-weight:600; }
-  #tree .row { display:flex; gap:6px; white-space:nowrap; padding:1px 0; }
-  #tree .idx { color:#ffb86b; min-width:32px; text-align:right; }
-  #tree .type { color:#8be9fd; min-width:120px; }
-  #tree .props { color:var(--dim); overflow:hidden; text-overflow:ellipsis; }
-  .hint { padding:6px 10px; background:#1a1a1f; color:var(--dim);
-          font-size:10.5px; border-top:1px solid var(--line); }
-  .hint code { color:var(--txt); background:#26262c; padding:1px 3px;
-               border-radius:3px; font-size:10px; }
-  input[type=file] { display:none; }
+  :root {
+    --bg: #f4f6fa;
+    --panel: #ffffff;
+    --border: #e3e6ec;
+    --border-strong: #cfd4dd;
+    --text: #1a1d24;
+    --muted: #6b7280;
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-soft: #eef2ff;
+    --ok: #059669;
+    --ok-soft: #ecfdf5;
+    --err: #dc2626;
+    --err-soft: #fef2f2;
+    --warn: #d97706;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow-sm: 0 1px 2px rgba(20, 20, 40, .05);
+    --shadow: 0 1px 3px rgba(20, 20, 40, .08), 0 4px 12px rgba(20, 20, 40, .04);
+    --shadow-lg: 0 4px 12px rgba(20, 20, 40, .08), 0 12px 32px rgba(20, 20, 40, .06);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ─────────── Header ─────────── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex: 0 0 auto;
+  }
+  header .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+  }
+  header .brand .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  header .status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 5px 10px;
+    background: var(--bg);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  header .status .led {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background .2s;
+  }
+  header .status.ready .led { background: var(--ok); box-shadow: 0 0 6px rgba(5,150,105,.5); }
+  header .status.error .led { background: var(--err); }
+
+  /* ─────────── Toolbar ─────────── */
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex: 0 0 auto;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .toolbar::-webkit-scrollbar { display: none; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    font: inherit;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: 38px;
+    transition: all .12s ease;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn:hover { background: #fafbfd; border-color: #b6bcc7; }
+  .btn:active { transform: translateY(1px); box-shadow: none; }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 1px 3px rgba(79, 70, 229, .3), 0 4px 12px rgba(79, 70, 229, .15);
+  }
+  .btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  .btn svg { width: 14px; height: 14px; stroke-width: 2; }
+
+  select.preset {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    min-height: 38px;
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .spacer { flex: 1; }
+
+  /* ─────────── Content grid ─────────── */
+  .content {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 12px;
+    padding: 12px 20px 20px;
+    min-height: 0;
+  }
+  @media (max-width: 900px) {
+    .content { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    header { padding: 12px 14px; }
+    .toolbar { padding: 10px 14px; }
+    .content { padding: 10px 14px 14px; }
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: #fbfcfe;
+    flex: 0 0 auto;
+  }
+  .card-head h2 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .card-head .meta {
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─────────── Preview ─────────── */
+  .preview-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      linear-gradient(45deg, #f8fafc 25%, transparent 25%) -8px 0/16px 16px,
+      linear-gradient(-45deg, #f8fafc 25%, transparent 25%) -8px 0/16px 16px,
+      linear-gradient(45deg, transparent 75%, #f8fafc 75%) -8px 0/16px 16px,
+      linear-gradient(-45deg, transparent 75%, #f8fafc 75%) -8px 0/16px 16px,
+      #ffffff;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 16px;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ─────────── XML editor ─────────── */
+  textarea {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    border: 0;
+    outline: 0;
+    resize: none;
+    padding: 14px 16px;
+    font: 12.5px/1.65 "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    color: var(--text);
+    background: var(--panel);
+    tab-size: 2;
+  }
+  textarea::selection { background: var(--accent-soft); }
+
+  /* ─────────── Bottom panel tabs ─────────── */
+  .bottom {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+  .tabs {
+    display: flex;
+    gap: 2px;
+    padding: 6px 8px 0;
+    background: #fbfcfe;
+    border-bottom: 1px solid var(--border);
+    flex: 0 0 auto;
+  }
+  .tabs button {
+    padding: 9px 14px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    transition: all .12s;
+  }
+  .tabs button:hover { color: var(--text); background: #f3f5f9; }
+  .tabs button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: var(--panel);
+  }
+  .tab-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    display: none;
+    background: var(--panel);
+  }
+  .tab-content.active { display: block; }
+
+  /* ─────────── Log ─────────── */
+  #log {
+    padding: 12px 16px;
+    margin: 0;
+    font: 11.5px/1.6 "SF Mono", ui-monospace, Consolas, monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+  }
+  #log .line { padding: 2px 0; display: flex; gap: 8px; }
+  #log .line .badge {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border-radius: 4px;
+    height: 18px;
+    margin-top: 1px;
+  }
+  #log .ok .badge  { background: var(--ok-soft); color: var(--ok); }
+  #log .err .badge { background: var(--err-soft); color: var(--err); }
+  #log .hi .badge  { background: var(--accent-soft); color: var(--accent); }
+  #log .dim        { color: var(--muted); }
+  #log .dim .badge { background: #f3f4f6; color: var(--muted); }
+  #log .line .msg  { flex: 1; min-width: 0; }
+
+  /* ─────────── Tree ─────────── */
+  #tree { padding: 10px 14px; font: 12px/1.7 "SF Mono", ui-monospace, Consolas, monospace; }
+  #tree .row {
+    display: grid;
+    grid-template-columns: auto 44px 140px 1fr;
+    gap: 10px;
+    padding: 3px 0;
+    white-space: nowrap;
+    border-radius: 4px;
+  }
+  #tree .row:hover { background: #f7f8fb; }
+  #tree .branch { color: #d1d5db; }
+  #tree .idx {
+    color: var(--accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  #tree .type { color: #b45309; font-weight: 500; }
+  #tree .props { color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+
+  /* ─────────── Empty/status states ─────────── */
+  .empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  /* ─────────── File input ─────────── */
+  input[type=file] { display: none; }
+
+  /* ─────────── Toast ─────────── */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a1d24;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    pointer-events: none;
+    transition: all .25s cubic-bezier(.2,.8,.2,1);
+    z-index: 100;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ─────────── Fullscreen width on very small screens ─────────── */
+  @media (max-width: 500px) {
+    .toolbar .btn span.label { display: none; }
+    .toolbar .btn { padding: 9px 10px; }
+    #tree .row { grid-template-columns: auto 38px 110px 1fr; }
+  }
 </style>
 </head>
 <body>
 <div class="app">
+
+  <header>
+    <div class="brand">
+      <span class="dot"></span>
+      StickNodes Studio
+    </div>
+    <div class="status" id="status">
+      <span class="led"></span>
+      <span id="statusText">loading…</span>
+    </div>
+  </header>
+
   <div class="toolbar">
-    <button id="btnBuild" class="primary">Build</button>
-    <button id="btnDownload">Download</button>
-    <button id="btnExport">→ XML</button>
-    <button id="btnLoadNodes">Load</button>
-    <button id="btnHex">Hex</button>
+    <button class="btn primary" id="btnBuild">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+      <span class="label">Build</span>
+    </button>
+    <button class="btn" id="btnDownload">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+      <span class="label">Download</span>
+    </button>
+    <button class="btn" id="btnExport">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h12l4 4v12H4z"/><path d="M8 10h8M8 14h5"/></svg>
+      <span class="label">Export XML</span>
+    </button>
+    <button class="btn" id="btnCopy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg>
+      <span class="label">Copy</span>
+    </button>
+    <button class="btn" id="btnLoad">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h12l4 4v12H4z"/><path d="M12 11v6m0 0l-3-3m3 3l3-3"/></svg>
+      <span class="label">Load</span>
+    </button>
+
+    <div class="spacer"></div>
+
+    <select class="preset" id="preset">
+      <option value="">Load preset…</option>
+      <option value="empty">Empty figure</option>
+      <option value="standing">Standing humanoid</option>
+      <option value="tpose">T-pose</option>
+      <option value="running">Running</option>
+      <option value="sitting">Sitting</option>
+    </select>
   </div>
-  <div class="stage"><canvas id="preview" width="640" height="420"></canvas></div>
-  <div class="tabs">
-    <button data-tab="xml" class="active">XML</button>
-    <button data-tab="log">Log</button>
-    <button data-tab="tree">Tree</button>
+
+  <div class="content">
+
+    <!-- Preview card -->
+    <div class="card">
+      <div class="card-head">
+        <h2>Preview</h2>
+        <span class="meta" id="previewMeta">—</span>
+      </div>
+      <div class="preview-wrap">
+        <canvas id="preview" width="800" height="700"></canvas>
+      </div>
+    </div>
+
+    <!-- Right column: XML editor + bottom tabs -->
+    <div style="display: flex; flex-direction: column; min-height: 0; gap: 12px;">
+
+      <div class="card" style="flex: 1 1 55%;">
+        <div class="card-head">
+          <h2>XML</h2>
+          <span class="meta" id="xmlMeta">—</span>
+        </div>
+        <textarea id="xml" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea>
+      </div>
+
+      <div class="card bottom" style="flex: 1 1 45%;">
+        <div class="tabs">
+          <button data-tab="log" class="active">Log</button>
+          <button data-tab="tree">Tree</button>
+        </div>
+        <div class="tab-content active" data-tab="log">
+          <pre id="log"></pre>
+        </div>
+        <div class="tab-content" data-tab="tree">
+          <div id="tree"></div>
+        </div>
+      </div>
+
+    </div>
   </div>
-  <div class="panel active" data-panel="xml"><textarea id="xml" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea></div>
-  <div class="panel" data-panel="log"><pre id="log">—</pre></div>
-  <div class="panel" data-panel="tree"><div id="tree"></div></div>
-  <div class="hint">
-    Angles in <b>degrees</b>. Colors: <code>#RGB</code> <code>#RGBA</code>
-    <code>#RRGGBB</code> <code>#RRGGBBAA</code>.
-    Top-level <code>&lt;node&gt;</code> attaches to the implicit root.
-  </div>
+
 </div>
+
 <input type="file" id="fileInput">
+<div id="toast"></div>
 
 <script type="module">
 /* ════════════════════════════════════════════════════════════════
-   Load the locally-built WASM (with tryreadanyway enabled).
-   The .js and _bg.wasm must be in the same folder as this HTML.
+   DOM helpers
    ════════════════════════════════════════════════════════════════ */
 const $ = id => document.getElementById(id);
-const xmlEl = $('xml'), logEl = $('log'), treeEl = $('tree'),
-      canvas = $('preview'), fileInput = $('fileInput');
+const xmlEl = $('xml');
+const logEl = $('log');
+const treeEl = $('tree');
+const canvas = $('preview');
+const fileInput = $('fileInput');
+const statusEl = $('status');
+const statusTextEl = $('statusText');
+const xmlMeta = $('xmlMeta');
+const previewMeta = $('previewMeta');
+const toastEl = $('toast');
 
-const log = (msg, cls) => {
-  const d = document.createElement('div');
-  if (cls) d.className = cls;
-  d.textContent = msg;
-  logEl.appendChild(d);
-  logEl.scrollTop = logEl.scrollHeight;
-};
-const clearLog = () => { logEl.textContent = ''; };
-const logErr = e => {
-  try { console.error(e); } catch (_) {}
-  log('✘ ' + (e && e.message ? e.message : String(e)), 'err');
-};
-
-let init, Stickfigure, Color;
-try {
-  const mod = await import('./sticknodes_rs.js');
-  init = mod.default;
-  Stickfigure = mod.Stickfigure;
-  Color = mod.Color;
-  log('module loaded', 'ok');
-} catch (e) {
-  log('Could not load ./sticknodes_rs.js — ' + (e.message || e), 'err');
-  log('Check that sticknodes_rs.js and sticknodes_rs_bg.wasm are in the same folder as this HTML, and that you opened the page over http:// not file://', 'err');
-  throw e;
+let toastTimer = null;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
 }
 
-try {
-  await init();
-  log('WASM ready (tryreadanyway enabled)', 'ok');
-} catch (e) {
-  log('WASM init failed: ' + (e.message || e), 'err');
-  throw e;
+function setStatus(state, text) {
+  statusEl.className = 'status ' + (state || '');
+  statusTextEl.textContent = text;
 }
 
 /* ════════════════════════════════════════════════════════════════
-   Constants — from the Rust source
+   Logger
+   ════════════════════════════════════════════════════════════════ */
+function logMsg(kind, msg) {
+  const kindClass = { ok: 'ok', err: 'err', hi: 'hi', dim: 'dim' }[kind] || 'dim';
+  const badgeText = { ok: 'OK', err: 'FAIL', hi: 'INFO', dim: '···' }[kind] || '···';
+  const line = document.createElement('div');
+  line.className = 'line ' + kindClass;
+  const badge = document.createElement('span');
+  badge.className = 'badge';
+  badge.textContent = badgeText;
+  const text = document.createElement('span');
+  text.className = 'msg';
+  text.textContent = msg;
+  line.appendChild(badge);
+  line.appendChild(text);
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+  // mirror to console (helps debugging on desktop)
+  try { console.log('[studio]', kind, msg); } catch (_) {}
+}
+function clearLog() { logEl.textContent = ''; }
+
+/* ════════════════════════════════════════════════════════════════
+   Module loader — bypasses the file server's MIME table by loading
+   the JS as text and the WASM as raw bytes, then initializing with
+   the ArrayBuffer directly.
+   ════════════════════════════════════════════════════════════════ */
+let mod = null;
+
+async function loadLibrary() {
+  setStatus('', 'loading library…');
+  logMsg('hi', 'Loading sticknodes_rs.js as text (MIME bypass)');
+  let jsText;
+  try {
+    const r = await fetch('./sticknodes_rs.js', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    jsText = await r.text();
+    logMsg('ok', 'fetched ' + jsText.length + ' chars');
+  } catch (e) {
+    logMsg('err', 'fetch sticknodes_rs.js: ' + e.message);
+    setStatus('error', 'library fetch failed');
+    throw e;
+  }
+
+  const blobUrl = URL.createObjectURL(
+    new Blob([jsText], { type: 'application/javascript' })
+  );
+  try {
+    mod = await import(blobUrl);
+    logMsg('ok', 'module imported');
+  } catch (e) {
+    logMsg('err', 'import module: ' + e.message);
+    setStatus('error', 'module error');
+    throw e;
+  } finally {
+    URL.revokeObjectURL(blobUrl);
+  }
+
+  logMsg('hi', 'Fetching WASM binary');
+  let wasmBytes;
+  try {
+    const r = await fetch('./sticknodes_rs_bg.wasm', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    wasmBytes = await r.arrayBuffer();
+    logMsg('ok', 'fetched ' + wasmBytes.byteLength.toLocaleString() + ' bytes');
+  } catch (e) {
+    logMsg('err', 'fetch wasm: ' + e.message);
+    setStatus('error', 'wasm fetch failed');
+    throw e;
+  }
+
+  logMsg('hi', 'Initializing WASM');
+  try {
+    await mod.default(wasmBytes);
+    logMsg('ok', 'WASM ready');
+    setStatus('ready', 'ready');
+  } catch (e) {
+    logMsg('err', 'init: ' + e.message);
+    setStatus('error', 'wasm init failed');
+    throw e;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Node type tables
    ════════════════════════════════════════════════════════════════ */
 const NODE_TYPE_NAME = {
   [-1]:'RootNode', 0:'RoundedSegment', 1:'Segment', 2:'Circle',
   3:'Triangle', 4:'FilledCircle', 5:'Ellipse', 6:'Trapezoid', 7:'Polygon'
 };
-// Serde serializes Rust enums by variant name → JS passes strings.
-const NODE_TYPE_STR = {
+const NODE_TYPE_VALID = {
   RoundedSegment:1, Segment:1, Circle:1, Triangle:1,
   FilledCircle:1, Ellipse:1, Trapezoid:1, Polygon:1
 };
 
 /* ════════════════════════════════════════════════════════════════
-   Colour helpers
+   Colors
    ════════════════════════════════════════════════════════════════ */
 function parseHexObj(hex) {
   let h = String(hex).trim().replace(/^#/, '');
@@ -155,18 +613,17 @@ function parseHexObj(hex) {
     throw new Error('bad hex: ' + hex);
   return c;
 }
-const toHexFromObj = c => '#'
+const toHex = c => '#'
   + [c.red, c.green, c.blue, c.alpha]
       .map(v => v.toString(16).padStart(2,'0')).join('').toUpperCase();
-const cssColor = c => 'rgba(' + c.red + ',' + c.green + ',' + c.blue + ',' +
-                      (c.alpha/255).toFixed(3) + ')';
-const cssColorHex = hex => {
+const cssFromHex = hex => {
   const c = parseHexObj(hex);
-  return cssColor(c);
+  return 'rgba(' + c.red + ',' + c.green + ',' + c.blue + ',' +
+         (c.alpha/255).toFixed(3) + ')';
 };
 
 /* ════════════════════════════════════════════════════════════════
-   Attribute maps — camelCase (because our Rust wrapper enabled
+   XML attribute maps (camelCase — matches our wrapper's
    #[serde(rename_all = "camelCase")] on NodeOptions)
    ════════════════════════════════════════════════════════════════ */
 const ATTR_NUM = {
@@ -212,14 +669,14 @@ const ATTR_COLOR = {
 const asBool = v => !(v === 'false' || v === '0' || v === '');
 
 /* ════════════════════════════════════════════════════════════════
-   XML element → options object
+   XML → options
    ════════════════════════════════════════════════════════════════ */
 function nodeOptionsFromEl(el) {
   const o = {};
   if (el.hasAttribute('type')) {
     const t = el.getAttribute('type');
-    if (!NODE_TYPE_STR[t]) throw new Error('unknown node type "' + t + '"');
-    o.nodeType = t;                              // string, serde enum variant
+    if (!NODE_TYPE_VALID[t]) throw new Error('unknown node type "' + t + '"');
+    o.nodeType = t;
   }
   for (const a in ATTR_NUM) {
     if (el.hasAttribute(a)) {
@@ -234,13 +691,12 @@ function nodeOptionsFromEl(el) {
     if (el.hasAttribute(a)) o[ATTR_COLOR[a]] = parseHexObj(el.getAttribute(a));
 
   if (el.hasAttribute('gradientMode'))
-    o.gradientMode = el.getAttribute('gradientMode');    // "Sideways" | "Normal"
+    o.gradientMode = el.getAttribute('gradientMode');
   if (el.hasAttribute('triangleType'))
-    o.triangleType = el.getAttribute('triangleType');    // "Isosceles" | "RightTriangle"
+    o.triangleType = el.getAttribute('triangleType');
   if (el.hasAttribute('angleLock'))
-    o.angleLockMode = el.getAttribute('angleLock');      // "None" | "Absolute" | "Relative"
+    o.angleLockMode = el.getAttribute('angleLock');
 
-  // <connector/> — nested child element
   const connEl = Array.from(el.children).find(c => c.tagName.toLowerCase() === 'connector');
   if (connEl) {
     const cd = {};
@@ -253,7 +709,7 @@ function nodeOptionsFromEl(el) {
     for (const a in map)
       if (connEl.hasAttribute(a)) cd[map[a]] = parseFloat(connEl.getAttribute(a));
     if (connEl.hasAttribute('method'))
-      cd.method = connEl.getAttribute('method');          // "ByPercent" | "ByValue"
+      cd.method = connEl.getAttribute('method');
     if (connEl.hasAttribute('reversed'))
       cd.reversed = asBool(connEl.getAttribute('reversed'));
     o.connectorData = cd;
@@ -283,7 +739,7 @@ function buildFigure(xmlText) {
   if (rootEl.tagName.toLowerCase() !== 'stickfigure')
     throw new Error('root element must be <stickfigure>');
 
-  const fig = new Stickfigure();
+  const fig = new mod.Stickfigure();
 
   if (rootEl.hasAttribute('version'))
     fig.setVersion(parseInt(rootEl.getAttribute('version'), 10));
@@ -299,8 +755,7 @@ function buildFigure(xmlText) {
   const walk = (parent, containerEl) => {
     for (const el of containerEl.children) {
       if (el.tagName.toLowerCase() !== 'node') continue;
-      const opts = nodeOptionsFromEl(el);
-      const child = parent.addChild(opts);
+      const child = parent.addChild(nodeOptionsFromEl(el));
       added++;
       walk(child, el);
     }
@@ -311,13 +766,16 @@ function buildFigure(xmlText) {
   for (const el of rootEl.children) {
     if (el.tagName.toLowerCase() !== 'polyfill') continue;
     try { fig.addPolyfill(polyfillOptionsFromEl(el)); pfAdded++; }
-    catch (e) { log('polyfill skipped: ' + (e.message || e), 'err'); }
+    catch (e) { logMsg('err', 'polyfill skipped: ' + (e.message || e)); }
   }
   return { fig, added, pfAdded };
 }
 
 /* ════════════════════════════════════════════════════════════════
-   World walk — same math the Rust writer uses
+   World walk — matches the Rust writer exactly:
+     global_angle = parent_angle + local_angle
+     x = length * cos(rad)
+     y = length * sin(rad)         ← +y is DOWN (matches StickNodes)
    ════════════════════════════════════════════════════════════════ */
 function walkWorld(fig) {
   const out = [];
@@ -336,17 +794,18 @@ function walkWorld(fig) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   Canvas render
+   Canvas render — NO Y-flip this time. Matches StickNodes orientation.
    ════════════════════════════════════════════════════════════════ */
 function render(fig) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   ctx.clearRect(0, 0, W, H);
+
   const items = walkWorld(fig);
 
   let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
   for (const it of items) {
-    const pad = Math.max(Math.abs(it.node.thickness || 0), Math.abs(it.node.length || 0));
+    const pad = Math.max(Math.abs(it.node.thickness || 0), Math.abs(it.node.length || 0)) / 2 + 5;
     for (const p of [[it.sx,it.sy],[it.ex,it.ey]]) {
       if (p[0]-pad < minX) minX = p[0]-pad;
       if (p[1]-pad < minY) minY = p[1]-pad;
@@ -355,26 +814,26 @@ function render(fig) {
     }
   }
   if (!isFinite(minX)) { minX=minY=-50; maxX=maxY=50; }
-  const spanX = Math.max(maxX - minX, 60);
-  const spanY = Math.max(maxY - minY, 60);
-  const fit = Math.min((W - 40) / spanX, (H - 40) / spanY);
+  const spanX = Math.max(maxX - minX, 40);
+  const spanY = Math.max(maxY - minY, 40);
+  const fit = Math.min((W - 60) / spanX, (H - 60) / spanY);
   const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
 
   ctx.save();
   ctx.translate(W/2, H/2);
-  ctx.scale(fit, -fit);
+  ctx.scale(fit, fit);                // ← no Y flip
   ctx.translate(-cx, -cy);
 
   let figCol;
-  try { figCol = cssColorHex(fig.colorHex); }
+  try { figCol = cssFromHex(fig.colorHex); }
   catch { figCol = 'rgba(32,32,32,1)'; }
 
   for (const it of items) {
     const n = it.node;
-    if (n.nodeType === -1) continue;                // skip root
+    if (n.nodeType === -1) continue;
     let col = figCol;
     if (n.useSegmentColor) {
-      try { col = cssColorHex(n.colorHex); } catch {}
+      try { col = cssFromHex(n.colorHex); } catch {}
     }
     ctx.strokeStyle = col;
     ctx.fillStyle = col;
@@ -385,16 +844,17 @@ function render(fig) {
     const angle = Math.atan2(it.ey - it.sy, it.ex - it.sx);
 
     switch (n.nodeType) {
-      case 1:                                       // Segment
-      case 0:                                       // RoundedSegment
+      case 1:
+      case 0:
         ctx.lineWidth = th;
         ctx.lineCap = n.nodeType === 0 ? 'round' : 'butt';
         ctx.beginPath();
-        ctx.moveTo(it.sx, it.sy); ctx.lineTo(it.ex, it.ey);
+        ctx.moveTo(it.sx, it.sy);
+        ctx.lineTo(it.ex, it.ey);
         ctx.stroke();
         break;
-      case 2:                                       // Circle (hollow)
-      case 4: {                                     // FilledCircle
+      case 2:
+      case 4: {
         const r = Math.max(1, len / 2);
         ctx.beginPath();
         ctx.arc(it.ex, it.ey, r, 0, Math.PI * 2);
@@ -402,78 +862,87 @@ function render(fig) {
         else { ctx.lineWidth = th; ctx.stroke(); }
         break;
       }
-      case 5:                                       // Ellipse
+      case 5:
         ctx.save();
-        ctx.translate(it.ex, it.ey); ctx.rotate(angle);
+        ctx.translate(it.ex, it.ey);
+        ctx.rotate(angle);
         ctx.beginPath();
         ctx.ellipse(0, 0, Math.max(1, len/2), Math.max(1, th/2), 0, 0, Math.PI*2);
         ctx.fill();
         ctx.restore();
         break;
-      case 3: {                                     // Triangle
+      case 3: {
         const r = Math.max(1, len), base = angle + Math.PI, side = 2*Math.PI/3;
         ctx.beginPath();
         ctx.moveTo(it.ex, it.ey);
         ctx.lineTo(it.ex + r*Math.cos(base + side/2), it.ey + r*Math.sin(base + side/2));
         ctx.lineTo(it.ex + r*Math.cos(base - side/2), it.ey + r*Math.sin(base - side/2));
-        ctx.closePath(); ctx.fill();
+        ctx.closePath();
+        ctx.fill();
         break;
       }
-      case 6:                                       // Trapezoid
-        // note: our wrapper doesn't expose trapezoid start/end thickness separately,
-        // so approximate using overall thickness as the base width
-        {
-          const w1 = Math.abs(th), w2 = w1 * 0.5;
-          const nx = -Math.sin(angle), ny = Math.cos(angle);
-          ctx.beginPath();
-          ctx.moveTo(it.sx + nx*w1/2, it.sy + ny*w1/2);
-          ctx.lineTo(it.ex + nx*w2/2, it.ey + ny*w2/2);
-          ctx.lineTo(it.ex - nx*w2/2, it.ey - ny*w2/2);
-          ctx.lineTo(it.sx - nx*w1/2, it.sy - ny*w1/2);
-          ctx.closePath(); ctx.fill();
-        }
+      case 6: {
+        const w1 = Math.abs(th), w2 = w1 * 0.5;
+        const nx = -Math.sin(angle), ny = Math.cos(angle);
+        ctx.beginPath();
+        ctx.moveTo(it.sx + nx*w1/2, it.sy + ny*w1/2);
+        ctx.lineTo(it.ex + nx*w2/2, it.ey + ny*w2/2);
+        ctx.lineTo(it.ex - nx*w2/2, it.ey - ny*w2/2);
+        ctx.lineTo(it.sx - nx*w1/2, it.sy - ny*w1/2);
+        ctx.closePath();
+        ctx.fill();
         break;
-      case 7:                                       // Polygon
-        // our wrapper doesn't expose numPolygonVertices; use 5 as default
-        {
-          const sides = 5, r = Math.max(1, len);
-          ctx.beginPath();
-          for (let i = 0; i < sides; i++) {
-            const a = angle + (i/sides)*Math.PI*2;
-            const px = it.ex + r*Math.cos(a), py = it.ey + r*Math.sin(a);
-            i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-          }
-          ctx.closePath(); ctx.fill();
+      }
+      case 7: {
+        const sides = 5, r = Math.max(1, len);
+        ctx.beginPath();
+        for (let i = 0; i < sides; i++) {
+          const a = angle + (i/sides)*Math.PI*2;
+          const px = it.ex + r*Math.cos(a), py = it.ey + r*Math.sin(a);
+          i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
         }
+        ctx.closePath();
+        ctx.fill();
         break;
+      }
     }
   }
   ctx.restore();
-  ctx.fillStyle = '#8a8a92';
-  ctx.font = '11px ui-monospace,monospace';
-  ctx.fillText('fit ×' + fit.toFixed(2), 8, 16);
+
+  previewMeta.textContent = '×' + fit.toFixed(2) + '  ' + items.length + ' nodes';
 }
 
 /* ════════════════════════════════════════════════════════════════
-   Tree view (read-only)
+   Tree view
    ════════════════════════════════════════════════════════════════ */
 function renderTree(fig) {
   treeEl.textContent = '';
   const visit = (node, depth) => {
     const row = document.createElement('div');
     row.className = 'row';
+    const branch = document.createElement('span');
+    branch.className = 'branch';
+    branch.textContent = '│ '.repeat(depth);
+    const idx = document.createElement('span');
+    idx.className = 'idx';
+    idx.textContent = '[' + node.drawIndex + ']';
+    const type = document.createElement('span');
+    type.className = 'type';
+    type.textContent = NODE_TYPE_NAME[node.nodeType] || node.nodeType;
+    const props = document.createElement('span');
+    props.className = 'props';
     let s = '';
-    if (node.length)      s += 'len=' + node.length + ' ';
+    if (node.length)      s += 'len=' + node.length.toFixed(1) + ' ';
     if (node.thickness)   s += 'th=' + node.thickness + ' ';
-    if (node.localAngle)  s += '∠' + node.localAngle + '° ';
+    if (node.localAngle)  s += '∠' + node.localAngle.toFixed(1) + '° ';
     if (node.useSegmentColor) {
       try { s += node.colorHex; } catch {}
     }
-    row.innerHTML =
-      '<span style="color:#444">' + '│ '.repeat(depth) + '</span>' +
-      '<span class="idx">[' + node.drawIndex + ']</span>' +
-      '<span class="type">' + (NODE_TYPE_NAME[node.nodeType] || node.nodeType) + '</span>' +
-      '<span class="props">' + s + '</span>';
+    props.textContent = s.trim();
+    row.appendChild(branch);
+    row.appendChild(idx);
+    row.appendChild(type);
+    row.appendChild(props);
     treeEl.appendChild(row);
     for (const k of node.children()) visit(k, depth + 1);
   };
@@ -498,7 +967,10 @@ function figureToXml(fig) {
     if (node.thickness)   attrs.push('thickness="' + node.thickness + '"');
     if (node.localAngle)  attrs.push('angle="' + node.localAngle + '"');
     if (node.useSegmentColor) {
-      try { attrs.push('color="' + node.colorHex + '"'); attrs.push('useSegmentColor="true"'); } catch {}
+      try {
+        attrs.push('color="' + node.colorHex + '"');
+        attrs.push('useSegmentColor="true"');
+      } catch {}
     }
     if (node.useSegmentScale) attrs.push('useSegmentScale="true"');
 
@@ -516,22 +988,102 @@ function figureToXml(fig) {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   Tabs
+   Presets
    ════════════════════════════════════════════════════════════════ */
-document.querySelectorAll('.tabs button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelector('.panel[data-panel="' + btn.dataset.tab + '"]')
-            .classList.add('active');
-  });
-});
+const PRESETS = {
+  empty: [
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <!-- Add <node> elements here -->',
+    '</stickfigure>'
+  ].join('\n'),
+
+  standing: [
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="70" thickness="20" angle="90" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="34" thickness="34" angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="200" color="#42489DFF" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="340" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="65" thickness="16" angle="250" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="65" thickness="16" angle="290" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'
+  ].join('\n'),
+
+  tpose: [
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="70" thickness="20" angle="90" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="34" thickness="34" angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="55" thickness="12" angle="90" color="#42489DFF" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="55" thickness="12" angle="-90" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="65" thickness="16" angle="250" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="65" thickness="16" angle="290" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'
+  ].join('\n'),
+
+  running: [
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="70" thickness="20" angle="80" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="34" thickness="34" angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="40" thickness="12" angle="220" color="#42489DFF" useSegmentColor="true">',
+    '      <node type="RoundedSegment" length="35" thickness="11" angle="-60" color="#42489DFF" useSegmentColor="true"/>',
+    '    </node>',
+    '    <node type="RoundedSegment" length="40" thickness="12" angle="320" color="#42489DFF" useSegmentColor="true">',
+    '      <node type="RoundedSegment" length="35" thickness="11" angle="60" color="#42489DFF" useSegmentColor="true"/>',
+    '    </node>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="250" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="50" thickness="14" angle="60" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="60" thickness="16" angle="290" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="50" thickness="14" angle="-90" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'
+  ].join('\n'),
+
+  sitting: [
+    '<?xml version="1.0"?>',
+    '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
+    '  <node type="RoundedSegment" length="70" thickness="20" angle="90" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="FilledCircle" length="34" thickness="34" angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="230" color="#42489DFF" useSegmentColor="true"/>',
+    '    <node type="RoundedSegment" length="45" thickness="12" angle="310" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="65" thickness="16" angle="20" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '  <node type="RoundedSegment" length="65" thickness="16" angle="-20" color="#42489DFF" useSegmentColor="true">',
+    '    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="#42489DFF" useSegmentColor="true"/>',
+    '  </node>',
+    '</stickfigure>'
+  ].join('\n'),
+};
 
 /* ════════════════════════════════════════════════════════════════
-   Actions
+   UI wiring
    ════════════════════════════════════════════════════════════════ */
 let currentFig = null;
+
+function updateXmlMeta() {
+  const text = xmlEl.value;
+  const lines = text.split('\n').length;
+  const bytes = new Blob([text]).size;
+  xmlMeta.textContent = lines + ' lines · ' + bytes + ' B';
+}
+
+xmlEl.addEventListener('input', updateXmlMeta);
 
 function buildAndShow() {
   clearLog();
@@ -540,13 +1092,15 @@ function buildAndShow() {
     currentFig = r.fig;
     render(r.fig);
     renderTree(r.fig);
-    log('✔ built: ' + r.added + ' node(s)' +
-        (r.pfAdded ? ', ' + r.pfAdded + ' polyfill(s)' : ''), 'ok');
-    log('version=' + r.fig.version + '  build=' + r.fig.build +
-        '  scale=' + r.fig.scale, 'ok');
+    logMsg('ok', 'Built ' + r.added + ' node(s)' +
+        (r.pfAdded ? ' · ' + r.pfAdded + ' polyfill(s)' : ''));
+    logMsg('dim', 'version=' + r.fig.version + ' · build=' + r.fig.build +
+        ' · scale=' + r.fig.scale);
+    toast('Built ' + r.added + ' node' + (r.added === 1 ? '' : 's'));
   } catch (e) {
-    logErr(e);
+    logMsg('err', e.message || String(e));
     document.querySelector('.tabs button[data-tab="log"]').click();
+    toast('Build failed');
   }
 }
 
@@ -560,12 +1114,18 @@ $('btnDownload').addEventListener('click', () => {
     const blob = new Blob([bytes], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'figure.nodes';
-    document.body.appendChild(a); a.click(); a.remove();
+    a.href = url;
+    a.download = 'figure.nodes';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    log('✔ exported ' + bytes.length + ' bytes', 'ok');
-    document.querySelector('.tabs button[data-tab="log"]').click();
-  } catch (e) { logErr(e); }
+    logMsg('ok', 'Exported ' + bytes.length.toLocaleString() + ' bytes');
+    toast('Downloaded figure.nodes');
+  } catch (e) {
+    logMsg('err', e.message || String(e));
+    toast('Export failed');
+  }
 });
 
 $('btnExport').addEventListener('click', () => {
@@ -573,81 +1133,88 @@ $('btnExport').addEventListener('click', () => {
     if (!currentFig) buildAndShow();
     if (!currentFig) return;
     xmlEl.value = figureToXml(currentFig);
-    log('✔ XML written back (limited — only a few fields exposed by the wrapper)', 'ok');
-    document.querySelector('.tabs button[data-tab="xml"]').click();
-  } catch (e) { logErr(e); }
+    updateXmlMeta();
+    logMsg('ok', 'XML written from current figure (partial — wrapper exposes a subset)');
+    toast('XML exported');
+  } catch (e) {
+    logMsg('err', e.message || String(e));
+  }
 });
 
-$('btnLoadNodes').addEventListener('click', () => fileInput.click());
+$('btnCopy').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(xmlEl.value);
+    toast('Copied to clipboard');
+  } catch (e) {
+    // Fallback: select all
+    xmlEl.focus();
+    xmlEl.select();
+    toast('Select-all — press Ctrl/Cmd+C');
+  }
+});
+
+$('btnLoad').addEventListener('click', () => fileInput.click());
 
 fileInput.addEventListener('change', async () => {
   const file = fileInput.files && fileInput.files[0];
   if (!file) return;
   try {
     const buf = new Uint8Array(await file.arrayBuffer());
-    const fig = Stickfigure.fromBytes(buf);
+    const fig = mod.Stickfigure.fromBytes(buf);
     currentFig = fig;
-    render(fig); renderTree(fig);
+    render(fig);
+    renderTree(fig);
     xmlEl.value = figureToXml(fig);
-    log('✔ loaded ' + file.name + ' (' + buf.length + ' bytes, version ' +
-        fig.version + ' build ' + fig.build + ')', 'ok');
-    document.querySelector('.tabs button[data-tab="xml"]').click();
-  } catch (e) { logErr(e); }
-  finally { fileInput.value = ''; }
+    updateXmlMeta();
+    logMsg('ok', 'Loaded ' + file.name + ' · ' + buf.length.toLocaleString() +
+        ' bytes · version ' + fig.version + ' build ' + fig.build);
+    toast('Loaded ' + file.name);
+  } catch (e) {
+    logMsg('err', 'load: ' + (e.message || String(e)));
+    toast('Load failed');
+  } finally {
+    fileInput.value = '';
+  }
 });
 
-$('btnHex').addEventListener('click', () => {
-  try {
-    if (!currentFig) buildAndShow();
-    if (!currentFig) return;
-    const bytes = currentFig.toBytes();
-    const lines = [];
-    for (let i = 0; i < bytes.length && i < 512; i += 16) {
-      const chunk = bytes.slice(i, i + 16);
-      const hex = Array.from(chunk).map(b => b.toString(16).padStart(2, '0')).join(' ');
-      const asc = Array.from(chunk).map(b => (b >= 32 && b < 127) ? String.fromCharCode(b) : '.').join('');
-      lines.push(i.toString(16).padStart(4, '0') + '  ' + hex.padEnd(48) + '  ' + asc);
-    }
-    if (bytes.length > 512) lines.push('… (' + (bytes.length - 512) + ' more bytes)');
-    log('hex dump — ' + bytes.length + ' bytes', 'hi');
-    log(lines.join('\n'), 'hi');
-    document.querySelector('.tabs button[data-tab="log"]').click();
-  } catch (e) { logErr(e); }
+$('preset').addEventListener('change', e => {
+  const key = e.target.value;
+  if (!key) return;
+  xmlEl.value = PRESETS[key] || PRESETS.standing;
+  updateXmlMeta();
+  buildAndShow();
+  e.target.value = '';
+});
+
+// Tabs
+document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector('.tab-content[data-tab="' + btn.dataset.tab + '"]')
+            .classList.add('active');
+  });
 });
 
 /* ════════════════════════════════════════════════════════════════
-   Default XML — 425 / build 100
+   Boot
    ════════════════════════════════════════════════════════════════ */
-xmlEl.value = [
-  '<?xml version="1.0"?>',
-  '<stickfigure version="425" build="100" scale="1.0" color="#202020FF">',
-  '',
-  '  <!-- Torso: points up (angle 90° = up) -->',
-  '  <node type="RoundedSegment" length="70" thickness="20"',
-  '        angle="90" color="#3366FFFF" useSegmentColor="true">',
-  '',
-  '    <!-- Head -->',
-  '    <node type="FilledCircle" length="36" thickness="36"',
-  '          angle="0" color="#FFCC99FF" useSegmentColor="true"/>',
-  '',
-  '    <!-- Arms -->',
-  '    <node type="RoundedSegment" length="50" thickness="13"',
-  '          angle="200" color="#3366FFFF" useSegmentColor="true"/>',
-  '    <node type="RoundedSegment" length="50" thickness="13"',
-  '          angle="340" color="#3366FFFF" useSegmentColor="true"/>',
-  '  </node>',
-  '',
-  '  <!-- Legs -->',
-  '  <node type="RoundedSegment" length="65" thickness="16"',
-  '        angle="250" color="#3366FFFF" useSegmentColor="true"/>',
-  '  <node type="RoundedSegment" length="65" thickness="16"',
-  '        angle="290" color="#3366FFFF" useSegmentColor="true"/>',
-  '',
-  '</stickfigure>'
-].join('\n');
+(async () => {
+  try {
+    await loadLibrary();
+    xmlEl.value = PRESETS.standing;
+    updateXmlMeta();
+    buildAndShow();
+  } catch (e) {
+    // already logged in loadLibrary
+  }
+})();
 
-log('ready', 'ok');
-buildAndShow();
+// Prevent losing scroll position on mobile rotate
+window.addEventListener('resize', () => {
+  if (currentFig) render(currentFig);
+});
 </script>
 </body>
 </html>
