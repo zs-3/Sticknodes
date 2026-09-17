@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#f4f6fa">
+<title>StickNodes Studio</title>
+<style>
+:root{
+  --bg:#f4f6fa;--panel:#fff;--panel2:#fbfcfe;--border:#e3e6ec;
+  --border2:#cfd4dd;--text:#1a1d24;--muted:#6b7280;--accent:#4f46e5;
+  --soft:#eef2ff;--ok:#059669;--err:#dc2626;--warn:#d97706;
+  --shadow:0 1px 3px rgba(20,20,40,.08),0 4px 12px rgba(20,20,40,.04);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);background:var(--bg)}
+button,select,textarea{font:inherit}
+.app{height:100dvh;display:flex;flex-direction:column}
+header{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:var(--panel);border-bottom:1px solid var(--border)}
+.brand{font-weight:750;display:flex;align-items:center;gap:9px}
+.brand-dot{width:9px;height:9px;border-radius:50%;background:#4f46e5;box-shadow:0 0 0 4px var(--soft)}
+.status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+.led{width:7px;height:7px;border-radius:50%;background:#9ca3af}
+.status.ready .led{background:var(--ok);box-shadow:0 0 7px rgba(5,150,105,.5)}
+.status.error .led{background:var(--err)}
+.toolbar{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--panel);border-bottom:1px solid var(--border);overflow:auto;flex:none}
+.btn,.preset{height:34px;border:1px solid var(--border2);border-radius:7px;background:var(--panel);padding:0 11px;color:var(--text);cursor:pointer;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.btn:hover,.preset:hover{background:#fafbfd}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:white}
+.btn.on{background:var(--soft);border-color:var(--accent);color:var(--accent)}
+.sep{width:1px;height:25px;background:var(--border);margin:0 2px}
+.spacer{flex:1}
+.content{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:10px;padding:10px 12px 12px}
+.card{min-height:0;background:var(--panel);border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.card-title{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 11px;background:var(--panel2);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);flex:none}
+.meta{font:11px ui-monospace,Consolas,monospace;font-weight:400;letter-spacing:0;text-transform:none;max-width:65%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preview-wrap{position:relative;flex:1;min-height:0;overflow:hidden;background:#fff;touch-action:none}
+canvas{display:block;width:100%;height:100%}
+.zoom{position:absolute;right:9px;top:9px;display:flex;flex-direction:column;background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
+.zoom button{width:34px;height:31px;border:0;background:transparent;cursor:pointer;font-size:16px}
+.zoom button:hover{background:var(--soft);color:var(--accent)}
+.zoom-pct{font:10px ui-monospace,monospace;text-align:center;color:var(--muted);padding:4px;border-block:1px solid var(--border)}
+.hint{position:absolute;left:9px;bottom:9px;background:rgba(20,22,28,.78);color:#fff;padding:5px 9px;border-radius:14px;font-size:11px;pointer-events:none;transition:opacity .5s}
+.hint.hide{opacity:0}
+.info{display:flex;gap:12px;flex-wrap:wrap;padding:6px 10px;background:#f7f8fb;border-top:1px solid var(--border);font:10.5px ui-monospace,Consolas,monospace;color:var(--muted);flex:none}
+.info b{color:var(--text)}
+.right{min-height:0;display:flex;flex-direction:column;gap:10px}
+.xml-card{flex:1 1 52%}
+.debug-card{flex:1 1 48%}
+textarea{flex:1;min-height:0;width:100%;resize:none;border:0;outline:0;padding:11px 12px;background:var(--panel);color:var(--text);font:12px/1.55 ui-monospace,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto}
+.tabs{display:flex;padding:5px 7px 0;gap:2px;border-bottom:1px solid var(--border);background:var(--panel2)}
+.tab{border:0;background:transparent;color:var(--muted);padding:7px 10px;font-size:11px;font-weight:700;border-bottom:2px solid transparent;cursor:pointer}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--panel)}
+.panel{display:none;flex:1;min-height:0;overflow:auto}
+.panel.active{display:block}
+#log{padding:9px 11px;font:11px/1.5 ui-monospace,Consolas,monospace}
+.logline{padding:2px 0;display:flex;gap:7px}
+.badge{width:40px;text-align:center;border-radius:4px;font-size:9px;font-weight:800;padding:1px 3px;flex:none}
+.log-ok .badge{background:#ecfdf5;color:#059669}.log-err .badge{background:#fef2f2;color:#dc2626}
+.log-warn .badge{background:#fffbeb;color:#d97706}.log-info .badge{background:#eef2ff;color:#4f46e5}
+#tree{padding:7px;font:11px/1.45 ui-monospace,Consolas,monospace}
+.tree-row{display:grid;grid-template-columns:36px 120px 15px 1fr;gap:6px;padding:3px 5px;border-radius:4px;cursor:pointer}
+.tree-row:hover{background:#f7f8fb}.tree-row.selected{background:var(--soft)}
+.tree-idx{color:var(--accent);font-weight:700}.tree-type{color:#a16207}.swatch{width:14px;height:14px;border:1px solid #bbb;border-radius:3px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,70px);opacity:0;background:#1a1d24;color:#fff;border-radius:20px;padding:9px 15px;font-size:12px;z-index:20;transition:.22s;pointer-events:none}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.file-input{display:none}
+@media(max-width:900px){
+ .content{grid-template-columns:1fr;grid-template-rows:minmax(300px,1fr) minmax(300px,1fr)}
+ .right{min-height:0}
+}
+@media(max-width:560px){
+ .toolbar .label{display:none}.btn{padding:0 9px}.content{padding:7px}.content{gap:7px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand"><span class="brand-dot"></span>StickNodes Studio</div>
+  <div class="status" id="status"><span class="led"></span><span id="statusText">loading WASM…</span></div>
+</header>
+
+<div class="toolbar">
+  <button class="btn primary" id="build">▶ <span class="label">Build</span></button>
+  <button class="btn" id="download">↓ <span class="label">Download .nodes</span></button>
+  <button class="btn" id="export">⇢ <span class="label">Export XML</span></button>
+  <button class="btn" id="copy">⧉ <span class="label">Copy XML</span></button>
+  <button class="btn" id="load">⇩ <span class="label">Load .nodes</span></button>
+  <input class="file-input" id="file" type="file" accept=".nodes,application/octet-stream">
+  <span class="sep"></span>
+  <button class="btn on" id="drag">↔ <span class="label">Drag</span></button>
+  <button class="btn on" id="fills">◇ <span class="label">Fills</span></button>
+  <button class="btn on" id="points">○ <span class="label">Editor handles</span></button>
+  <button class="btn" id="flip">⇅ <span class="label">Flip Y</span></button>
+  <span class="spacer"></span>
+  <select class="preset" id="preset">
+    <option value="">Preset…</option>
+    <option value="standing">Standing</option>
+    <option value="tpose">T-pose</option>
+    <option value="running">Running</option>
+    <option value="sitting">Sitting</option>
+    <option value="waving">Waving</option>
+  </select>
+</div>
+
+<div class="content">
+  <section class="card">
+    <div class="card-title"><span>Preview</span><span class="meta" id="previewMeta">—</span></div>
+    <div class="preview-wrap" id="previewWrap">
+      <canvas id="preview"></canvas>
+      <div class="zoom">
+        <button id="zin">+</button><div class="zoom-pct" id="zoomPct">—</div>
+        <button id="zout">−</button><button id="zfit">⌂</button><button id="zreset">◎</button>
+      </div>
+      <div class="hint" id="hint">Pinch to zoom · drag canvas to pan · tap tip to select · drag tip to edit</div>
+    </div>
+    <div class="info">
+      <span>wasm <b id="wasm">—</b></span>
+      <span>figure <b id="figver">—</b></span>
+      <span>nodes <b id="nodes">0</b></span>
+      <span>polyfills <b id="polyfills">0</b></span>
+      <span>selected <b id="selected">—</b></span>
+      <span>stretchy <b id="stretchy">—</b></span>
+    </div>
+  </section>
+
+  <div class="right">
+    <section class="card xml-card">
+      <div class="card-title"><span>XML document</span><span class="meta" id="xmlMeta">—</span></div>
+      <textarea id="xml" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+    </section>
+
+    <section class="card debug-card">
+      <div class="tabs">
+        <button class="tab active" data-panel="log">Log</button>
+        <button class="tab" data-panel="tree">Tree <span id="treeCount">0</span></button>
+        <button class="tab" data-panel="json">WASM JSON</button>
+      </div>
+      <div class="panel active" id="panel-log"><div id="log"></div></div>
+      <div class="panel" id="panel-tree"><div id="tree"></div></div>
+      <div class="panel" id="panel-json"><textarea id="json" readonly></textarea></div>
+    </section>
+  </div>
+</div>
+</div>
+<div id="toast"></div>
+
+<script type="module">
+import { StickNodesRenderer } from './rend.js';
+
+const $ = id => document.getElementById(id);
+const canvas=$('preview'), xmlEl=$('xml'), fileEl=$('file');
+let mod=null, currentFig=null, renderer=null, toastTimer=null;
+
+const NODE_NAMES={
+  [-1]:'RootNode',0:'RoundedSegment',1:'Segment',2:'Circle',3:'Triangle',
+  4:'FilledCircle',5:'Ellipse',6:'Trapezoid',7:'Polygon'
+};
+const NODE_TYPES=new Set(Object.values(NODE_NAMES).filter(x=>x!=='RootNode'));
+
+function log(kind,msg){
+  const d=document.createElement('div');
+  d.className='logline log-'+kind;
+  const b=document.createElement('span');b.className='badge';
+  b.textContent={ok:'OK',err:'FAIL',warn:'WARN',info:'INFO'}[kind]||'INFO';
+  const t=document.createElement('span');t.textContent=msg;
+  d.append(b,t);$('log').appendChild(d);
+  $('panel-log').scrollTop=$('panel-log').scrollHeight;
+}
+function clearLog(){$('log').textContent=''}
+function toast(s){
+  $('toast').textContent=s;$('toast').classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),1800);
+}
+function status(ok,text){
+  $('status').className='status '+(ok?'ready':'error');$('statusText').textContent=text;
+}
+
+/* --------------------------- WASM loading ------------------------------- */
+async function loadWasm(){
+  try{
+    const jsText=await (await fetch('./sticknodes_rs.js',{cache:'no-store'})).text();
+    const blob=URL.createObjectURL(new Blob([jsText],{type:'application/javascript'}));
+    try{mod=await import(blob)}finally{URL.revokeObjectURL(blob)}
+    log('ok','sticknodes_rs.js module loaded');
+
+    const bytes=await (await fetch('./sticknodes_rs_bg.wasm',{cache:'no-store'})).arrayBuffer();
+    await mod.default(bytes);
+    const v=mod.SUPPORTED_VERSION?.()??'?';
+    const b=mod.SUPPORTED_BUILD?.()??'?';
+    $('wasm').textContent=v+'/'+b;
+    log('ok','WASM initialized — supported '+v+'/'+b);
+    status(true,'WASM ready');
+  }catch(e){
+    console.error(e);log('err','WASM initialization failed: '+e.message);
+    status(false,'WASM failed');throw e;
+  }
+}
+
+/* --------------------------- XML parser --------------------------------- */
+
+const BOOL_ATTRS={
+  static:'isStatic',stretchy:'isStretchy',floaty:'isFloaty',
+  smartStretch:'isSmartStretch',doNotApplySmartStretch:'doNotApplySmartStretch',
+  smartStretchResetImpulse:'smartStretchResetImpulse',
+  useSegmentColor:'useSegmentColor',useCircleOutline:'useCircleOutline',
+  hollow:'circleIsHollow',useGradient:'useGradient',reverseGradient:'reverseGradient',
+  useSegmentScale:'useSegmentScale',curveCirculization:'curveCirculization',
+  halfArc:'halfArc',triangleFlipped:'triangleFlipped',triangleUpsideDown:'triangleUpsideDown',
+  useTrapezoidStart:'useTrapezoidThicknessStart',
+  useTrapezoidEnd:'useTrapezoidThicknessEnd',
+  trapezoidRoundedStart:'trapezoidIsRoundedStart',
+  trapezoidRoundedEnd:'trapezoidIsRoundedEnd',
+  dragLocked:'isDragLocked'
+};
+
+const NUM_ATTRS={
+  length:'length',defaultLength:'defaultLength',
+  thickness:'thickness',defaultThickness:'defaultThickness',
+  scale:'scale',angle:'localAngle',defaultAngle:'defaultAngle',
+  defaultLocalAngle:'defaultLocalAngle',
+  curveRadius:'segmentCurveRadiusAndDefaultCurveRadius',
+  curvePrecision:'segmentCurvePolyfillPrecision',
+  trapezoidStartThickness:'trapezoidThicknessStart',
+  trapezoidEndThickness:'trapezoidThicknessEnd',
+  polygonVertices:'numPolygonVertices',
+  angleLockRelativeMultiplier:'angleLockRelativeMultiplier',
+  dragLockAngle:'dragLockAngle',
+  smartStretchMultiplier:'smartStretchMultiplier'
+};
+
+const COLOR_ATTRS={
+  color:'color',gradientColor:'gradientColor',outlineColor:'circleOutlineColor'
+};
+
+const KNOWN_NODE_ATTRS=new Set([
+  'type',...Object.keys(BOOL_ATTRS),...Object.keys(NUM_ATTRS),
+  ...Object.keys(COLOR_ATTRS),'gradientMode','triangleType','angleLock'
+]);
+
+function colorObject(hex){
+  let h=String(hex||'').trim().replace(/^#/,'');
+  if(!/^[0-9a-fA-F]+$/.test(h))throw new Error('invalid color '+hex);
+  if(h.length===3)h=h.split('').map(c=>c+c).join('')+'FF';
+  if(h.length===4)h=h.split('').map(c=>c+c).join('');
+  if(h.length===6)h+='FF';
+  if(h.length!==8)throw new Error('color must be RGB/RGBA hex: '+hex);
+  return {
+    red:parseInt(h.slice(0,2),16),green:parseInt(h.slice(2,4),16),
+    blue:parseInt(h.slice(4,6),16),alpha:parseInt(h.slice(6,8),16)
+  };
+}
+function parseBool(v){return !(['false','0','no','off',''].includes(String(v).trim().toLowerCase()))}
+
+function nodeOptions(el,warnings){
+  const o={};
+  const type=el.getAttribute('type');
+  if(type){
+    if(!NODE_TYPES.has(type))throw new Error('unknown node type "'+type+'"');
+    o.nodeType=type;
+  }
+
+  for(const [xml,key] of Object.entries(NUM_ATTRS)){
+    if(!el.hasAttribute(xml))continue;
+    const raw=el.getAttribute(xml),v=Number(raw);
+    if(!Number.isFinite(v))throw new Error('<node> '+xml+' must be numeric, got "'+raw+'"');
+    o[key]=v;
+  }
+  for(const [xml,key] of Object.entries(BOOL_ATTRS)){
+    if(el.hasAttribute(xml))o[key]=parseBool(el.getAttribute(xml));
+  }
+  for(const [xml,key] of Object.entries(COLOR_ATTRS)){
+    if(el.hasAttribute(xml))o[key]=colorObject(el.getAttribute(xml));
+  }
+  if(el.hasAttribute('gradientMode'))o.gradientMode=el.getAttribute('gradientMode');
+  if(el.hasAttribute('triangleType'))o.triangleType=el.getAttribute('triangleType');
+  if(el.hasAttribute('angleLock'))o.angleLockMode=el.getAttribute('angleLock');
+
+  for(const a of el.getAttributeNames()){
+    if(!KNOWN_NODE_ATTRS.has(a))
+      warnings.push('unknown node attribute "'+a+'" ignored');
+  }
+  return o;
+}
+
+function polyfillOptions(el,warnings){
+  const anchorRaw=el.getAttribute('anchor');
+  const anchor=Number(anchorRaw);
+  if(!Number.isInteger(anchor)||anchor<0)throw new Error('<polyfill> anchor must be a non-negative integer');
+
+  const attachedRaw=el.getAttribute('attached')||'';
+  const attached=[];
+  if(attachedRaw.trim()){
+    for(const x of attachedRaw.split(',')){
+      const n=Number(x.trim());
+      if(!Number.isInteger(n)||n<0)throw new Error('invalid polyfill attached index "'+x+'"');
+      attached.push(n);
+    }
+  }
+
+  for(const a of el.getAttributeNames()){
+    if(!['anchor','attached','color','useColor'].includes(a))
+      warnings.push('unknown polyfill attribute "'+a+'" ignored');
+  }
+
+  return {
+    anchor,
+    attached,
+    colorHex:el.getAttribute('color')||'#000000FF',
+    usePolyfillColor:parseBool(el.getAttribute('useColor')??'true')
+  };
+}
+
+function parseXML(text){
+  const warnings=[];
+  const parser=new DOMParser();
+  const doc=parser.parseFromString(text,'application/xml');
+  const err=doc.querySelector('parsererror');
+  if(err)throw new Error('XML parse error: '+err.textContent.replace(/\s+/g,' ').trim());
+
+  const root=doc.documentElement;
+  if(!root||root.tagName.toLowerCase()!=='stickfigure')
+    throw new Error('root element must be <stickfigure>');
+
+  const fig=new mod.Stickfigure();
+  try{fig.setNodeLimitEnabled(false)}catch(_){}
+
+  const version=root.hasAttribute('version')?Number(root.getAttribute('version')):null;
+  const build=root.hasAttribute('build')?Number(root.getAttribute('build')):null;
+  const scale=root.hasAttribute('scale')?Number(root.getAttribute('scale')):null;
+
+  if(version!==null&&!Number.isInteger(version))throw new Error('stickfigure version must be an integer');
+  if(build!==null&&!Number.isInteger(build))throw new Error('stickfigure build must be an integer');
+  if(scale!==null&&!Number.isFinite(scale))throw new Error('stickfigure scale must be numeric');
+
+  if(version!==null)fig.setVersion(version);
+  if(build!==null)fig.build=build;
+  if(scale!==null)fig.scale=scale;
+  if(root.hasAttribute('color'))fig.colorHex=root.getAttribute('color');
+
+  const rootNode=fig.rootNode();
+  let nodeCount=0;
+
+  function walk(parent,element){
+    for(const childEl of Array.from(element.children)){
+      const tag=childEl.tagName.toLowerCase();
+      if(tag==='node'){
+        const child=parent.addChild(nodeOptions(childEl,warnings));
+        nodeCount++;
+        walk(child,childEl);
+      }else if(tag!=='polyfill'){
+        warnings.push('unknown <stickfigure> child <'+childEl.tagName+'> ignored');
+      }
+    }
+  }
+  walk(rootNode,root);
+
+  let pfCount=0;
+  for(const el of Array.from(root.children)){
+    if(el.tagName.toLowerCase()!=='polyfill')continue;
+    fig.addPolyfill(polyfillOptions(el,warnings));pfCount++;
+  }
+
+  return {fig,nodeCount,pfCount,warnings};
+}
+
+/* --------------------------- XML exporter ------------------------------- */
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function boolAttr(a,key,node,out){
+  try{if(node[key])out.push(a+'="true"')}catch(_){}
+}
+function numAttr(a,key,node,out){
+  try{
+    const v=Number(node[key]);
+    if(Number.isFinite(v))out.push(a+'="'+esc(v)+'"');
+  }catch(_){}
+}
+function figureToXML(fig){
+  const out=['<?xml version="1.0"?>'];
+  out.push('<stickfigure version="'+esc(fig.version)+'" build="'+esc(fig.build)+'" scale="'+esc(fig.scale)+'" color="'+esc(fig.colorHex)+'">');
+
+  const write=(node,depth)=>{
+    const pad='  '.repeat(depth),a=[];
+    const t=NODE_NAMES[node.nodeType];
+    if(t&&t!=='RootNode')a.push('type="'+t+'"');
+
+    /* Export all exposed scalar state rather than the old minimal XML. */
+    for(const [x,k] of Object.entries(NUM_ATTRS))numAttr(x,k,node,a);
+    for(const [x,k] of Object.entries(BOOL_ATTRS))boolAttr(x,k,node,a);
+
+    try{if(node.colorHex)a.push('color="'+esc(node.colorHex)+'"')}catch(_){}
+    try{if(node.gradientColorHex)a.push('gradientColor="'+esc(node.gradientColorHex)+'"')}catch(_){}
+    try{if(node.circleOutlineColorHex)a.push('outlineColor="'+esc(node.circleOutlineColorHex)+'"')}catch(_){}
+    try{if(node.gradientMode!==undefined)a.push('gradientMode="'+esc(node.gradientMode)+'"')}catch(_){}
+    try{if(node.triangleType!==undefined)a.push('triangleType="'+esc(node.triangleType)+'"')}catch(_){}
+    try{if(node.angleLockMode!==undefined)a.push('angleLock="'+esc(node.angleLockMode)+'"')}catch(_){}
+
+    const kids=safeChildren(node);
+    const start=pad+'<node '+a.join(' ');
+    if(!kids.length){out.push(start+'/>' );return}
+    out.push(start+'>');
+    for(const k of kids)write(k,depth+1);
+    out.push(pad+'</node>');
+  };
+
+  function safeChildren(n){try{return n.children()||[]}catch(_){return []}}
+  for(const n of safeChildren(fig.rootNode()))write(n,1);
+
+  try{
+    for(const pf of fig.allPolyfills()){
+      const attached=Array.from(pf.attached||[]).join(',');
+      out.push('  <polyfill anchor="'+esc(pf.anchorDrawIndex)+'" attached="'+esc(attached)+'" color="'+esc(pf.colorHex)+'" useColor="'+(pf.usePolyfillColor?'true':'false')+'"/>');
+    }
+  }catch(_){}
+  out.push('</stickfigure>');
+  return out.join('\n');
+}
+
+/* --------------------------- UI / tree ---------------------------------- */
+
+function renderTree(){
+  if(!currentFig)return;
+  const tree=$('tree');tree.textContent='';
+  const selected=renderer?.getSelectedIndex?.();
+  let count=0;
+
+  function visit(n,depth){
+    count++;
+    const row=document.createElement('div');
+    row.className='tree-row'+(n.drawIndex===selected?' selected':'');
+    const idx=document.createElement('span');idx.className='tree-idx';idx.textContent='['+n.drawIndex+']';
+    const typ=document.createElement('span');typ.className='tree-type';typ.textContent=NODE_NAMES[n.nodeType]||String(n.nodeType);
+    const sw=document.createElement('span');sw.className='swatch';
+    try{sw.style.background=n.colorHex}catch(_){}
+    const props=document.createElement('span');
+    const p=[];
+    try{p.push('L='+Number(n.length).toFixed(1))}catch(_){}
+    try{p.push('T='+Number(n.thickness).toFixed(1))}catch(_){}
+    try{p.push('A='+Number(n.localAngle).toFixed(1)+'°')}catch(_){}
+    if(depth)p.unshift('│ '.repeat(Math.min(depth,12)));
+    props.textContent=p.join(' ');
+    row.append(idx,typ,sw,props);
+    row.onclick=()=>{
+      renderer.selectedIndex=n.drawIndex;
+      renderer.render();renderTree();updateSelected(n);
+    };
+    tree.appendChild(row);
+    try{for(const k of n.children())visit(k,depth+1)}catch(_){}
+  }
+  try{visit(currentFig.rootNode(),0)}catch(e){log('err','tree: '+e.message)}
+  $('treeCount').textContent=count;
+}
+function updateSelected(n){
+  if(!n){$('selected').textContent='—';$('stretchy').textContent='—';return}
+  $('selected').textContent='['+n.drawIndex+'] '+(NODE_NAMES[n.nodeType]||n.nodeType);
+  $('stretchy').textContent=safe(()=>n.isStretchy?'yes':'no','—');
+}
+
+function safe(fn,fallback){try{return fn()}catch(_){return fallback}}
+
+function updateXMLMeta(){
+  const t=xmlEl.value;
+  $('xmlMeta').textContent=t.split(/\n/).length+' lines · '+new Blob([t]).size+' B';
+}
+function updateInfo(info){
+  if(!info)return;
+  $('nodes').textContent=info.nodeCount??0;
+  $('polyfills').textContent=info.fillCount??0;
+  $('previewMeta').textContent='×'+Number(info.zoom||1).toFixed(3)+' · '+(info.nodeCount||0)+' nodes · '+(info.fillCount||0)+' fills';
+  $('zoomPct').textContent=Math.round((info.zoom||1)*100)+'%';
+  if(currentFig)$('figver').textContent=currentFig.version+'/'+currentFig.build+' (s='+Number(currentFig.scale||1).toFixed(2)+')';
+}
+
+/* --------------------------- Presets ------------------------------------ */
+
+const BODY='#42489DFF',SKIN='#FFCC99FF';
+const PRESETS={
+standing:`<?xml version="1.0"?>
+<stickfigure version="425" build="100" scale="1" color="#202020FF">
+  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="${BODY}" useSegmentColor="true">
+    <node type="FilledCircle" length="20" thickness="40" angle="0" color="${SKIN}" useSegmentColor="true"/>
+    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="${BODY}" useSegmentColor="true"/>
+    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="${BODY}" useSegmentColor="true"/>
+  </node>
+  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="${BODY}" useSegmentColor="true"/>
+  </node>
+  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="${BODY}" useSegmentColor="true"/>
+  </node>
+</stickfigure>`,
+tpose:`<?xml version="1.0"?>
+<stickfigure version="425" build="100" scale="1" color="#202020FF">
+  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="${BODY}" useSegmentColor="true">
+    <node type="FilledCircle" length="20" thickness="40" angle="0" color="${SKIN}" useSegmentColor="true"/>
+    <node type="RoundedSegment" length="55" thickness="12" angle="90" color="${BODY}" useSegmentColor="true"/>
+    <node type="RoundedSegment" length="55" thickness="12" angle="-90" color="${BODY}" useSegmentColor="true"/>
+  </node>
+  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="${BODY}" useSegmentColor="true"/>
+  </node>
+  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="${BODY}" useSegmentColor="true"/>
+  </node>
+</stickfigure>`,
+running:`<?xml version="1.0"?>
+<stickfigure version="425" build="100" scale="1" color="#202020FF">
+  <node type="RoundedSegment" length="65" thickness="20" angle="280" color="${BODY}" useSegmentColor="true">
+    <node type="FilledCircle" length="20" thickness="40" angle="0" color="${SKIN}" useSegmentColor="true"/>
+    <node type="RoundedSegment" length="40" thickness="12" angle="130" color="${BODY}" useSegmentColor="true">
+      <node type="RoundedSegment" length="35" thickness="11" angle="-50" color="${BODY}" useSegmentColor="true"/>
+    </node>
+    <node type="RoundedSegment" length="40" thickness="12" angle="210" color="${BODY}" useSegmentColor="true">
+      <node type="RoundedSegment" length="35" thickness="11" angle="50" color="${BODY}" useSegmentColor="true"/>
+    </node>
+  </node>
+  <node type="RoundedSegment" length="55" thickness="16" angle="50" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="50" thickness="14" angle="40" color="${BODY}" useSegmentColor="true"/>
+  </node>
+  <node type="RoundedSegment" length="55" thickness="16" angle="110" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="55" thickness="14" angle="30" color="${BODY}" useSegmentColor="true"/>
+  </node>
+</stickfigure>`,
+sitting:`<?xml version="1.0"?>
+<stickfigure version="425" build="100" scale="1" color="#202020FF">
+  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="${BODY}" useSegmentColor="true">
+    <node type="FilledCircle" length="20" thickness="40" angle="0" color="${SKIN}" useSegmentColor="true"/>
+    <node type="RoundedSegment" length="45" thickness="12" angle="140" color="${BODY}" useSegmentColor="true"/>
+    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="${BODY}" useSegmentColor="true"/>
+  </node>
+  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="${BODY}" useSegmentColor="true"/>
+  </node>
+  <node type="RoundedSegment" length="60" thickness="16" angle="0" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="55" thickness="14" angle="90" color="${BODY}" useSegmentColor="true"/>
+  </node>
+</stickfigure>`,
+waving:`<?xml version="1.0"?>
+<stickfigure version="425" build="100" scale="1" color="#202020FF">
+  <node type="RoundedSegment" length="65" thickness="20" angle="270" color="${BODY}" useSegmentColor="true">
+    <node type="FilledCircle" length="20" thickness="40" angle="0" color="${SKIN}" useSegmentColor="true"/>
+    <node type="RoundedSegment" length="45" thickness="12" angle="70" color="${BODY}" useSegmentColor="true">
+      <node type="RoundedSegment" length="40" thickness="11" angle="-40" color="${BODY}" useSegmentColor="true"/>
+    </node>
+    <node type="RoundedSegment" length="45" thickness="12" angle="220" color="${BODY}" useSegmentColor="true"/>
+  </node>
+  <node type="RoundedSegment" length="60" thickness="16" angle="70" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="55" thickness="14" angle="20" color="${BODY}" useSegmentColor="true"/>
+  </node>
+  <node type="RoundedSegment" length="60" thickness="16" angle="110" color="${BODY}" useSegmentColor="true">
+    <node type="RoundedSegment" length="55" thickness="14" angle="-20" color="${BODY}" useSegmentColor="true"/>
+  </node>
+</stickfigure>`
+};
+
+/* --------------------------- Build / load ------------------------------- */
+
+function build(){
+  clearLog();
+  try{
+    const r=parseXML(xmlEl.value);
+    currentFig=r.fig;renderer.setFigure(currentFig);
+    const info=renderer.render();
+    updateInfo(info);renderTree();
+    $('json').value=JSON.stringify(safe(()=>currentFig.toJsObject(),{}),null,2);
+    log('ok','built '+r.nodeCount+' nodes'+(r.pfCount?', '+r.pfCount+' polyfills':''));
+    if(r.warnings.length){
+      for(const w of r.warnings.slice(0,30))log('warn',w);
+      if(r.warnings.length>30)log('warn','… '+(r.warnings.length-30)+' more warnings');
+    }
+  }catch(e){
+    console.error(e);log('err',e.message);toast('Build failed');
+  }
+}
+function downloadNodes(){
+  try{
+    if(!currentFig)build();
+    const bytes=currentFig.toBytes();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([bytes],{type:'application/octet-stream'}));
+    a.download='figure.nodes';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    log('ok','downloaded '+bytes.length+' bytes');toast('Downloaded .nodes');
+  }catch(e){log('err','download: '+e.message)}
+}
+function exportXML(){
+  try{
+    if(!currentFig)build();
+    xmlEl.value=figureToXML(currentFig);updateXMLMeta();toast('XML exported');
+  }catch(e){log('err','XML export: '+e.message)}
+}
+async function loadFile(){
+  const f=fileEl.files?.[0];if(!f)return;
+  try{
+    const bytes=new Uint8Array(await f.arrayBuffer());
+    const fig=mod.Stickfigure.fromBytes(bytes);
+    try{fig.setNodeLimitEnabled(false)}catch(_){}
+    currentFig=fig;renderer.setFigure(fig);
+    const info=renderer.render();updateInfo(info);renderTree();
+    xmlEl.value=figureToXML(fig);updateXMLMeta();
+    $('json').value=JSON.stringify(safe(()=>fig.toJsObject(),{}),null,2);
+    log('ok','loaded '+f.name+' · '+bytes.length+' bytes');
+  }catch(e){log('err','load '+f.name+': '+e.message);toast('Load failed')}
+  finally{fileEl.value=''}
+}
+
+/* --------------------------- Wire renderer ------------------------------ */
+
+async function main(){
+  await loadWasm();
+  renderer=new StickNodesRenderer(canvas);
+  renderer.setFills(true);renderer.setDragEnabled(true);renderer.setShowPoints(true);renderer.setFlipY(false);
+
+  renderer.onNodeChanged(node=>{
+    try{
+      xmlEl.value=figureToXML(currentFig);updateXMLMeta();
+      renderTree();updateSelected(node);
+      $('json').value=JSON.stringify(safe(()=>currentFig.toJsObject(),{}),null,2);
+    }catch(e){log('err','update XML: '+e.message)}
+  });
+  renderer.onSelect(node=>{
+    updateSelected(node);renderTree();
+  });
+
+  xmlEl.value=PRESETS.standing;updateXMLMeta();build();
+  setTimeout(()=>$('hint').classList.add('hide'),6500);
+}
+
+$('build').onclick=build;
+$('download').onclick=downloadNodes;
+$('export').onclick=exportXML;
+$('load').onclick=()=>$('file').click();
+fileEl.onchange=loadFile;
+
+$('copy').onclick=async()=>{
+  try{await navigator.clipboard.writeText(xmlEl.value);toast('Copied XML')}
+  catch(_){xmlEl.focus();xmlEl.select();toast('Select the XML and copy')}
+};
+$('xml').addEventListener('input',updateXMLMeta);
+
+$('drag').onclick=()=>{
+  const on=!$('drag').classList.contains('on');$('drag').classList.toggle('on',on);renderer?.setDragEnabled(on);
+};
+$('fills').onclick=()=>{
+  const on=!$('fills').classList.contains('on');$('fills').classList.toggle('on',on);renderer?.setFills(on);renderer?.render();
+};
+$('points').onclick=()=>{
+  const on=!$('points').classList.contains('on');$('points').classList.toggle('on',on);renderer?.setShowPoints(on);renderer?.render();
+};
+$('flip').onclick=()=>{
+  const on=!$('flip').classList.contains('on');$('flip').classList.toggle('on',on);renderer?.setFlipY(on);renderer?.render();
+};
+$('zin').onclick=()=>{renderer?.zoomBy(1.25);updateInfo(renderer?.render())};
+$('zout').onclick=()=>{renderer?.zoomBy(.8);updateInfo(renderer?.render())};
+$('zfit').onclick=()=>{renderer?.fitView();updateInfo(renderer?.render())};
+$('zreset').onclick=()=>{renderer?.resetView();updateInfo(renderer?.render())};
+
+$('preset').onchange=e=>{
+  const k=e.target.value;if(!k)return;
+  xmlEl.value=PRESETS[k];updateXMLMeta();build();e.target.value='';
+};
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');$('panel-'+t.dataset.panel).classList.add('active');
+});
+
+window.addEventListener('resize',()=>{if(renderer){const info=renderer.render();updateInfo(info)}});
+
+main().catch(e=>console.error(e));
+</script>
+</body>
+</html>
