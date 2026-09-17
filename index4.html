@@ -1,1688 +1,753 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>StickNodes Web Editor — JSON</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>StickNodes Web Editor</title>
+<style>
+  :root {
+    --bg:#f4f6fa; --panel:#fff; --panel-2:#fbfcfe;
+    --border:#e3e6ec; --border-strong:#cfd4dd;
+    --text:#1a1d24; --muted:#6b7280; --muted-2:#9ca3af;
+    --accent:#4f46e5; --accent-hover:#4338ca; --accent-soft:#eef2ff;
+    --ok:#059669; --ok-soft:#ecfdf5;
+    --err:#dc2626; --err-soft:#fef2f2;
+    --warn:#d97706; --warn-soft:#fffbeb;
+    --radius:10px; --radius-sm:6px;
+    --shadow-sm:0 1px 2px rgba(20,20,40,.05);
+    --shadow:0 1px 3px rgba(20,20,40,.08),0 4px 12px rgba(20,20,40,.04);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    background:var(--bg); color:var(--text); overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
-  <style>
-    :root {
-      --bg: #101114;
-      --panel: #181a1f;
-      --panel2: #20232a;
-      --border: #30343d;
-      --text: #f2f4f8;
-      --muted: #9da3ad;
-      --accent: #5ea7ff;
-      --danger: #ff6262;
-    }
+  /* ── Header ── */
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;padding:10px 16px;background:var(--panel);
+    border-bottom:1px solid var(--border);flex:0 0 auto;
+  }
+  header .brand{display:flex;align-items:center;gap:10px;
+    font-weight:700;font-size:15px;letter-spacing:-.01em}
+  header .brand .dot{width:10px;height:10px;border-radius:50%;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    box-shadow:0 0 0 3px var(--accent-soft)}
+  header .status{display:flex;align-items:center;gap:7px;font-size:12px;
+    color:var(--muted);padding:5px 11px;background:var(--bg);
+    border-radius:20px;border:1px solid var(--border)}
+  header .status .led{width:6px;height:6px;border-radius:50%;
+    background:var(--muted-2);transition:background .2s}
+  header .status.ready .led{background:var(--ok);
+    box-shadow:0 0 6px rgba(5,150,105,.5)}
+  header .status.error .led{background:var(--err)}
 
-    * {
-      box-sizing: border-box;
-    }
+  /* ── Toolbar ── */
+  .toolbar{
+    display:flex;align-items:center;gap:6px;padding:8px 16px;
+    background:var(--panel);border-bottom:1px solid var(--border);
+    flex:0 0 auto;overflow-x:auto;scrollbar-width:none;
+  }
+  .toolbar::-webkit-scrollbar{display:none}
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 12px;font:inherit;font-weight:500;font-size:12.5px;
+    color:var(--text);background:var(--panel);
+    border:1px solid var(--border-strong);border-radius:var(--radius-sm);
+    cursor:pointer;white-space:nowrap;min-height:36px;
+    transition:all .12s ease;box-shadow:var(--shadow-sm);
+  }
+  .btn:hover{background:#fafbfd;border-color:#b6bcc7}
+  .btn:active{transform:translateY(1px);box-shadow:none}
+  .btn.primary{
+    background:var(--accent);border-color:var(--accent);color:#fff;
+    box-shadow:0 1px 3px rgba(79,70,229,.3),0 4px 12px rgba(79,70,229,.15);
+  }
+  .btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+  .btn.toggle.on{
+    background:var(--accent-soft);border-color:var(--accent);color:var(--accent);
+  }
+  .btn svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .sep{width:1px;height:24px;background:var(--border);margin:0 2px;flex:0 0 auto}
+  select.preset{
+    font:inherit;font-size:12.5px;font-weight:500;padding:8px 10px;
+    background:var(--panel);border:1px solid var(--border-strong);
+    border-radius:var(--radius-sm);cursor:pointer;min-height:36px;
+    color:var(--text);box-shadow:var(--shadow-sm);
+  }
+  .spacer{flex:1}
 
-    html,
-    body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: var(--bg);
-      color: var(--text);
-      font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-    }
+  /* ── Main ── */
+  .main{
+    flex:1 1 auto;display:grid;
+    grid-template-columns:minmax(0,1fr) 420px;
+    gap:10px;padding:10px 16px 14px;min-height:0;
+  }
+  @media(max-width:900px){
+    .main{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 400px}
+  }
 
-    button,
-    input,
-    textarea,
-    select {
-      font: inherit;
-    }
+  /* ── Canvas card ── */
+  .canvas-card{
+    position:relative;background:var(--panel);
+    border:1px solid var(--border);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;min-height:0;
+  }
+  .canvas-wrap{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%);
+    touch-action:none;user-select:none;cursor:grab;overflow:hidden;
+  }
+  .canvas-wrap.grabbing{cursor:grabbing}
+  canvas{display:block;width:100%;height:100%;background:#fff}
 
-    button {
-      border: 1px solid var(--border);
-      background: var(--panel2);
-      color: var(--text);
-      padding: 8px 11px;
-      border-radius: 7px;
-      cursor: pointer;
-    }
+  /* zoom controls */
+  .zoom-controls{
+    position:absolute;top:10px;right:10px;
+    display:flex;flex-direction:column;gap:3px;
+    background:rgba(255,255,255,.94);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border:1px solid var(--border);border-radius:8px;
+    padding:4px;box-shadow:var(--shadow);
+  }
+  .zoom-controls button{
+    width:32px;height:32px;border:0;border-radius:6px;
+    background:transparent;color:var(--text);
+    font-size:16px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .1s;
+  }
+  .zoom-controls button:hover{background:var(--accent-soft);color:var(--accent)}
+  .zoom-controls svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .zoom-controls .pct{
+    font:600 10px/1 ui-monospace,Consolas,monospace;
+    color:var(--muted);text-align:center;padding:4px 0;
+    border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  }
 
-    button:hover {
-      background: #292d35;
-    }
+  .canvas-status{
+    position:absolute;left:10px;bottom:10px;
+    padding:6px 11px;border:1px solid var(--border);
+    border-radius:8px;background:rgba(255,255,255,.94);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    color:var(--muted);font-size:11.5px;font-weight:500;
+    pointer-events:none;box-shadow:var(--shadow-sm);
+    max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .canvas-status.err{color:var(--err);border-color:#fccac0;background:var(--err-soft)}
 
-    button.active {
-      border-color: var(--accent);
-      background: #1f3652;
-    }
+  /* ── Panel ── */
+  .panel{
+    display:flex;flex-direction:column;min-height:0;gap:10px;
+  }
+  .card{
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:var(--radius);box-shadow:var(--shadow);
+    display:flex;flex-direction:column;min-height:0;overflow:hidden;
+  }
+  .card-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:9px 12px;border-bottom:1px solid var(--border);
+    background:var(--panel-2);flex:0 0 auto;
+  }
+  .card-head h2{
+    margin:0;font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+  }
+  .card-head .meta{
+    font-size:10.5px;color:var(--muted);
+    font-variant-numeric:tabular-nums;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;
+  }
 
-    button.danger {
-      border-color: #673333;
-      color: #ff8b8b;
-    }
+  textarea{
+    flex:1 1 auto;min-height:0;width:100%;
+    border:0;outline:0;resize:none;
+    padding:12px 14px;
+    background:var(--panel);color:var(--text);
+    font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;
+    tab-size:2;
+  }
+  textarea::selection{background:var(--accent-soft)}
 
-    #app {
-      display: grid;
-      grid-template-rows: 52px 1fr;
-      width: 100%;
-      height: 100%;
-    }
+  /* actions row */
+  .actions{
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:6px;padding:8px;border-top:1px solid var(--border);
+    background:var(--panel-2);
+  }
+  .actions .btn{justify-content:center;min-height:34px;font-size:12px}
 
-    /* Toolbar */
-    #toolbar {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 7px 10px;
-      background: #15171b;
-      border-bottom: 1px solid var(--border);
-      overflow-x: auto;
-      white-space: nowrap;
-    }
+  /* tree */
+  .tree-wrap{
+    flex:0 0 auto;height:200px;min-height:120px;
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .tree-wrap .tree-scroll{
+    flex:1 1 auto;overflow:auto;padding:6px;
+  }
+  .tree-row{
+    display:flex;align-items:center;gap:8px;
+    padding:5px 8px;border-radius:5px;
+    font:11.5px/1.4 ui-monospace,Consolas,monospace;
+    color:#374151;cursor:pointer;
+    border:1px solid transparent;
+  }
+  .tree-row:hover{background:#f3f5f9}
+  .tree-row.selected{
+    background:var(--accent-soft);color:var(--accent);
+    border-color:#c7d2fe;
+  }
+  .tree-row.polyfill{color:#047857}
+  .tree-row .idx{
+    color:var(--accent);font-weight:700;min-width:34px;
+  }
+  .tree-row.selected .idx{color:var(--accent-hover)}
+  .tree-row .type{color:#b45309;font-weight:500;flex:1;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-    #toolbar .title {
-      font-weight: 700;
-      margin-right: 8px;
-    }
+  /* hide file input */
+  input[type=file]{display:none}
 
-    #toolbar .separator {
-      width: 1px;
-      height: 28px;
-      background: var(--border);
-      margin: 0 4px;
-    }
+  /* toast */
+  #toast{
+    position:fixed;left:50%;bottom:24px;
+    transform:translateX(-50%) translateY(80px);
+    background:#1a1d24;color:#fff;padding:10px 18px;
+    border-radius:24px;font-size:13px;font-weight:500;
+    box-shadow:0 12px 32px rgba(20,20,40,.18);
+    opacity:0;pointer-events:none;z-index:100;
+    transition:all .25s cubic-bezier(.2,.8,.2,1);
+    max-width:80vw;text-align:center;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    /* Main */
-    #main {
-      min-height: 0;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 390px;
-    }
-
-    #viewport {
-      position: relative;
-      min-width: 0;
-      min-height: 0;
-      background:
-        radial-gradient(circle at center, #202329 0, #131519 65%, #0e0f12 100%);
-      overflow: hidden;
-    }
-
-    #canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-
-    #status {
-      position: absolute;
-      left: 10px;
-      bottom: 10px;
-      padding: 7px 10px;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      background: rgba(15, 17, 20, 0.88);
-      color: var(--muted);
-      font-size: 12px;
-      pointer-events: none;
-    }
-
-    /* Right panel */
-    #panel {
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      background: var(--panel);
-      border-left: 1px solid var(--border);
-    }
-
-    #panel-header {
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    #panel-header h2 {
-      margin: 0 0 4px;
-      font-size: 16px;
-    }
-
-    #panel-header p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    #json {
-      flex: 1;
-      min-height: 0;
-      width: 100%;
-      resize: none;
-      border: 0;
-      outline: 0;
-      padding: 13px;
-      background: #101216;
-      color: #dce7f5;
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        monospace;
-      font-size: 12px;
-      line-height: 1.5;
-      tab-size: 2;
-    }
-
-    #panel-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 7px;
-      padding: 9px;
-      border-top: 1px solid var(--border);
-    }
-
-    /* Tree */
-    #tree-wrap {
-      height: 220px;
-      min-height: 120px;
-      overflow: auto;
-      border-top: 1px solid var(--border);
-      background: #131519;
-    }
-
-    #tree-title {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      padding: 8px 10px;
-      background: #191b20;
-      border-bottom: 1px solid var(--border);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    #tree {
-      padding: 7px;
-    }
-
-    .tree-row {
-      padding: 5px 7px;
-      border-radius: 5px;
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        monospace;
-      font-size: 11px;
-      color: #c9ced7;
-      cursor: pointer;
-    }
-
-    .tree-row:hover {
-      background: #22262d;
-    }
-
-    .tree-row.selected {
-      background: #1d3855;
-      color: white;
-    }
-
-    .tree-row.polyfill {
-      color: #82d7a5;
-    }
-
-    /* Small screens */
-    @media (max-width: 850px) {
-      #main {
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(0, 1fr) 330px;
-      }
-
-      #panel {
-        border-left: 0;
-        border-top: 1px solid var(--border);
-      }
-
-      #tree-wrap {
-        height: 120px;
-      }
-    }
-  </style>
+  @media(max-width:560px){
+    .toolbar .btn .label{display:none}
+    .toolbar .btn{padding:8px 10px}
+  }
+</style>
 </head>
-
 <body>
-<div id="app">
+<div class="app">
 
-  <!-- TOOLBAR -->
-  <div id="toolbar">
-    <span class="title">StickNodes JSON Editor</span>
+  <header>
+    <div class="brand"><span class="dot"></span>StickNodes Web Editor</div>
+    <div class="status" id="status"><span class="led"></span><span id="statusText">Loading…</span></div>
+  </header>
 
-    <button id="build">Build JSON</button>
-    <button id="downloadNodes">Download .nodes</button>
+  <div class="toolbar">
+    <button class="btn primary" id="build">
+      <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
+      <span class="label">Build JSON</span>
+    </button>
+    <button class="btn" id="downloadNodes">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+      <span class="label">Download .nodes</span>
+    </button>
 
-    <div class="separator"></div>
+    <div class="sep"></div>
 
-    <button id="load">Load</button>
-    <button id="copyJson">Copy JSON</button>
-    <button id="formatJson">Format JSON</button>
+    <button class="btn" id="load">
+      <svg viewBox="0 0 24 24"><path d="M4 4h12l4 4v12H4z"/><path d="M12 11v6m0 0l-3-3m3 3l3-3"/></svg>
+      <span class="label">Load</span>
+    </button>
+    <button class="btn" id="copyJson">
+      <svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg>
+      <span class="label">Copy</span>
+    </button>
+    <button class="btn" id="formatJson">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      <span class="label">Format</span>
+    </button>
 
-    <div class="separator"></div>
+    <div class="sep"></div>
 
-    <button id="drag" class="active">Drag</button>
-    <button id="fills" class="active">Fills</button>
-    <button id="points" class="active">Points</button>
-    <button id="limbPoints" class="active">Limb points</button>
-    <button id="flip">Flip</button>
+    <button class="btn toggle on" id="drag" title="Enable node dragging">
+      <svg viewBox="0 0 24 24"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
+      <span class="label">Drag</span>
+    </button>
+    <button class="btn toggle on" id="fills" title="Render polyfill fills">
+      <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9-9 9z"/></svg>
+      <span class="label">Fills</span>
+    </button>
+    <button class="btn toggle on" id="points" title="Show all node handles">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7" opacity=".5"/></svg>
+      <span class="label">Points</span>
+    </button>
+    <button class="btn toggle on" id="limbPoints" title="Only show handles for limb nodes">
+      <svg viewBox="0 0 24 24"><path d="M6 6l6 12 6-12"/></svg>
+      <span class="label">Limb only</span>
+    </button>
+    <button class="btn toggle" id="flip" title="Flip Y in preview">
+      <svg viewBox="0 0 24 24"><path d="M12 3v18M4 12h16M7 8l-3 4 3 4M17 8l3 4-3 4"/></svg>
+      <span class="label">Flip</span>
+    </button>
 
-    <div class="separator"></div>
+    <div class="sep"></div>
 
-    <button id="zoomIn">+</button>
-    <button id="zoomOut">−</button>
-    <button id="zoomReset">Reset Zoom</button>
+    <button class="btn" id="zoomOut" title="Zoom out">−</button>
+    <button class="btn" id="zoomIn" title="Zoom in">+</button>
+    <button class="btn" id="zoomReset" title="Reset zoom">⌂</button>
 
-    <select id="preset">
+    <div class="spacer"></div>
+
+    <select class="preset" id="preset">
       <option value="">Preset…</option>
       <option value="standing">Standing</option>
       <option value="simple">Simple</option>
       <option value="stickman">Stickman</option>
     </select>
 
-    <input
-      id="file"
-      type="file"
-      accept=".nodes,.json,application/json,application/octet-stream"
-      hidden
-    />
+    <input id="file" type="file" accept=".nodes,.json,application/json,application/octet-stream">
   </div>
 
-  <!-- MAIN -->
-  <div id="main">
+  <div class="main">
 
-    <!-- CANVAS -->
-    <div id="viewport">
-      <canvas id="canvas"></canvas>
-      <div id="status">Loading…</div>
+    <!-- Canvas -->
+    <div class="canvas-card">
+      <div class="canvas-wrap" id="viewport">
+        <canvas id="canvas"></canvas>
+        <div class="zoom-controls">
+          <button id="zoomIn2" title="Zoom in">+</button>
+          <div class="pct" id="zoomPct">100%</div>
+          <button id="zoomOut2" title="Zoom out">−</button>
+          <button id="zoomReset2" title="Fit view">
+            <svg viewBox="0 0 24 24"><path d="M4 4h6M4 4v6M20 4h-6M20 4v6M4 20h6M4 20v-6M20 20h-6M20 20v-6"/></svg>
+          </button>
+        </div>
+        <div class="canvas-status" id="status2">Loading…</div>
+      </div>
     </div>
 
-    <!-- PANEL -->
-    <aside id="panel">
+    <!-- Right panel -->
+    <div class="panel">
 
-      <div id="panel-header">
-        <h2>Figure JSON</h2>
-        <p>
-          Edit the figure representation here. You can load StickNodes
-          <code>.nodes</code> files or JSON documents.
-        </p>
+      <div class="card" style="flex:1 1 55%">
+        <div class="card-head">
+          <h2>Figure JSON</h2>
+          <span class="meta" id="jsonMeta">-</span>
+        </div>
+        <textarea id="json" spellcheck="false" autocapitalize="off" autocorrect="off" wrap="off"></textarea>
+        <div class="actions">
+          <button class="btn primary" id="applyJson">Apply</button>
+          <button class="btn" id="prettyJson">Pretty</button>
+          <button class="btn" id="copyJson2">Copy</button>
+          <button class="btn" id="resetJson">Reset</button>
+        </div>
       </div>
 
-      <textarea id="json" spellcheck="false"></textarea>
-
-      <div id="panel-actions">
-        <button id="applyJson">Apply JSON</button>
-        <button id="prettyJson">Pretty JSON</button>
-        <button id="copyJson2">Copy</button>
-        <button id="resetJson">Reset</button>
+      <div class="card tree-wrap" style="flex:1 1 45%">
+        <div class="card-head">
+          <h2>Node Tree</h2>
+          <span class="meta" id="treeMeta">0 nodes</span>
+        </div>
+        <div class="tree-scroll" id="tree"></div>
       </div>
 
-      <div id="tree-wrap">
-        <div id="tree-title">Node Tree</div>
-        <div id="tree"></div>
-      </div>
-
-    </aside>
+    </div>
   </div>
 </div>
 
+<div id="toast"></div>
+
 <script type="module">
+import {
+  StickNodesRenderer,
+  figureToJSON,
+  jsonStringifyFigure,
+  jsonToFigure,
+} from "./ren.js";
 
-  /*
-   * ============================================================
-   * IMPORT THE CANVAS RENDERER
-   * ============================================================
-   *
-   * Your saved renderer:
-   *
-   *     ren.js
-   *
-   * Make sure ren.js is in the same directory as this index.html.
-   */
+/* ── DOM refs ────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const canvas    = $("canvas");
+const viewport  = $("viewport");
+const jsonBox   = $("json");
+const treeEl    = $("tree");
+const statusEl  = $("status");
+const statusTxt = $("statusText");
+const status2   = $("status2");
+const toastEl   = $("toast");
+const fileInput = $("file");
 
-  import {
-    StickNodesRenderer,
-    NODE_TYPE,
-    figureToJSON,
-    jsonStringifyFigure,
-    jsonToFigure
-  } from "./ren.js";
+/* ── Status / log helpers ───────────────────────────────────────── */
+function setStatus(text, kind = "") {
+  statusTxt.textContent = text;
+  statusEl.className = "status " + kind;
+  status2.textContent = text;
+  status2.className = "canvas-status " + (kind === "error" ? "err" : "");
+}
+let toastTimer = null;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+}
 
+/* ── Type map ────────────────────────────────────────────────────── */
+const TYPE_NAME = {
+  0:"RoundedSegment", 1:"Segment", 2:"Circle", 3:"Triangle",
+  4:"FilledCircle", 5:"Ellipse", 6:"Trapezoid", 7:"Polygon"
+};
 
-  /*
-   * ============================================================
-   * WASM
-   * ============================================================
-   */
+/* ── State ───────────────────────────────────────────────────────── */
+let mod = null;
+let figure = null;
+let renderer = null;
+let selectedNodeIndex = -1;
 
-  let mod = null;
-  let figure = null;
-  let renderer = null;
-
-  let selectedNodeIndex = -1;
-
-  const canvas = document.getElementById("canvas");
-  const viewport = document.getElementById("viewport");
-
-  const jsonBox = document.getElementById("json");
-  const tree = document.getElementById("tree");
-  const status = document.getElementById("status");
-
-
-  /*
-   * ============================================================
-   * HELPERS
-   * ============================================================
-   */
-
-  function setStatus(text) {
-    status.textContent = text;
+/* ── JSON <-> Figure ─────────────────────────────────────────────── */
+function updateJSON() {
+  if (!figure) { jsonBox.value = ""; return; }
+  try {
+    jsonBox.value = jsonStringifyFigure(figure, 2);
+  } catch (e) {
+    console.error("serialize failed:", e);
+    try { jsonBox.value = JSON.stringify(figureToJSON(figure), null, 2); } catch (_) {}
   }
+  updateJsonMeta();
+}
+function updateJsonMeta() {
+  const t = jsonBox.value;
+  $("jsonMeta").textContent =
+    t.split("\n").length + " lines · " + new Blob([t]).size + " B";
+}
+jsonBox.addEventListener("input", updateJsonMeta);
 
-
-  function getJSON() {
-    if (!figure) {
-      return null;
-    }
-
-    try {
-      return figureToJSON(figure);
-    } catch (err) {
-      console.error(err);
-      return null;
-    }
+/* ── Tree ────────────────────────────────────────────────────────── */
+function updateTree() {
+  treeEl.innerHTML = "";
+  if (!figure) {
+    $("treeMeta").textContent = "0 nodes";
+    return;
   }
+  let nodes = [];
+  try { nodes = figure.allNodes?.() || []; } catch (_) {}
+  for (const node of nodes) {
+    let idx = -1, type = -1;
+    try { idx = node.drawIndex; } catch (_) {}
+    try { type = node.nodeType; } catch (_) {}
 
+    const row = document.createElement("div");
+    row.className = "tree-row";
+    row.innerHTML =
+      `<span class="idx">[${idx}]</span>` +
+      `<span class="type">${TYPE_NAME[type] || ("Type" + type)}</span>`;
+    if (idx === selectedNodeIndex) row.classList.add("selected");
 
-  function updateJSON() {
-    if (!figure) {
+    row.onclick = () => {
+      selectedNodeIndex = idx;
+      try { renderer?.setSelectedNode?.(idx); } catch (_) {}
+      updateTree();
+      render();
+    };
+    treeEl.appendChild(row);
+  }
+  let pfCount = 0;
+  try { pfCount = (figure.allPolyfills?.() || []).length; } catch (_) {}
+  $("treeMeta").textContent =
+    nodes.length + " nodes · " + pfCount + " polyfills";
+}
+
+/* ── Render ──────────────────────────────────────────────────────── */
+function render() {
+  if (!renderer || !figure) return;
+  try { renderer.setFigure?.(figure); } catch (_) {}
+  try { renderer.render?.(); } catch (e) {
+    console.error("renderer error:", e);
+    setStatus("Render error: " + e.message, "error");
+  }
+  try {
+    const z = renderer.view?.zoom || 1;
+    $("zoomPct").textContent = Math.round(z * 100) + "%";
+  } catch (_) {}
+}
+
+/* ── Apply figure ────────────────────────────────────────────────── */
+function setFigure(newFigure) {
+  if (!newFigure) throw new Error("Invalid figure");
+  figure = newFigure;
+  selectedNodeIndex = -1;
+  try { renderer.setFigure?.(figure); } catch (_) {}
+  updateJSON();
+  updateTree();
+  render();
+  setStatus("Figure loaded", "ready");
+}
+
+/* ── JSON build ──────────────────────────────────────────────────── */
+function applyJSON() {
+  const text = jsonBox.value.trim();
+  if (!text) { alert("JSON is empty."); return; }
+  try {
+    const data = JSON.parse(text);
+    const newFigure = jsonToFigure(data, mod.Stickfigure);
+    setFigure(newFigure);
+    toast("Built from JSON");
+  } catch (e) {
+    console.error(e);
+    setStatus("Build failed: " + e.message, "error");
+    alert("Could not build figure from JSON:\n\n" + e.message);
+  }
+}
+
+/* ── Load ────────────────────────────────────────────────────────── */
+$("load").onclick = () => fileInput.click();
+fileInput.onchange = async (ev) => {
+  const f = ev.target.files?.[0];
+  if (!f) return;
+  try {
+    const name = f.name.toLowerCase();
+    if (name.endsWith(".json")) {
+      jsonBox.value = await f.text();
+      updateJsonMeta();
+      applyJSON();
       return;
     }
-
-    try {
-      jsonBox.value = jsonStringifyFigure(
-        figure,
-        2
-      );
-    } catch (err) {
-      console.error("Could not serialize figure:", err);
-
-      try {
-        jsonBox.value = JSON.stringify(
-          getJSON(),
-          null,
-          2
-        );
-      } catch (_) {}
-    }
+    const bytes = new Uint8Array(await f.arrayBuffer());
+    if (!mod?.Stickfigure) throw new Error("WASM not loaded");
+    const loaded = mod.Stickfigure.fromBytes(bytes);
+    try { loaded.setNodeLimitEnabled(false); } catch (_) {}
+    setFigure(loaded);
+    setStatus(`Loaded ${f.name}`, "ready");
+    toast("Loaded " + f.name);
+  } catch (e) {
+    console.error(e);
+    setStatus("Load failed: " + e.message, "error");
+    alert("Could not load file:\n\n" + e.message);
+  } finally {
+    ev.target.value = "";
   }
+};
 
-
-  function updateTree() {
-
-    tree.innerHTML = "";
-
-    if (!figure) {
-      return;
-    }
-
-    let nodes = [];
-
-    /*
-     * Prefer allNodes() when the WASM wrapper provides it.
-     */
-
-    try {
-      if (typeof figure.allNodes === "function") {
-        nodes = figure.allNodes() || [];
-      }
-    } catch (_) {}
-
-    /*
-     * Fallback:
-     * recursively walk from rootNode().
-     */
-
-    if (!nodes.length) {
-
-      try {
-
-        const root =
-          typeof figure.rootNode === "function"
-            ? figure.rootNode()
-            : null;
-
-        if (root) {
-
-          const visited = new Set();
-
-          function walk(node, depth) {
-
-            if (!node) {
-              return;
-            }
-
-            let index = -1;
-
-            try {
-              if (typeof node.index === "number") {
-                index = node.index;
-              } else if (typeof node.getIndex === "function") {
-                index = node.getIndex();
-              }
-            } catch (_) {}
-
-            /*
-             * Some wrappers don't expose index directly.
-             * In that case use the order we discover the nodes.
-             */
-
-            if (index < 0) {
-              index = nodes.length;
-            }
-
-            if (visited.has(index)) {
-              return;
-            }
-
-            visited.add(index);
-            nodes.push(node);
-
-            let children = [];
-
-            try {
-              if (typeof node.children === "function") {
-                children = node.children() || [];
-              }
-            } catch (_) {}
-
-            for (const child of children) {
-              walk(child, depth + 1);
-            }
-          }
-
-          walk(root, 0);
-        }
-
-      } catch (err) {
-        console.warn("Tree fallback failed:", err);
-      }
-    }
-
-
-    /*
-     * If nodes are available, create rows.
-     */
-
-    nodes.forEach((node, arrayIndex) => {
-
-      const row = document.createElement("div");
-      row.className = "tree-row";
-
-      let idx = arrayIndex;
-      let type = "?";
-
-      try {
-        if (typeof node.index === "number") {
-          idx = node.index;
-        } else if (typeof node.getIndex === "function") {
-          idx = node.getIndex();
-        }
-      } catch (_) {}
-
-      try {
-        if (typeof node.nodeType === "function") {
-          type = node.nodeType();
-        } else if (typeof node.nodeType === "number") {
-          type = node.nodeType;
-        }
-      } catch (_) {}
-
-      row.textContent =
-        `Node ${idx}   type=${type}`;
-
-      if (idx === selectedNodeIndex) {
-        row.classList.add("selected");
-      }
-
-      row.onclick = () => {
-
-        selectedNodeIndex = idx;
-
-        if (renderer) {
-          try {
-            renderer.setSelectedNode?.(idx);
-          } catch (_) {}
-        }
-
-        updateTree();
-        render();
-      };
-
-      tree.appendChild(row);
-    });
-
-    /*
-     * Polyfills.
-     */
-
-    try {
-
-      let polyfills = [];
-
-      if (typeof figure.allPolyfills === "function") {
-        polyfills = figure.allPolyfills() || [];
-      }
-
-      polyfills.forEach((polyfill, i) => {
-
-        const row = document.createElement("div");
-
-        row.className =
-          "tree-row polyfill";
-
-        row.textContent =
-          `Polyfill ${i}`;
-
-        tree.appendChild(row);
-      });
-
-    } catch (_) {}
+/* ── Download ────────────────────────────────────────────────────── */
+$("downloadNodes").onclick = () => {
+  if (!figure) { alert("No figure loaded."); return; }
+  try {
+    const bytes = figure.toBytes();
+    const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    const blob = new Blob([u8], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "stickfigure.nodes";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    setStatus(`Downloaded ${u8.length} bytes`, "ready");
+    toast("Downloaded .nodes");
+  } catch (e) {
+    console.error(e);
+    setStatus("Export failed: " + e.message, "error");
   }
-
-
-  function render() {
-
-    if (!renderer || !figure) {
-      return;
-    }
-
-    try {
-      renderer.setFigure?.(figure);
-    } catch (_) {}
-
-    try {
-      renderer.render?.();
-    } catch (err) {
-      console.error("Renderer error:", err);
-      setStatus(
-        "Renderer error: " + err.message
-      );
-    }
-  }
-
-
-  /*
-   * ============================================================
-   * APPLY FIGURE
-   * ============================================================
-   */
-
-  function setFigure(newFigure) {
-
-    if (!newFigure) {
-      throw new Error("Invalid StickNodes figure.");
-    }
-
-    figure = newFigure;
-
-    selectedNodeIndex = -1;
-
-    try {
-      renderer.setFigure?.(figure);
-    } catch (_) {}
-
-    updateJSON();
-    updateTree();
-    render();
-
-    setStatus("Figure loaded");
-  }
-
-
-  /*
-   * ============================================================
-   * JSON → FIGURE
-   * ============================================================
-   */
-
-  function applyJSON() {
-
-    const text = jsonBox.value.trim();
-
-    if (!text) {
-      alert("JSON is empty.");
-      return;
-    }
-
-    try {
-
-      const data = JSON.parse(text);
-
-      const newFigure = jsonToFigure(data, mod.Stickfigure);
-
-      setFigure(newFigure);
-
-    } catch (err) {
-
-      console.error(err);
-
-      alert(
-        "Could not build StickNodes figure from JSON:\n\n" +
-        err.message
-      );
-    }
-  }
-
-
-  /*
-   * ============================================================
-   * LOAD FILE
-   * ============================================================
-   */
-
-  document.getElementById("load").onclick = () => {
-    document.getElementById("file").click();
-  };
-
-
-  document.getElementById("file").onchange =
-    async event => {
-
-      const file =
-        event.target.files?.[0];
-
-      if (!file) {
-        return;
-      }
-
-      try {
-
-        const name =
-          file.name.toLowerCase();
-
-        /*
-         * JSON
-         */
-
-        if (name.endsWith(".json")) {
-
-          const text =
-            await file.text();
-
-          jsonBox.value = text;
-
-          applyJSON();
-
-          return;
-        }
-
-
-        /*
-         * StickNodes binary
-         */
-
-        const bytes =
-          new Uint8Array(
-            await file.arrayBuffer()
-          );
-
-        if (
-          !mod ||
-          !mod.Stickfigure
-        ) {
-          throw new Error(
-            "StickNodes WASM is not loaded."
-          );
-        }
-
-
-        let loaded = null;
-
-
-        /*
-         * Main API.
-         */
-
-        if (
-          typeof mod.Stickfigure.fromBytes ===
-          "function"
-        ) {
-
-          loaded =
-            mod.Stickfigure.fromBytes(
-              bytes
-            );
-
-        } else {
-
-          /*
-           * Fallback constructor.
-           */
-
-          loaded =
-            new mod.Stickfigure();
-
-          if (
-            typeof loaded.fromBytes ===
-            "function"
-          ) {
-            loaded =
-              loaded.fromBytes(bytes);
-          } else {
-            throw new Error(
-              "The WASM wrapper does not expose Stickfigure.fromBytes()."
-            );
-          }
-        }
-
-
-        setFigure(loaded);
-
-        setStatus(
-          `Loaded ${file.name}`
-        );
-
-      } catch (err) {
-
-        console.error(err);
-
-        alert(
-          "Could not load file:\n\n" +
-          err.message
-        );
-      }
-
-      /*
-       * Allow selecting the same file again.
-       */
-
-      event.target.value = "";
-    };
-
-
-  /*
-   * ============================================================
-   * BUILD JSON BUTTON
-   * ============================================================
-   */
-
-  document.getElementById("build").onclick =
-    applyJSON;
-
-
-  document.getElementById("applyJson").onclick =
-    applyJSON;
-
-
-  /*
-   * ============================================================
-   * FORMAT JSON
-   * ============================================================
-   */
-
-  function formatJSON() {
-
-    try {
-
-      const data =
-        JSON.parse(jsonBox.value);
-
-      jsonBox.value =
-        JSON.stringify(
-          data,
-          null,
-          2
-        );
-
-    } catch (err) {
-
-      alert(
-        "Invalid JSON:\n\n" +
-        err.message
-      );
-    }
-  }
-
-
-  document.getElementById("formatJson").onclick =
-    formatJSON;
-
-  document.getElementById("prettyJson").onclick =
-    formatJSON;
-
-
-  /*
-   * ============================================================
-   * COPY JSON
-   * ============================================================
-   */
-
-  async function copyJSON() {
-
-    try {
-
-      await navigator.clipboard.writeText(
-        jsonBox.value
-      );
-
-      setStatus("JSON copied");
-
-    } catch (err) {
-
-      /*
-       * Fallback for older browsers.
-       */
-
-      jsonBox.focus();
-      jsonBox.select();
-
-      document.execCommand("copy");
-
-      setStatus("JSON copied");
-    }
-  }
-
-
-  document.getElementById("copyJson").onclick =
-    copyJSON;
-
-  document.getElementById("copyJson2").onclick =
-    copyJSON;
-
-
-  /*
-   * ============================================================
-   * DOWNLOAD .NODES
-   * ============================================================
-   */
-
-  document.getElementById("downloadNodes").onclick =
-    () => {
-
-      if (!figure) {
-        alert("No figure loaded.");
-        return;
-      }
-
-      try {
-
-        let bytes;
-
-        if (
-          typeof figure.toBytes ===
-          "function"
-        ) {
-          bytes =
-            figure.toBytes();
-        } else if (
-          mod?.Stickfigure &&
-          typeof mod.Stickfigure.toBytes ===
-          "function"
-        ) {
-          bytes =
-            mod.Stickfigure.toBytes(
-              figure
-            );
-        } else {
-          throw new Error(
-            "The WASM wrapper does not expose toBytes()."
-          );
-        }
-
-
-        /*
-         * Convert possible WASM typed arrays.
-         */
-
-        bytes =
-          bytes instanceof Uint8Array
-            ? bytes
-            : new Uint8Array(bytes);
-
-
-        const blob =
-          new Blob(
-            [bytes],
-            {
-              type:
-                "application/octet-stream"
-            }
-          );
-
-
-        const url =
-          URL.createObjectURL(blob);
-
-
-        const a =
-          document.createElement("a");
-
-        a.href = url;
-        a.download =
-          "stickfigure.nodes";
-
-        document.body.appendChild(a);
-
-        a.click();
-
-        a.remove();
-
-        URL.revokeObjectURL(url);
-
-        setStatus(
-          "Downloaded .nodes"
-        );
-
-      } catch (err) {
-
-        console.error(err);
-
-        alert(
-          "Could not export .nodes:\n\n" +
-          err.message
-        );
-      }
-    };
-
-
-  /*
-   * ============================================================
-   * RENDERER SETTINGS
-   * ============================================================
-   */
-
-  document.getElementById("drag").onclick =
-    function () {
-
-      this.classList.toggle("active");
-
-      renderer?.setDragEnabled?.(
-        this.classList.contains("active")
-      );
-    };
-
-
-  document.getElementById("fills").onclick =
-    function () {
-
-      this.classList.toggle("active");
-
-      renderer?.setFills?.(
-        this.classList.contains("active")
-      );
-
-      render();
-    };
-
-
-  document.getElementById("points").onclick =
-    function () {
-
-      this.classList.toggle("active");
-
-      renderer?.setShowPoints?.(
-        this.classList.contains("active")
-      );
-
-      render();
-    };
-
-
-  document.getElementById("limbPoints").onclick =
-    function () {
-
-      this.classList.toggle("active");
-
-      renderer?.setShowLimbPointsOnly?.(
-        this.classList.contains("active")
-      );
-
-      render();
-    };
-
-
-  /*
-   * ============================================================
-   * FLIP
-   * ============================================================
-   */
-
-  document.getElementById("flip").onclick =
-    () => {
-
-      if (!figure) {
-        return;
-      }
-
-      try {
-
-        /*
-         * Prefer the actual StickNodes/WASM
-         * flip implementation.
-         */
-
-        if (
-          typeof figure.flip ===
-          "function"
-        ) {
-          figure.flip();
-        } else {
-
-          /*
-           * Fallback: flip the root if exposed.
-           */
-
-          const root =
-            figure.rootNode?.();
-
-          if (
-            root &&
-            typeof root.flip ===
-            "function"
-          ) {
-            root.flip();
-          } else {
-            throw new Error(
-              "Flip is not exposed by this WASM wrapper."
-            );
-          }
-        }
-
-        updateJSON();
-        updateTree();
-        render();
-
-      } catch (err) {
-
-        console.error(err);
-
-        alert(
-          "Could not flip figure:\n\n" +
-          err.message
-        );
-      }
-    };
-
-
-  /*
-   * ============================================================
-   * ZOOM
-   * ============================================================
-   */
-
-  document.getElementById("zoomIn").onclick =
-    () => {
-
-      renderer?.zoom?.(
-        1.15
-      );
-
-      render();
-    };
-
-
-  document.getElementById("zoomOut").onclick =
-    () => {
-
-      renderer?.zoom?.(
-        1 / 1.15
-      );
-
-      render();
-    };
-
-
-  document.getElementById("zoomReset").onclick =
-    () => {
-
-      renderer?.resetView?.();
-
-      render();
-    };
-
-
-  /*
-   * ============================================================
-   * PRESETS
-   * ============================================================
-   *
-   * These are generated through the same JSON
-   * conversion path rather than XML.
-   */
-
-  const PRESETS = {
+};
+
+/* ── Build / Apply / Format / Copy ───────────────────────────────── */
+$("build").onclick = applyJSON;
+$("applyJson").onclick = applyJSON;
+
+function formatJSON() {
+  try {
+    jsonBox.value = JSON.stringify(JSON.parse(jsonBox.value), null, 2);
+    updateJsonMeta();
+  } catch (e) { alert("Invalid JSON:\n\n" + e.message); }
+}
+$("formatJson").onclick = formatJSON;
+$("prettyJson").onclick = formatJSON;
+
+async function copyJSON() {
+  try { await navigator.clipboard.writeText(jsonBox.value); toast("Copied"); }
+  catch (_) { jsonBox.focus(); jsonBox.select(); document.execCommand("copy"); toast("Copied"); }
+}
+$("copyJson").onclick = copyJSON;
+$("copyJson2").onclick = copyJSON;
+
+$("resetJson").onclick = () => {
+  jsonBox.value = JSON.stringify(PRESETS.standing, null, 2);
+  updateJsonMeta();
+  applyJSON();
+};
+
+/* ── Renderer toggles ────────────────────────────────────────────── */
+$("drag").onclick = function () {
+  this.classList.toggle("on");
+  renderer?.setDragEnabled?.(this.classList.contains("on"));
+  toast("Drag: " + (this.classList.contains("on") ? "ON" : "OFF"));
+};
+$("fills").onclick = function () {
+  this.classList.toggle("on");
+  renderer?.setFills?.(this.classList.contains("on"));
+  render();
+  toast("Fills: " + (this.classList.contains("on") ? "ON" : "OFF"));
+};
+$("points").onclick = function () {
+  this.classList.toggle("on");
+  renderer?.setShowPoints?.(this.classList.contains("on"));
+  render();
+};
+$("limbPoints").onclick = function () {
+  this.classList.toggle("on");
+  renderer?.setShowLimbPointsOnly?.(this.classList.contains("on"));
+  render();
+};
+$("flip").onclick = function () {
+  this.classList.toggle("on");
+  renderer?.setFlipY?.(this.classList.contains("on"));
+  render();
+  toast("Flip Y: " + (this.classList.contains("on") ? "ON" : "OFF"));
+};
+
+/* ── Zoom ────────────────────────────────────────────────────────── */
+function doZoom(f) {
+  renderer?.zoomBy?.(f);
+  render();
+}
+$("zoomIn").onclick     = () => doZoom(1.25);
+$("zoomOut").onclick    = () => doZoom(1 / 1.25);
+$("zoomReset").onclick  = () => { renderer?.fitView?.(); render(); };
+$("zoomIn2").onclick    = () => doZoom(1.25);
+$("zoomOut2").onclick   = () => doZoom(1 / 1.25);
+$("zoomReset2").onclick = () => { renderer?.fitView?.(); render(); };
+
+/* ── Presets ─────────────────────────────────────────────────────── */
+const PRESETS = {
   standing: {
     version: 425, build: 100, scale: 1, color: "#202020FF",
-    nodes: [
-      {
-        id: 0, type: "RoundedSegment",
-        length: 80, thickness: 15, angle: 270,
-        color: "#000000FF", useSegmentColor: true, stretchy: true,
-        children: [
-          { id: 1, type: "FilledCircle",
-            length: 20, thickness: 40, angle: 0,
-            color: "#000000FF", useSegmentColor: true }
-        ]
-      }
-    ],
+    nodes: [{
+      id: 0, type: "RoundedSegment",
+      length: 80, thickness: 15, angle: 270,
+      color: "#202020FF", useSegmentColor: true, stretchy: true,
+      children: [{
+        id: 1, type: "FilledCircle",
+        length: 20, thickness: 40, angle: 0,
+        color: "#202020FF", useSegmentColor: true
+      }]
+    }],
     polyfills: []
   },
-
   simple: {
     version: 425, build: 100, scale: 1, color: "#202020FF",
-    nodes: [
-      {
-        id: 0, type: "RoundedSegment",
-        length: 100, thickness: 12, angle: 270,
-        color: "#3366FFFF", useSegmentColor: true, stretchy: true,
-        children: [
-          { id: 1, type: "FilledCircle",
-            length: 20, thickness: 40, angle: 0,
-            color: "#FFCC99FF", useSegmentColor: true }
-        ]
-      }
-    ],
+    nodes: [{
+      id: 0, type: "RoundedSegment",
+      length: 100, thickness: 12, angle: 270,
+      color: "#3366FFFF", useSegmentColor: true, stretchy: true,
+      children: [{
+        id: 1, type: "FilledCircle",
+        length: 20, thickness: 40, angle: 0,
+        color: "#FFCC99FF", useSegmentColor: true
+      }]
+    }],
     polyfills: []
   },
-
   stickman: {
     version: 425, build: 100, scale: 1, color: "#202020FF",
-    nodes: [
-      {
-        id: 0, type: "RoundedSegment",
-        length: 70, thickness: 18, angle: 270,
-        color: "#3366FFFF", useSegmentColor: true, stretchy: true,
-        children: [
-          { id: 1, type: "FilledCircle",
-            length: 20, thickness: 40, angle: 0,
-            color: "#FFCC99FF", useSegmentColor: true },
-          { id: 2, type: "RoundedSegment",
-            length: 50, thickness: 12, angle: 130,
-            color: "#3366FFFF", useSegmentColor: true, stretchy: true },
-          { id: 3, type: "RoundedSegment",
-            length: 50, thickness: 12, angle: 230,
-            color: "#3366FFFF", useSegmentColor: true, stretchy: true }
-        ]
-      },
-      { id: 4, type: "RoundedSegment",
-        length: 60, thickness: 16, angle: 60,
-        color: "#3366FFFF", useSegmentColor: true, stretchy: true },
-      { id: 5, type: "RoundedSegment",
-        length: 60, thickness: 16, angle: 120,
-        color: "#3366FFFF", useSegmentColor: true, stretchy: true }
-    ],
+    nodes: [{
+      id: 0, type: "RoundedSegment",
+      length: 70, thickness: 18, angle: 270,
+      color: "#3366FFFF", useSegmentColor: true, stretchy: true,
+      children: [
+        { id: 1, type: "FilledCircle",
+          length: 20, thickness: 40, angle: 0,
+          color: "#FFCC99FF", useSegmentColor: true },
+        { id: 2, type: "RoundedSegment",
+          length: 50, thickness: 12, angle: 130,
+          color: "#3366FFFF", useSegmentColor: true, stretchy: true },
+        { id: 3, type: "RoundedSegment",
+          length: 50, thickness: 12, angle: 230,
+          color: "#3366FFFF", useSegmentColor: true, stretchy: true }
+      ]
+    },
+    { id: 4, type: "RoundedSegment",
+      length: 60, thickness: 16, angle: 60,
+      color: "#3366FFFF", useSegmentColor: true, stretchy: true },
+    { id: 5, type: "RoundedSegment",
+      length: 60, thickness: 16, angle: 120,
+      color: "#3366FFFF", useSegmentColor: true, stretchy: true }],
     polyfills: []
   }
 };
 
+$("preset").onchange = (e) => {
+  const name = e.target.value;
+  if (!name) return;
+  const p = PRESETS[name];
+  if (!p) return;
+  jsonBox.value = JSON.stringify(p, null, 2);
+  updateJsonMeta();
+  applyJSON();
+  e.target.value = "";
+};
 
-  document.getElementById("preset").onchange =
-    () => {
+/* ── Resize ─────────────────────────────────────────────────────── */
+// The renderer handles its own canvas sizing on every render() call.
+window.addEventListener("resize", () => render());
+window.addEventListener("orientationchange", () => setTimeout(() => render(), 250));
 
-      const name =
-        document.getElementById(
-          "preset"
-        ).value;
+/* ── WASM init ──────────────────────────────────────────────────── */
+async function initWasm() {
+  setStatus("Loading WASM…");
 
-      if (!name) {
-        return;
-      }
-
-      try {
-
-        const preset =
-          PRESETS[name];
-
-        if (!preset) {
-          return;
-        }
-
-        jsonBox.value =
-          JSON.stringify(
-            preset,
-            null,
-            2
-          );
-
-        applyJSON();
-
-      } catch (err) {
-
-        console.error(err);
-
-        alert(
-          "Preset failed:\n\n" +
-          err.message
-        );
-      }
-
-      document.getElementById(
-        "preset"
-      ).value = "";
-    };
-
-
-  /*
-   * ============================================================
-   * CANVAS POINTER / DRAGGING
-   * ============================================================
-   *
-   * The renderer is responsible for converting pointer
-   * coordinates and calling the real WASM node.dragTo()
-   * whenever possible.
-   */
-
-  canvas.addEventListener(
-    "pointerdown",
-    event => {
-
-      if (!renderer) {
-        return;
-      }
-
-      try {
-        renderer.pointerDown?.(
-          event
-        );
-      } catch (_) {}
-    }
-  );
-
-
-  canvas.addEventListener(
-    "pointermove",
-    event => {
-
-      if (!renderer) {
-        return;
-      }
-
-      try {
-        renderer.pointerMove?.(
-          event
-        );
-      } catch (_) {}
-    }
-  );
-
-
-  canvas.addEventListener(
-    "pointerup",
-    event => {
-
-      if (!renderer) {
-        return;
-      }
-
-      try {
-        renderer.pointerUp?.(
-          event
-        );
-      } catch (_) {}
-
-      updateJSON();
-      updateTree();
-      render();
-    }
-  );
-
-
-  canvas.addEventListener(
-    "pointercancel",
-    event => {
-
-      try {
-        renderer?.pointerUp?.(
-          event
-        );
-      } catch (_) {}
-    }
-  );
-
-
-  /*
-   * ============================================================
-   * WHEEL ZOOM
-   * ============================================================
-   */
-
-  canvas.addEventListener(
-    "wheel",
-    event => {
-
-      event.preventDefault();
-
-      const factor =
-        event.deltaY < 0
-          ? 1.1
-          : 1 / 1.1;
-
-      try {
-        renderer?.zoomAt?.(
-          factor,
-          event.offsetX,
-          event.offsetY
-        );
-      } catch (_) {
-
-        renderer?.zoom?.(
-          factor
-        );
-      }
-
-      render();
-    },
-    {
-      passive: false
-    }
-  );
-
-
-  /*
-   * ============================================================
-   * RESIZE
-   * ============================================================
-   */
-
-  function resize() {
-
-    const rect =
-      viewport.getBoundingClientRect();
-
-    const dpr =
-      Math.max(
-        1,
-        Math.min(
-          window.devicePixelRatio || 1,
-          3
-        )
-      );
-
-    canvas.width =
-      Math.max(
-        1,
-        Math.floor(
-          rect.width * dpr
-        )
-      );
-
-    canvas.height =
-      Math.max(
-        1,
-        Math.floor(
-          rect.height * dpr
-        )
-      );
-
-    canvas.style.width =
-      rect.width + "px";
-
-    canvas.style.height =
-      rect.height + "px";
-
-
-    try {
-      renderer?.resize?.(
-        rect.width,
-        rect.height,
-        dpr
-      );
-    } catch (_) {}
-
-    render();
+  // Try direct import, fall back to blob URL (Android HTTP servers
+  // serve .js with the wrong MIME).
+  try {
+    mod = await import("./sticknodes_rs.js");
+  } catch (e) {
+    const jsText = await (await fetch("./sticknodes_rs.js", { cache: "no-store" })).text();
+    const blobUrl = URL.createObjectURL(new Blob([jsText], { type: "application/javascript" }));
+    try { mod = await import(blobUrl); }
+    finally { URL.revokeObjectURL(blobUrl); }
   }
 
+  const wasmBytes = await (await fetch("./sticknodes_rs_bg.wasm", { cache: "no-store" })).arrayBuffer();
+  if (typeof mod.default === "function") await mod.default(wasmBytes);
+  else if (typeof mod.init === "function") await mod.init(wasmBytes);
 
-  window.addEventListener(
-    "resize",
-    resize
-  );
+  // Create renderer
+  renderer = new StickNodesRenderer(canvas);
+  renderer.setFills(true);
+  renderer.setShowPoints(true);
+  renderer.setShowLimbPointsOnly(true);
+  renderer.setDragEnabled(true);
+  renderer.setFlipY(false);
 
+  // Set initial preset
+  jsonBox.value = JSON.stringify(PRESETS.standing, null, 2);
+  updateJsonMeta();
 
-  /*
-   * ============================================================
-   * WASM INITIALIZATION
-   * ============================================================
-   */
-
-  async function initWasm() {
-
-    setStatus(
-      "Loading StickNodes WASM…"
-    );
-
-    /*
-     * The generated wasm-bindgen JS file.
-     *
-     * Keep:
-     *
-     *     sticknodes_rs.js
-     *     sticknodes_rs_bg.wasm
-     *
-     * beside index.html.
-     */
-
-    // Try direct import first, fall back to blob URL (Android file servers
-// serve .js with the wrong MIME and Chrome refuses direct module import).
-try {
-  mod = await import("./sticknodes_rs.js");
-} catch (e) {
-  const jsText = await (await fetch("./sticknodes_rs.js", { cache: "no-store" })).text();
-  const blobUrl = URL.createObjectURL(new Blob([jsText], { type: "application/javascript" }));
-  try { mod = await import(blobUrl); }
-  finally { URL.revokeObjectURL(blobUrl); }
-}
-
-// Fetch wasm as ArrayBuffer (avoids the instantiateStreaming MIME check)
-const wasmBytes = await (await fetch("./sticknodes_rs_bg.wasm", { cache: "no-store" })).arrayBuffer();
-if (typeof mod.default === "function") {
-  await mod.default(wasmBytes);
-} else if (typeof mod.init === "function") {
-  await mod.init(wasmBytes);
-}
-
-
-    /*
-     * Create renderer.
-     */
-
-    renderer =
-      new StickNodesRenderer(
-        canvas
-      );
-
-
-    /*
-     * Renderer defaults.
-     */
-
-    renderer.setFills?.(
-      true
-    );
-
-    renderer.setShowPoints?.(
-      true
-    );
-
-    renderer.setShowLimbPointsOnly?.(
-      true
-    );
-
-    renderer.setDragEnabled?.(
-      true
-    );
-
-
-    /*
-     * If renderer has a resize method,
-     * initialize it now.
-     */
-
-    resize();
-
-
-    /*
-     * Load default preset.
-     */
-
-    jsonBox.value =
-      JSON.stringify(
-        PRESETS.standing,
-        null,
-        2
-      );
-
-
-    try {
-
-      const defaultFigure = jsonToFigure(PRESETS.standing, mod.Stickfigure);
-
-      setFigure(
-        defaultFigure
-      );
-
-    } catch (err) {
-
-      console.error(
-        "Default figure failed:",
-        err
-      );
-
-      setStatus(
-        "WASM loaded — waiting for figure"
-      );
-    }
-
-
-    setStatus(
-      "Ready"
-    );
+  try {
+    const fig = jsonToFigure(PRESETS.standing, mod.Stickfigure);
+    setFigure(fig);
+  } catch (e) {
+    console.error("Default figure failed:", e);
+    setStatus("WASM loaded - waiting for figure", "error");
+    return;
   }
 
+  setStatus("Ready", "ready");
+}
 
-  /*
-   * ============================================================
-   * KEYBOARD SHORTCUTS
-   * ============================================================
-   */
+/* ── Keyboard shortcuts ─────────────────────────────────────────── */
+window.addEventListener("keydown", (ev) => {
+  if (document.activeElement === jsonBox) return;
+  if (ev.ctrlKey && ev.key.toLowerCase() === "s") {
+    ev.preventDefault(); $("downloadNodes").click(); return;
+  }
+  if (ev.key === "+" || ev.key === "=") { doZoom(1.15); }
+  else if (ev.key === "-" || ev.key === "_") { doZoom(1 / 1.15); }
+  else if (ev.key === "0") { renderer?.fitView?.(); render(); }
+});
 
-  window.addEventListener(
-    "keydown",
-    event => {
-
-      /*
-       * Don't steal keys while editing JSON.
-       */
-
-      if (
-        document.activeElement ===
-        jsonBox
-      ) {
-        return;
-      }
-
-
-      if (
-        event.ctrlKey &&
-        event.key.toLowerCase() === "s"
-      ) {
-
-        event.preventDefault();
-
-        document
-          .getElementById(
-            "downloadNodes"
-          )
-          .click();
-
-        return;
-      }
-
-
-      if (
-        event.ctrlKey &&
-        event.key.toLowerCase() === "c"
-      ) {
-        return;
-      }
-
-
-      if (event.key === "+" || event.key === "=") {
-
-        renderer?.zoom?.(
-          1.1
-        );
-
-        render();
-
-      } else if (
-        event.key === "-" ||
-        event.key === "_"
-      ) {
-
-        renderer?.zoom?.(
-          1 / 1.1
-        );
-
-        render();
-
-      } else if (
-        event.key === "0"
-      ) {
-
-        renderer?.resetView?.();
-
-        render();
-      }
-
-    }
-  );
-
-
-  /*
-   * ============================================================
-   * START
-   * ============================================================
-   */
-
-  initWasm()
-    .catch(err => {
-
-      console.error(
-        "Initialization failed:",
-        err
-      );
-
-      setStatus(
-        "Initialization failed"
-      );
-
-      alert(
-        "StickNodes WASM failed to initialize.\n\n" +
-        err.message
-      );
-    });
-
+/* ── Start ──────────────────────────────────────────────────────── */
+initWasm().catch((err) => {
+  console.error("Init failed:", err);
+  setStatus("Initialization failed: " + err.message, "error");
+  alert("StickNodes WASM failed to initialize.\n\n" + err.message);
+});
 </script>
-
 </body>
 </html>
