@@ -412,51 +412,115 @@ function getNodeColor(n) {
    ══════════════════════════════════════════════════════════════════════ */
 function extractScene(fig, showFills = true) {
   const figScale = Math.max(EPS, num(safeGet(fig, "scale", 1), 1));
-  const all = safeCall(fig, "allNodes", [], []);
   const scene = [];
+  const visited = new Set();
 
-  for (const n of Array.isArray(all) ? all : []) {
-    const type = num(safeGet(n, "nodeType", -1), -1);
-    if (type < 0 || type > 7) continue;
+  /* ── Walk the tree manually, computing positions in JS ─────────
+     This is the same math the old XML renderer used, which worked.
+     WASM getGlobalStart/End turned out not to be reliable, so we
+     do the trigonometry ourselves. */
+  function visit(node, sx, sy, parentAngle, depth) {
+    if (!node || depth > 128) return;
 
-    const start = readPoint(n, "getGlobalStart");
-    const end   = readPoint(n, "getGlobalEnd");
-    if (!start || !end) continue;
+    let type = -1, idx = -1;
+    try { type = node.nodeType; } catch (_) { return; }
+    try { idx = node.drawIndex; } catch (_) {}
 
-    const effTh = Math.abs(num(
-      safeCall(n, "getEffectiveThickness", [], safeGet(n, "thickness", 1)), 1));
-    const gradientMode = num(safeGet(n, "gradientMode", 0), 0);
+    // Root: don't draw, but process children
+    if (type === -1) {
+      let kids = [];
+      try { kids = node.children() || []; } catch (_) {}
+      for (const k of kids) visit(k, sx, sy, parentAngle, depth + 1);
+      return;
+    }
+    if (type < 0 || type > 7) return;
+    if (visited.has(idx)) return;
+    visited.add(idx);
+
+    // Read props via getters
+    let localAngle = 0, length = 0, rawThickness = 1;
+    let useSegScale = false, segScale = 1;
+    try { localAngle   = num(node.localAngle, 0); } catch (_) {}
+    try { length       = num(node.length, 0);     } catch (_) {}
+    try { rawThickness = num(node.thickness, 1);  } catch (_) {}
+    try { useSegScale  = bool(node.useSegmentScale); } catch (_) {}
+    try { segScale     = num(node.scale, 1);      } catch (_) {}
+
+    const globalAngle = parentAngle + localAngle;
+    const rad = globalAngle * Math.PI / 180;
+    const sf = useSegScale ? segScale : 1;
+
+    const ex = sx + length * Math.cos(rad) * sf * figScale;
+    const ey = sy + length * Math.sin(rad) * sf * figScale;
+
+    // Visual properties
+    let color = { r: 0, g: 0, b: 0, a: 255 };
+    try { color = getNodeColor(node); } catch (_) {}
+
+    let hollow = false;
+    try { hollow = bool(node.circleIsHollow); } catch (_) {}
+
+    let trapStart = 0, trapEnd = 0, numPoly = 5, curveRadius = 0;
+    try { trapStart   = num(node.trapezoidThicknessStart, 0); } catch (_) {}
+    try { trapEnd     = num(node.trapezoidThicknessEnd,   0); } catch (_) {}
+    try { numPoly     = Math.max(3, Math.floor(num(node.numPolygonVertices, 5))); } catch (_) {}
+    try { curveRadius = num(node.segmentCurveRadiusAndDefaultCurveRadius, 0); } catch (_) {}
+
+    let useGradient = false, reverseGradient = false, gradientMode = 0;
+    let gradientColor = color;
+    try { useGradient     = bool(node.useGradient);     } catch (_) {}
+    try { reverseGradient = bool(node.reverseGradient); } catch (_) {}
+    try { gradientMode    = num(node.gradientMode, 0);  } catch (_) {}
+    try { gradientColor = hexToRgba(readHex(node, "gradientColorHex",
+                              readHex(node, "colorHex", "#000000"))); } catch (_) {}
+
+    let triangleFlipped = false, triangleUpsideDown = false;
+    try { triangleFlipped    = bool(node.triangleFlipped);    } catch (_) {}
+    try { triangleUpsideDown = bool(node.triangleUpsideDown); } catch (_) {}
+
+    let isStretchy = false;
+    try { isStretchy = bool(node.isStretchy); } catch (_) {}
 
     scene.push({
-      node: n, type,
-      drawIndex: num(safeGet(n, "drawIndex", scene.length), scene.length),
-      sx: start[0] * figScale, sy: start[1] * figScale,
-      ex: end[0]   * figScale, ey: end[1]   * figScale,
-      thickness: effTh * figScale,
-      color: getNodeColor(n),
-      gradientColor: hexToRgba(readHex(n, "gradientColorHex",
-        readHex(n, "colorHex", "#000000"))),
-      useGradient:     bool(safeGet(n, "useGradient", false)),
-      reverseGradient: bool(safeGet(n, "reverseGradient", false)),
-      gradientMode,
+      node, type, drawIndex: idx,
+      sx, sy, ex, ey,
+      thickness: rawThickness * sf * figScale,
+      color,
+      gradientColor,
+      useGradient, reverseGradient, gradientMode,
       gradientAxis: gradientMode === 1 ? "y" : "x",
-      hollow: bool(safeGet(n, "circleIsHollow", false)),
-      trapStart: num(safeGet(n, "trapezoidThicknessStart", 0), 0),
-      trapEnd:   num(safeGet(n, "trapezoidThicknessEnd", 0), 0),
-      numPoly: Math.max(3, Math.floor(num(safeGet(n, "numPolygonVertices", 5), 5))),
-      curveRadius: num(safeGet(n, "segmentCurveRadiusAndDefaultCurveRadius",
-        safeGet(n, "curveRadius", 0)), 0),
+      hollow,
+      trapStart: trapStart * sf * figScale,
+      trapEnd:   trapEnd   * sf * figScale,
+      numPoly, curveRadius,
       isLimb: LIMB_TYPES.has(type),
-      isStretchy: bool(safeGet(n, "isStretchy", false)),
-      useSegmentScale: bool(safeGet(n, "useSegmentScale", false)),
-      segmentScale: num(safeGet(n, "scale", 1), 1),
-      triangleFlipped: bool(safeGet(n, "triangleFlipped", false)),
-      triangleUpsideDown: bool(safeGet(n, "triangleUpsideDown", false)),
+      isStretchy,
+      useSegmentScale: useSegScale,
+      segmentScale: segScale,
+      triangleFlipped, triangleUpsideDown,
     });
+
+    // Recurse children
+    let kids = [];
+    try { kids = node.children() || []; } catch (_) {}
+    for (const k of kids) visit(k, ex, ey, globalAngle, depth + 1);
+  }
+
+  // Start at root — children begin at origin with angle 0
+  try {
+    const root = safeCall(fig, "rootNode", [], null);
+    if (root) {
+      let kids = [];
+      try { kids = root.children() || []; } catch (_) {}
+      for (const k of kids) visit(k, 0, 0, 0, 0);
+    }
+  } catch (e) {
+    console.error("extractScene walk failed:", e);
   }
 
   scene.sort((a, b) => a.drawIndex - b.drawIndex);
 
+  // Polyfills — kept as-is
   const polyfills = [];
   if (showFills) {
     const pfs = safeCall(fig, "allPolyfills", [], []);
