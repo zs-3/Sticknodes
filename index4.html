@@ -677,8 +677,7 @@
 
       const data = JSON.parse(text);
 
-      const newFigure =
-        jsonToFigure(data);
+      const newFigure = jsonToFigure(data, mod.Stickfigure);
 
       setFigure(newFigure);
 
@@ -1171,166 +1170,69 @@
    */
 
   const PRESETS = {
+  standing: {
+    version: 425, build: 100, scale: 1, color: "#202020FF",
+    nodes: [
+      {
+        id: 0, type: "RoundedSegment",
+        length: 80, thickness: 15, angle: 270,
+        color: "#000000FF", useSegmentColor: true, stretchy: true,
+        children: [
+          { id: 1, type: "FilledCircle",
+            length: 20, thickness: 40, angle: 0,
+            color: "#000000FF", useSegmentColor: true }
+        ]
+      }
+    ],
+    polyfills: []
+  },
 
-    standing: {
-      version: 3,
-      build: 1,
-      scale: 1,
-      color: "#000000",
+  simple: {
+    version: 425, build: 100, scale: 1, color: "#202020FF",
+    nodes: [
+      {
+        id: 0, type: "RoundedSegment",
+        length: 100, thickness: 12, angle: 270,
+        color: "#3366FFFF", useSegmentColor: true, stretchy: true,
+        children: [
+          { id: 1, type: "FilledCircle",
+            length: 20, thickness: 40, angle: 0,
+            color: "#FFCC99FF", useSegmentColor: true }
+        ]
+      }
+    ],
+    polyfills: []
+  },
 
-      nodes: [
-        {
-          index: 0,
-          parent: -1,
-          nodeType: 1,
-          x: 0,
-          y: 0,
-          length: 100,
-          thickness: 8,
-          angle: 90,
-          localAngle: 90,
-          color: "#000000",
-          children: [1]
-        },
-        {
-          index: 1,
-          parent: 0,
-          nodeType: 1,
-          x: 0,
-          y: -100,
-          length: 100,
-          thickness: 8,
-          angle: 90,
-          localAngle: 0,
-          color: "#000000",
-          children: []
-        }
-      ],
-
-      polyfills: []
-    },
-
-
-    simple: {
-      version: 3,
-      build: 1,
-      scale: 1,
-      color: "#000000",
-
-      nodes: [
-        {
-          index: 0,
-          parent: -1,
-          nodeType: 1,
-          x: 0,
-          y: 0,
-          length: 120,
-          thickness: 10,
-          angle: 90,
-          localAngle: 90,
-          color: "#000000",
-          children: [1, 2]
-        },
-        {
-          index: 1,
-          parent: 0,
-          nodeType: 2,
-          x: 0,
-          y: -120,
-          length: 0,
-          thickness: 35,
-          angle: 0,
-          localAngle: 0,
-          color: "#000000",
-          children: []
-        },
-        {
-          index: 2,
-          parent: 0,
-          nodeType: 1,
-          x: 0,
-          y: -120,
-          length: 90,
-          thickness: 8,
-          angle: 45,
-          localAngle: -45,
-          color: "#000000",
-          children: []
-        }
-      ],
-
-      polyfills: []
-    },
-
-
-    stickman: {
-      version: 3,
-      build: 1,
-      scale: 1,
-      color: "#000000",
-
-      nodes: [
-        {
-          index: 0,
-          parent: -1,
-          nodeType: 1,
-          x: 0,
-          y: 0,
-          length: 110,
-          thickness: 8,
-          angle: 90,
-          localAngle: 90,
-          color: "#000000",
-          children: [1, 2, 3]
-        },
-
-        {
-          index: 1,
-          parent: 0,
-          nodeType: 2,
-          x: 0,
-          y: -110,
-          length: 0,
-          thickness: 38,
-          angle: 0,
-          localAngle: 0,
-          color: "#000000",
-          children: []
-        },
-
-        {
-          index: 2,
-          parent: 0,
-          nodeType: 1,
-          x: 0,
-          y: -110,
-          length: 90,
-          thickness: 8,
-          angle: 35,
-          localAngle: -55,
-          color: "#000000",
-          children: []
-        },
-
-        {
-          index: 3,
-          parent: 0,
-          nodeType: 1,
-          x: 0,
-          y: -110,
-          length: 90,
-          thickness: 8,
-          angle: 145,
-          localAngle: 55,
-          color: "#000000",
-          children: []
-        }
-      ],
-
-      polyfills: []
-    }
-
-  };
+  stickman: {
+    version: 425, build: 100, scale: 1, color: "#202020FF",
+    nodes: [
+      {
+        id: 0, type: "RoundedSegment",
+        length: 70, thickness: 18, angle: 270,
+        color: "#3366FFFF", useSegmentColor: true, stretchy: true,
+        children: [
+          { id: 1, type: "FilledCircle",
+            length: 20, thickness: 40, angle: 0,
+            color: "#FFCC99FF", useSegmentColor: true },
+          { id: 2, type: "RoundedSegment",
+            length: 50, thickness: 12, angle: 130,
+            color: "#3366FFFF", useSegmentColor: true, stretchy: true },
+          { id: 3, type: "RoundedSegment",
+            length: 50, thickness: 12, angle: 230,
+            color: "#3366FFFF", useSegmentColor: true, stretchy: true }
+        ]
+      },
+      { id: 4, type: "RoundedSegment",
+        length: 60, thickness: 16, angle: 60,
+        color: "#3366FFFF", useSegmentColor: true, stretchy: true },
+      { id: 5, type: "RoundedSegment",
+        length: 60, thickness: 16, angle: 120,
+        color: "#3366FFFF", useSegmentColor: true, stretchy: true }
+    ],
+    polyfills: []
+  }
+};
 
 
   document.getElementById("preset").onchange =
@@ -1579,34 +1481,24 @@
      * beside index.html.
      */
 
-    mod =
-      await import(
-        "./sticknodes_rs.js"
-      );
+    // Try direct import first, fall back to blob URL (Android file servers
+// serve .js with the wrong MIME and Chrome refuses direct module import).
+try {
+  mod = await import("./sticknodes_rs.js");
+} catch (e) {
+  const jsText = await (await fetch("./sticknodes_rs.js", { cache: "no-store" })).text();
+  const blobUrl = URL.createObjectURL(new Blob([jsText], { type: "application/javascript" }));
+  try { mod = await import(blobUrl); }
+  finally { URL.revokeObjectURL(blobUrl); }
+}
 
-
-    /*
-     * Initialize wasm-bindgen.
-     */
-
-    if (
-      typeof mod.default ===
-      "function"
-    ) {
-
-      await mod.default(
-        "./sticknodes_rs_bg.wasm"
-      );
-
-    } else if (
-      typeof mod.init ===
-      "function"
-    ) {
-
-      await mod.init(
-        "./sticknodes_rs_bg.wasm"
-      );
-    }
+// Fetch wasm as ArrayBuffer (avoids the instantiateStreaming MIME check)
+const wasmBytes = await (await fetch("./sticknodes_rs_bg.wasm", { cache: "no-store" })).arrayBuffer();
+if (typeof mod.default === "function") {
+  await mod.default(wasmBytes);
+} else if (typeof mod.init === "function") {
+  await mod.init(wasmBytes);
+}
 
 
     /*
@@ -1662,10 +1554,7 @@
 
     try {
 
-      const defaultFigure =
-        jsonToFigure(
-          PRESETS.standing
-        );
+      const defaultFigure = jsonToFigure(PRESETS.standing, mod.Stickfigure);
 
       setFigure(
         defaultFigure
