@@ -26,7 +26,6 @@
   }
   .app{display:flex;flex-direction:column;height:100vh;height:100dvh}
 
-  /* ── Header ── */
   header{
     display:flex;align-items:center;justify-content:space-between;
     gap:12px;padding:10px 16px;background:var(--panel);
@@ -46,7 +45,6 @@
     box-shadow:0 0 6px rgba(5,150,105,.5)}
   header .status.error .led{background:var(--err)}
 
-  /* ── Toolbar ── */
   .toolbar{
     display:flex;align-items:center;gap:6px;padding:8px 16px;
     background:var(--panel);border-bottom:1px solid var(--border);
@@ -81,7 +79,6 @@
   }
   .spacer{flex:1}
 
-  /* ── Main ── */
   .main{
     flex:1 1 auto;display:grid;
     grid-template-columns:minmax(0,1fr) 420px;
@@ -91,7 +88,6 @@
     .main{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 400px}
   }
 
-  /* ── Canvas card ── */
   .canvas-card{
     position:relative;background:var(--panel);
     border:1px solid var(--border);border-radius:var(--radius);
@@ -105,7 +101,6 @@
   .canvas-wrap.grabbing{cursor:grabbing}
   canvas{display:block;width:100%;height:100%;background:#fff}
 
-  /* zoom controls */
   .zoom-controls{
     position:absolute;top:10px;right:10px;
     display:flex;flex-direction:column;gap:3px;
@@ -140,8 +135,8 @@
     white-space:nowrap;
   }
   .canvas-status.err{color:var(--err);border-color:#fccac0;background:var(--err-soft)}
+  .canvas-status.ok{color:var(--ok);border-color:#bbf7d0;background:var(--ok-soft)}
 
-  /* ── Panel ── */
   .panel{
     display:flex;flex-direction:column;min-height:0;gap:10px;
   }
@@ -175,7 +170,6 @@
   }
   textarea::selection{background:var(--accent-soft)}
 
-  /* actions row */
   .actions{
     display:grid;grid-template-columns:1fr 1fr;
     gap:6px;padding:8px;border-top:1px solid var(--border);
@@ -183,7 +177,6 @@
   }
   .actions .btn{justify-content:center;min-height:34px;font-size:12px}
 
-  /* tree */
   .tree-wrap{
     flex:0 0 auto;height:200px;min-height:120px;
     display:flex;flex-direction:column;overflow:hidden;
@@ -211,10 +204,8 @@
   .tree-row .type{color:#b45309;font-weight:500;flex:1;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-  /* hide file input */
   input[type=file]{display:none}
 
-  /* toast */
   #toast{
     position:fixed;left:50%;bottom:24px;
     transform:translateX(-50%) translateY(80px);
@@ -245,6 +236,10 @@
     <button class="btn primary" id="build">
       <svg viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3z"/></svg>
       <span class="label">Build JSON</span>
+    </button>
+    <button class="btn" id="pasteJson">
+      <svg viewBox="0 0 24 24"><rect x="8" y="4" width="8" height="4" rx="1"/><path d="M6 8h12v12H6z"/></svg>
+      <span class="label">Paste JSON</span>
     </button>
     <button class="btn" id="downloadNodes">
       <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
@@ -293,7 +288,7 @@
 
     <button class="btn" id="zoomOut" title="Zoom out">−</button>
     <button class="btn" id="zoomIn" title="Zoom in">+</button>
-    <button class="btn" id="zoomReset" title="Reset zoom">⌂</button>
+    <button class="btn" id="zoomReset" title="Fit view">⌂</button>
 
     <div class="spacer"></div>
 
@@ -309,7 +304,6 @@
 
   <div class="main">
 
-    <!-- Canvas -->
     <div class="canvas-card">
       <div class="canvas-wrap" id="viewport">
         <canvas id="canvas"></canvas>
@@ -325,7 +319,6 @@
       </div>
     </div>
 
-    <!-- Right panel -->
     <div class="panel">
 
       <div class="card" style="flex:1 1 55%">
@@ -364,7 +357,7 @@ import {
   jsonToFigure,
 } from "./ren.js";
 
-/* ── DOM refs ────────────────────────────────────────────────────── */
+/* ── DOM ─────────────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
 const canvas    = $("canvas");
 const viewport  = $("viewport");
@@ -376,12 +369,22 @@ const status2   = $("status2");
 const toastEl   = $("toast");
 const fileInput = $("file");
 
-/* ── Status / log helpers ───────────────────────────────────────── */
+/* ── Default JSON header (empty figure) ─────────────────────────── */
+const DEFAULT_JSON = `{
+  "version": 425,
+  "build": 100,
+  "scale": 1,
+  "color": "#202020FF",
+  "nodes": [],
+  "polyfills": []
+}`;
+
+/* ── Status / toast ──────────────────────────────────────────────── */
 function setStatus(text, kind = "") {
   statusTxt.textContent = text;
   statusEl.className = "status " + kind;
   status2.textContent = text;
-  status2.className = "canvas-status " + (kind === "error" ? "err" : "");
+  status2.className = "canvas-status " + (kind === "error" ? "err" : kind === "ready" ? "ok" : "");
 }
 let toastTimer = null;
 function toast(msg) {
@@ -403,23 +406,18 @@ let figure = null;
 let renderer = null;
 let selectedNodeIndex = -1;
 
-/* ── JSON <-> Figure ─────────────────────────────────────────────── */
-function updateJSON() {
-  if (!figure) { jsonBox.value = ""; return; }
-  try {
-    jsonBox.value = jsonStringifyFigure(figure, 2);
-  } catch (e) {
-    console.error("serialize failed:", e);
-    try { jsonBox.value = JSON.stringify(figureToJSON(figure), null, 2); } catch (_) {}
-  }
-  updateJsonMeta();
-}
+/* ── JSON meta ───────────────────────────────────────────────────── */
 function updateJsonMeta() {
   const t = jsonBox.value;
   $("jsonMeta").textContent =
     t.split("\n").length + " lines · " + new Blob([t]).size + " B";
 }
 jsonBox.addEventListener("input", updateJsonMeta);
+
+function setJsonBoxToDefault() {
+  jsonBox.value = DEFAULT_JSON;
+  updateJsonMeta();
+}
 
 /* ── Tree ────────────────────────────────────────────────────────── */
 function updateTree() {
@@ -470,35 +468,89 @@ function render() {
   } catch (_) {}
 }
 
-/* ── Apply figure ────────────────────────────────────────────────── */
+/* ── Load a figure into state ────────────────────────────────────── */
 function setFigure(newFigure) {
   if (!newFigure) throw new Error("Invalid figure");
   figure = newFigure;
   selectedNodeIndex = -1;
   try { renderer.setFigure?.(figure); } catch (_) {}
-  updateJSON();
   updateTree();
   render();
-  setStatus("Figure loaded", "ready");
 }
 
-/* ── JSON build ──────────────────────────────────────────────────── */
-function applyJSON() {
+/* ── BUILD / APPLY — parse JSON, render, KEEP JSON in the box ──── */
+function buildFromJson() {
   const text = jsonBox.value.trim();
-  if (!text) { alert("JSON is empty."); return; }
+  if (!text) {
+    setStatus("JSON is empty", "error");
+    toast("JSON is empty");
+    return;
+  }
   try {
     const data = JSON.parse(text);
     const newFigure = jsonToFigure(data, mod.Stickfigure);
     setFigure(newFigure);
-    toast("Built from JSON");
+    setStatus("Built from json", "ready");
+    toast("Built from json");
   } catch (e) {
     console.error(e);
     setStatus("Build failed: " + e.message, "error");
+    toast("Build failed");
     alert("Could not build figure from JSON:\n\n" + e.message);
   }
 }
 
-/* ── Load ────────────────────────────────────────────────────────── */
+$("build").onclick = buildFromJson;
+$("applyJson").onclick = buildFromJson;
+
+/* ── Reset — JSON box back to default header, clears preview ──── */
+$("resetJson").onclick = () => {
+  setJsonBoxToDefault();
+  try {
+    figure = null;
+    selectedNodeIndex = -1;
+    renderer?.setFigure?.(null);
+    renderer?.render?.();
+    updateTree();
+  } catch (_) {}
+  setStatus("Reset");
+  toast("Reset to default");
+};
+
+/* ── Paste JSON ──────────────────────────────────────────────────── */
+$("pasteJson").onclick = async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text) { toast("Clipboard empty"); return; }
+    jsonBox.value = text;
+    updateJsonMeta();
+    toast("Pasted JSON");
+  } catch (e) {
+    toast("Clipboard blocked — paste manually");
+    jsonBox.focus();
+  }
+};
+
+/* ── Format ─────────────────────────────────────────────────────── */
+function formatJSON() {
+  try {
+    jsonBox.value = JSON.stringify(JSON.parse(jsonBox.value), null, 2);
+    updateJsonMeta();
+    toast("Formatted");
+  } catch (e) { alert("Invalid JSON:\n\n" + e.message); }
+}
+$("formatJson").onclick = formatJSON;
+$("prettyJson").onclick = formatJSON;
+
+/* ── Copy ───────────────────────────────────────────────────────── */
+async function copyJSON() {
+  try { await navigator.clipboard.writeText(jsonBox.value); toast("Copied"); }
+  catch (_) { jsonBox.focus(); jsonBox.select(); document.execCommand("copy"); toast("Copied"); }
+}
+$("copyJson").onclick = copyJSON;
+$("copyJson2").onclick = copyJSON;
+
+/* ── Load file ──────────────────────────────────────────────────── */
 $("load").onclick = () => fileInput.click();
 fileInput.onchange = async (ev) => {
   const f = ev.target.files?.[0];
@@ -508,7 +560,8 @@ fileInput.onchange = async (ev) => {
     if (name.endsWith(".json")) {
       jsonBox.value = await f.text();
       updateJsonMeta();
-      applyJSON();
+      setStatus("JSON file loaded");
+      toast("JSON file loaded");
       return;
     }
     const bytes = new Uint8Array(await f.arrayBuffer());
@@ -516,7 +569,11 @@ fileInput.onchange = async (ev) => {
     const loaded = mod.Stickfigure.fromBytes(bytes);
     try { loaded.setNodeLimitEnabled(false); } catch (_) {}
     setFigure(loaded);
-    setStatus(`Loaded ${f.name}`, "ready");
+    try {
+      jsonBox.value = jsonStringifyFigure(loaded, 2);
+      updateJsonMeta();
+    } catch (_) {}
+    setStatus("Loaded " + f.name, "ready");
     toast("Loaded " + f.name);
   } catch (e) {
     console.error(e);
@@ -527,7 +584,7 @@ fileInput.onchange = async (ev) => {
   }
 };
 
-/* ── Download ────────────────────────────────────────────────────── */
+/* ── Download .nodes ────────────────────────────────────────────── */
 $("downloadNodes").onclick = () => {
   if (!figure) { alert("No figure loaded."); return; }
   try {
@@ -547,33 +604,7 @@ $("downloadNodes").onclick = () => {
   }
 };
 
-/* ── Build / Apply / Format / Copy ───────────────────────────────── */
-$("build").onclick = applyJSON;
-$("applyJson").onclick = applyJSON;
-
-function formatJSON() {
-  try {
-    jsonBox.value = JSON.stringify(JSON.parse(jsonBox.value), null, 2);
-    updateJsonMeta();
-  } catch (e) { alert("Invalid JSON:\n\n" + e.message); }
-}
-$("formatJson").onclick = formatJSON;
-$("prettyJson").onclick = formatJSON;
-
-async function copyJSON() {
-  try { await navigator.clipboard.writeText(jsonBox.value); toast("Copied"); }
-  catch (_) { jsonBox.focus(); jsonBox.select(); document.execCommand("copy"); toast("Copied"); }
-}
-$("copyJson").onclick = copyJSON;
-$("copyJson2").onclick = copyJSON;
-
-$("resetJson").onclick = () => {
-  jsonBox.value = JSON.stringify(PRESETS.standing, null, 2);
-  updateJsonMeta();
-  applyJSON();
-};
-
-/* ── Renderer toggles ────────────────────────────────────────────── */
+/* ── Renderer toggles ───────────────────────────────────────────── */
 $("drag").onclick = function () {
   this.classList.toggle("on");
   renderer?.setDragEnabled?.(this.classList.contains("on"));
@@ -602,7 +633,7 @@ $("flip").onclick = function () {
   toast("Flip Y: " + (this.classList.contains("on") ? "ON" : "OFF"));
 };
 
-/* ── Zoom ────────────────────────────────────────────────────────── */
+/* ── Zoom ───────────────────────────────────────────────────────── */
 function doZoom(f) {
   renderer?.zoomBy?.(f);
   render();
@@ -679,12 +710,11 @@ $("preset").onchange = (e) => {
   if (!p) return;
   jsonBox.value = JSON.stringify(p, null, 2);
   updateJsonMeta();
-  applyJSON();
+  toast("Preset filled — click Build");
   e.target.value = "";
 };
 
 /* ── Resize ─────────────────────────────────────────────────────── */
-// The renderer handles its own canvas sizing on every render() call.
 window.addEventListener("resize", () => render());
 window.addEventListener("orientationchange", () => setTimeout(() => render(), 250));
 
@@ -692,8 +722,6 @@ window.addEventListener("orientationchange", () => setTimeout(() => render(), 25
 async function initWasm() {
   setStatus("Loading WASM…");
 
-  // Try direct import, fall back to blob URL (Android HTTP servers
-  // serve .js with the wrong MIME).
   try {
     mod = await import("./sticknodes_rs.js");
   } catch (e) {
@@ -707,7 +735,6 @@ async function initWasm() {
   if (typeof mod.default === "function") await mod.default(wasmBytes);
   else if (typeof mod.init === "function") await mod.init(wasmBytes);
 
-  // Create renderer
   renderer = new StickNodesRenderer(canvas);
   renderer.setFills(true);
   renderer.setShowPoints(true);
@@ -715,18 +742,11 @@ async function initWasm() {
   renderer.setDragEnabled(true);
   renderer.setFlipY(false);
 
-  // Set initial preset
-  jsonBox.value = JSON.stringify(PRESETS.standing, null, 2);
-  updateJsonMeta();
-
-  try {
-    const fig = jsonToFigure(PRESETS.standing, mod.Stickfigure);
-    setFigure(fig);
-  } catch (e) {
-    console.error("Default figure failed:", e);
-    setStatus("WASM loaded - waiting for figure", "error");
-    return;
-  }
+  // Empty preview to start; JSON box holds the header only
+  figure = null;
+  renderer.setFigure(null);
+  renderer.render();
+  setJsonBoxToDefault();
 
   setStatus("Ready", "ready");
 }
@@ -737,8 +757,8 @@ window.addEventListener("keydown", (ev) => {
   if (ev.ctrlKey && ev.key.toLowerCase() === "s") {
     ev.preventDefault(); $("downloadNodes").click(); return;
   }
-  if (ev.key === "+" || ev.key === "=") { doZoom(1.15); }
-  else if (ev.key === "-" || ev.key === "_") { doZoom(1 / 1.15); }
+  if (ev.key === "+" || ev.key === "=") doZoom(1.15);
+  else if (ev.key === "-" || ev.key === "_") doZoom(1 / 1.15);
   else if (ev.key === "0") { renderer?.fitView?.(); render(); }
 });
 
