@@ -37,7 +37,8 @@ function bool(v, d = false) {
 }
 function clamp(v, lo = 0, hi = 1) { return Math.max(lo, Math.min(hi, v)); }
 function finitePoint(p) {
-  return Array.isArray(p) && p.length >= 2 &&
+  return p !== null && p !== undefined &&
+    typeof p.length === "number" && p.length >= 2 &&
     Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1]));
 }
 
