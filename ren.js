@@ -1,28 +1,30 @@
 /* ══════════════════════════════════════════════════════════════════════
-   ren.js — StickNodes Canvas renderer + JSON document layer
-   .nodes ↔ WASM ↔ JSON (our format) ↔ Canvas
-   Coordinates: StickNodes world, Y-down.
+   ren.js — StickNodes Canvas renderer + JSON layer  (fresh rewrite)
+   .nodes ↔ WASM ↔ JSON ↔ Canvas
+   Coordinates: world units, Y-down.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* ── Node type constants ─────────────────────────────────────────── */
 export const NODE_TYPE = Object.freeze({
   RoundedSegment: 0, Segment: 1, Circle: 2, Triangle: 3,
   FilledCircle: 4, Ellipse: 5, Trapezoid: 6, Polygon: 7,
-  ROUNDED_SEGMENT: 0, SEGMENT: 1, CIRCLE: 2, TRIANGLE: 3,
-  FILLED_CIRCLE: 4, ELLIPSE: 5, TRAPEZOID: 6, POLYGON: 7,
 });
-
 const LIMB_TYPES = new Set([0, 1]);
-const EPS = 1e-7;
+const TYPE_INT_TO_NAME = [
+  "RoundedSegment","Segment","Circle","Triangle",
+  "FilledCircle","Ellipse","Trapezoid","Polygon",
+];
 const TYPE_NAME_TO_INT = {
   RoundedSegment: 0, Segment: 1, Circle: 2, Triangle: 3,
   FilledCircle: 4, Ellipse: 5, Trapezoid: 6, Polygon: 7,
 };
-const TYPE_INT_TO_NAME = [
-  "RoundedSegment","Segment","Circle","Triangle",
-  "FilledCircle","Ellipse","Trapezoid","Polygon"
-];
+const GRADIENT_MODE_NAMES = { 0: "Sideways", 1: "Normal" };
+const TRIANGLE_TYPE_NAMES = { 0: "Isosceles", 1: "RightTriangle" };
+const ANGLE_LOCK_NAMES    = { 0: "None", 1: "Absolute", 2: "Relative" };
 
-/* ── basic helpers ───────────────────────────────────────────────── */
+const EPS = 1e-7;
+
+/* ── scalar helpers ──────────────────────────────────────────────── */
 function num(v, d = 0) { const n = Number(v); return Number.isFinite(n) ? n : d; }
 function bool(v, d = false) {
   if (v === undefined || v === null) return d;
@@ -39,7 +41,7 @@ function finitePoint(p) {
     Number.isFinite(Number(p[0])) && Number.isFinite(Number(p[1]));
 }
 
-/* ── colors ──────────────────────────────────────────────────────── */
+/* ── color helpers ───────────────────────────────────────────────── */
 export function hexToRgba(hex) {
   let h = String(hex ?? "#000000").trim().replace(/^#/, "");
   if (/^[0-9a-fA-F]{3}$/.test(h)) h = h.split("").map(c => c + c).join("") + "FF";
@@ -54,7 +56,8 @@ export function hexToRgba(hex) {
   };
 }
 export function rgbaToHex(c) {
-  const h = n => Math.max(0, Math.min(255, Math.round(num(n)))).toString(16).padStart(2, "0").toUpperCase();
+  const h = n => Math.max(0, Math.min(255, Math.round(num(n))))
+    .toString(16).padStart(2, "0").toUpperCase();
   return `#${h(c.r)}${h(c.g)}${h(c.b)}${h(c.a)}`;
 }
 export function hexToWasmColor(hex) {
@@ -62,9 +65,7 @@ export function hexToWasmColor(hex) {
   return { red: c.r, green: c.g, blue: c.b, alpha: c.a };
 }
 function mulColor(c, m) { return { r: c.r*m, g: c.g*m, b: c.b*m, a: c.a*m }; }
-function css(c) {
-  return `rgba(${c.r|0},${c.g|0},${c.b|0},${clamp(c.a/255, 0, 1)})`;
-}
+function css(c) { return `rgba(${c.r|0},${c.g|0},${c.b|0},${clamp(c.a/255, 0, 1).toFixed(3)})`; }
 function lerpColor(a, b, t) {
   t = clamp(t);
   return {
@@ -76,7 +77,7 @@ function lerpColor(a, b, t) {
 }
 
 /* ── interpolation ───────────────────────────────────────────────── */
-function sineIn(t) { return 1 - Math.cos((clamp(t) * Math.PI) / 2); }
+function sineIn(t)  { return 1 - Math.cos((clamp(t) * Math.PI) / 2); }
 function sineOut(t) { return Math.sin((clamp(t) * Math.PI) / 2); }
 function gradientT(t, reverse = false, mode = 0) {
   let x = clamp(t);
@@ -86,12 +87,13 @@ function gradientT(t, reverse = false, mode = 0) {
 }
 function aaParams(m) { return Math.max(2, Math.floor((m < 80 ? m/80 : 1) * 6)); }
 
-/* ── primitives ──────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   CANVAS PRIMITIVES
+   ══════════════════════════════════════════════════════════════════════ */
 function pSeg(ctx, x1, y1, x2, y2, th, col) {
   ctx.strokeStyle = col;
   ctx.lineWidth = Math.max(Math.abs(th), 0.01);
   ctx.lineCap = "butt";
-  ctx.lineJoin = "miter";
   ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
 }
 function pRSeg(ctx, x1, y1, x2, y2, th, col) {
@@ -116,8 +118,9 @@ function pRing(ctx, cx, cy, ro, ri, col) {
 function pEllipse(ctx, cx, cy, rx, ry, ang, col) {
   ctx.fillStyle = col;
   ctx.beginPath();
-  if (typeof ctx.ellipse === "function") {
-    ctx.ellipse(cx, cy, Math.max(Math.abs(rx),0.01), Math.max(Math.abs(ry),0.01), ang, 0, Math.PI*2);
+  if (ctx.ellipse) {
+    ctx.ellipse(cx, cy, Math.max(Math.abs(rx),0.01), Math.max(Math.abs(ry),0.01),
+      ang, 0, Math.PI*2);
   } else {
     ctx.save(); ctx.translate(cx, cy); ctx.rotate(ang);
     ctx.scale(Math.max(Math.abs(rx),0.01), Math.max(Math.abs(ry),0.01));
@@ -157,7 +160,7 @@ function pTrap(ctx, x1, y1, x2, y2, w1, w2, col) {
   ctx.closePath(); ctx.fill();
 }
 
-/* ── curved segment ─────────────────────────────────────────────── */
+/* ── curve helper for curved segments ───────────────────────────── */
 function curveInfo(x1, y1, x2, y2, radius) {
   const dx = x2-x1, dy = y2-y1;
   const chord = Math.hypot(dx, dy);
@@ -168,37 +171,19 @@ function curveInfo(x1, y1, x2, y2, radius) {
   const mx = (x1+x2)/2, my = (y1+y2)/2;
   const nx = -dy/chord, ny = dx/chord;
   const sign = num(radius) >= 0 ? 1 : -1;
-  const ccx = mx + nx*sag*sign, ccy = my + ny*sag*sign;
+  const ccx = mx + nx*sag*sign;
+  const ccy = my + ny*sag*sign;
   let a1 = Math.atan2(y1-ccy, x1-ccx);
   let a2 = Math.atan2(y2-ccy, x2-ccx);
   let da = a2 - a1;
   if (sign > 0) { while (da < 0) da += Math.PI*2; if (da > Math.PI) da -= Math.PI*2; }
-  else { while (da > 0) da -= Math.PI*2; if (da < -Math.PI) da += Math.PI*2; }
-  return { cx: ccx, cy: ccy, R, a1, a2: a1+da, da };
-}
-function aCurvedSegment(ctx, x1, y1, x2, y2, th, radius, c, rounded) {
-  const info = curveInfo(x1, y1, x2, y2, radius);
-  if (!info) { rounded ? aRSeg(ctx, x1, y1, x2, y2, th, c) : aSeg(ctx, x1, y1, x2, y2, th, c); return; }
-  const col = css(c), dim = css(mulColor(c, 0.2));
-  const N = aaParams(Math.max(Math.abs(th), info.R * Math.abs(info.da)));
-  const grow = rounded ? 0.14 : 0.18666667;
-  for (let i = 1; i <= N; i++) {
-    ctx.strokeStyle = dim;
-    ctx.lineWidth = Math.max(th + grow*i, 0.01);
-    ctx.lineCap = rounded ? "round" : "butt";
-    ctx.beginPath();
-    ctx.arc(info.cx, info.cy, info.R, info.a1, info.a2, info.da < 0);
-    ctx.stroke();
-  }
-  ctx.strokeStyle = col;
-  ctx.lineWidth = Math.max(th, 0.01);
-  ctx.lineCap = rounded ? "round" : "butt";
-  ctx.beginPath();
-  ctx.arc(info.cx, info.cy, info.R, info.a1, info.a2, info.da < 0);
-  ctx.stroke();
+  else          { while (da > 0) da -= Math.PI*2; if (da < -Math.PI) da += Math.PI*2; }
+  return { cx: ccx, cy: ccy, R, a1, a2: a1 + da, da };
 }
 
-/* ── AA wrappers ────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   ANTI-ALIASED DRAWING (matches StickNodes multi-pass approach)
+   ══════════════════════════════════════════════════════════════════════ */
 function aRSeg(ctx, x1, y1, x2, y2, th, c) {
   const col = css(c), dim = css(mulColor(c, 0.2));
   const len = Math.hypot(x2-x1, y2-y1);
@@ -218,6 +203,23 @@ function aSeg(ctx, x1, y1, x2, y2, th, c) {
     pSeg(ctx, x1-ca*h, y1-sa*h, x2+ca*h, y2+sa*h, th+g, dim);
   }
   pSeg(ctx, x1, y1, x2, y2, th, col);
+}
+function aCurved(ctx, x1, y1, x2, y2, th, radius, c, rounded) {
+  const info = curveInfo(x1, y1, x2, y2, radius);
+  if (!info) { rounded ? aRSeg(ctx, x1, y1, x2, y2, th, c) : aSeg(ctx, x1, y1, x2, y2, th, c); return; }
+  const col = css(c), dim = css(mulColor(c, 0.2));
+  const N = aaParams(Math.max(Math.abs(th), info.R * Math.abs(info.da)));
+  const grow = rounded ? 0.14 : 0.18666667;
+  for (let i = 1; i <= N; i++) {
+    ctx.strokeStyle = dim;
+    ctx.lineWidth = Math.max(th + grow*i, 0.01);
+    ctx.lineCap = rounded ? "round" : "butt";
+    ctx.beginPath(); ctx.arc(info.cx, info.cy, info.R, info.a1, info.a2, info.da < 0); ctx.stroke();
+  }
+  ctx.strokeStyle = col;
+  ctx.lineWidth = Math.max(th, 0.01);
+  ctx.lineCap = rounded ? "round" : "butt";
+  ctx.beginPath(); ctx.arc(info.cx, info.cy, info.R, info.a1, info.a2, info.da < 0); ctx.stroke();
 }
 function aCircle(ctx, cx, cy, r, c) {
   const col = css(c), dim = css(mulColor(c, 0.2));
@@ -298,59 +300,52 @@ function segmentGradient(ctx, x1, y1, x2, y2, c1, c2, axis, reverse, mode) {
   }
   return g;
 }
-function drawGradientSegment(ctx, s) {
-  const c1 = s.color, c2 = s.gradientColor || s.color;
-  const info = s.curveRadius ? curveInfo(s.sx, s.sy, s.ex, s.ey, s.curveRadius) : null;
-  ctx.save();
-  ctx.strokeStyle = segmentGradient(ctx, s.sx, s.sy, s.ex, s.ey,
-    c1, c2, s.gradientAxis, s.reverseGradient, s.gradientMode);
-  ctx.lineWidth = Math.max(Math.abs(s.thickness), 0.01);
-  ctx.lineCap = s.type === 0 ? "round" : "butt";
-  ctx.lineJoin = "round";
-  if (info) {
-    ctx.beginPath();
-    ctx.arc(info.cx, info.cy, info.R, info.a1, info.a2, info.da < 0);
-    ctx.stroke();
-  } else {
-    ctx.beginPath(); ctx.moveTo(s.sx, s.sy); ctx.lineTo(s.ex, s.ey); ctx.stroke();
-  }
-  ctx.restore();
-}
 
-/* ── node dispatch ──────────────────────────────────────────────── */
+/* ── node dispatch ───────────────────────────────────────────────── */
 function drawNode(ctx, s) {
   const dx = s.ex - s.sx, dy = s.ey - s.sy;
   const len = Math.hypot(dx, dy);
   const angle = Math.atan2(dy, dx);
+
   if (s.useGradient && (s.type === 0 || s.type === 1)) {
-    drawGradientSegment(ctx, s);
+    const c1 = s.color, c2 = s.gradientColor || s.color;
+    const info = s.curveRadius ? curveInfo(s.sx, s.sy, s.ex, s.ey, s.curveRadius) : null;
+    ctx.save();
+    ctx.strokeStyle = segmentGradient(ctx, s.sx, s.sy, s.ex, s.ey,
+      c1, c2, s.gradientAxis, s.reverseGradient, s.gradientMode);
+    ctx.lineWidth = Math.max(Math.abs(s.thickness), 0.01);
+    ctx.lineCap = s.type === 0 ? "round" : "butt";
+    ctx.lineJoin = "round";
+    if (info) {
+      ctx.beginPath(); ctx.arc(info.cx, info.cy, info.R, info.a1, info.a2, info.da < 0); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.moveTo(s.sx, s.sy); ctx.lineTo(s.ex, s.ey); ctx.stroke();
+    }
+    ctx.restore();
     return;
   }
+
   switch (s.type) {
     case 0:
-      aCurvedSegment(ctx, s.sx, s.sy, s.ex, s.ey, s.thickness, s.curveRadius, s.color, true);
+      aCurved(ctx, s.sx, s.sy, s.ex, s.ey, s.thickness, s.curveRadius, s.color, true);
       break;
     case 1:
-      aCurvedSegment(ctx, s.sx, s.sy, s.ex, s.ey, s.thickness, s.curveRadius, s.color, false);
+      aCurved(ctx, s.sx, s.sy, s.ex, s.ey, s.thickness, s.curveRadius, s.color, false);
       break;
     case 2: {
-      const innerR = Math.max(0, s.thickness/2);
-      const outerR = Math.max(innerR, (Math.abs(len) + Math.abs(s.thickness))/2);
+      const innerR = Math.max(0, s.thickness / 2);
+      const outerR = Math.max(innerR, (Math.abs(len) + Math.abs(s.thickness)) / 2);
       if (s.hollow) aRing(ctx, s.ex, s.ey, outerR, innerR, s.color);
       else aCircle(ctx, s.ex, s.ey, outerR, s.color);
       break;
     }
     case 3: {
       const halfBase = Math.max(Math.abs(s.thickness), 0.01) / 2;
-      const ux = len > EPS ? dx/len : 1, uy = len > EPS ? dy/len : 0;
+      const ux = len > EPS ? dx / len : 1, uy = len > EPS ? dy / len : 0;
       const px = -uy, py = ux;
       let ax = s.sx + px*halfBase, ay = s.sy + py*halfBase;
       let bx = s.sx - px*halfBase, by = s.sy - py*halfBase;
-      if (s.triangleFlipped) { [ax,bx]=[bx,ax]; [ay,by]=[by,ay]; }
-      if (s.triangleUpsideDown) {
-        [ax,s.ex]=[s.ex,ax]; [ay,s.ey]=[s.ey,ay];
-        [bx,s.ex]=[s.ex,bx]; [by,s.ey]=[s.ey,by];
-      }
+      if (s.triangleFlipped) { [ax,bx] = [bx,ax]; [ay,by] = [by,ay]; }
       aTri(ctx, s.ex, s.ey, ax, ay, bx, by, s.color);
       break;
     }
@@ -360,14 +355,14 @@ function drawNode(ctx, s) {
       break;
     }
     case 5: {
-      const rx = Math.max(0.5, Math.abs(len)/2);
-      const ry = Math.max(0.5, Math.abs(s.thickness)/2);
-      aEllipse(ctx, s.ex, s.ey, rx, ry, angle - Math.PI/2, s.color);
+      const rx = Math.max(0.5, Math.abs(len) / 2);
+      const ry = Math.max(0.5, Math.abs(s.thickness) / 2);
+      aEllipse(ctx, s.ex, s.ey, rx, ry, angle - Math.PI / 2, s.color);
       break;
     }
     case 6: {
       const w1 = s.trapStart > EPS ? Math.abs(s.trapStart) : Math.abs(s.thickness);
-      const w2 = s.trapEnd > EPS ? Math.abs(s.trapEnd) : Math.abs(s.thickness)*0.5;
+      const w2 = s.trapEnd   > EPS ? Math.abs(s.trapEnd)   : Math.abs(s.thickness) * 0.5;
       aTrap(ctx, s.sx, s.sy, s.ex, s.ey, w1, w2, s.color);
       break;
     }
@@ -379,7 +374,13 @@ function drawNode(ctx, s) {
   }
 }
 
-/* ── WASM property helpers ──────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   WASM PROPERTY ACCESS (with optional logger for debugging)
+   ══════════════════════════════════════════════════════════════════════ */
+let debugLogger = null;
+export function setDebugLogger(fn) { debugLogger = typeof fn === "function" ? fn : null; }
+function dbg(...args) { if (debugLogger) try { debugLogger(...args); } catch (_) {} }
+
 function safeGet(obj, name, d) {
   try { const v = obj?.[name]; return v === undefined || v === null ? d : v; }
   catch (_) { return d; }
@@ -405,35 +406,42 @@ function getNodeColor(n) {
     readHex(n, "colorHex", "#000000")));
 }
 
-/* ── scene extraction ───────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   SCENE EXTRACTION
+   ══════════════════════════════════════════════════════════════════════ */
 function extractScene(fig, showFills = true) {
   const figScale = Math.max(EPS, num(safeGet(fig, "scale", 1), 1));
   const all = safeCall(fig, "allNodes", [], []);
   const scene = [];
+
   for (const n of Array.isArray(all) ? all : []) {
     const type = num(safeGet(n, "nodeType", -1), -1);
     if (type < 0 || type > 7) continue;
+
     const start = readPoint(n, "getGlobalStart");
-    const end = readPoint(n, "getGlobalEnd");
+    const end   = readPoint(n, "getGlobalEnd");
     if (!start || !end) continue;
+
     const effTh = Math.abs(num(
       safeCall(n, "getEffectiveThickness", [], safeGet(n, "thickness", 1)), 1));
     const gradientMode = num(safeGet(n, "gradientMode", 0), 0);
+
     scene.push({
       node: n, type,
       drawIndex: num(safeGet(n, "drawIndex", scene.length), scene.length),
-      sx: start[0]*figScale, sy: start[1]*figScale,
-      ex: end[0]*figScale,   ey: end[1]*figScale,
+      sx: start[0] * figScale, sy: start[1] * figScale,
+      ex: end[0]   * figScale, ey: end[1]   * figScale,
       thickness: effTh * figScale,
       color: getNodeColor(n),
-      gradientColor: hexToRgba(readHex(n, "gradientColorHex", readHex(n, "colorHex", "#000000"))),
-      useGradient: bool(safeGet(n, "useGradient", false)),
+      gradientColor: hexToRgba(readHex(n, "gradientColorHex",
+        readHex(n, "colorHex", "#000000"))),
+      useGradient:     bool(safeGet(n, "useGradient", false)),
       reverseGradient: bool(safeGet(n, "reverseGradient", false)),
       gradientMode,
       gradientAxis: gradientMode === 1 ? "y" : "x",
       hollow: bool(safeGet(n, "circleIsHollow", false)),
       trapStart: num(safeGet(n, "trapezoidThicknessStart", 0), 0),
-      trapEnd: num(safeGet(n, "trapezoidThicknessEnd", 0), 0),
+      trapEnd:   num(safeGet(n, "trapezoidThicknessEnd", 0), 0),
       numPoly: Math.max(3, Math.floor(num(safeGet(n, "numPolygonVertices", 5), 5))),
       curveRadius: num(safeGet(n, "segmentCurveRadiusAndDefaultCurveRadius",
         safeGet(n, "curveRadius", 0)), 0),
@@ -445,6 +453,7 @@ function extractScene(fig, showFills = true) {
       triangleUpsideDown: bool(safeGet(n, "triangleUpsideDown", false)),
     });
   }
+
   scene.sort((a, b) => a.drawIndex - b.drawIndex);
 
   const polyfills = [];
@@ -456,21 +465,19 @@ function extractScene(fig, showFills = true) {
       const flat = safeCall(fig, "getPolyfillVertices", [anchor], null);
       if (!flat || flat.length < 6) continue;
       const verts = [];
-      for (let i = 0; i + 1 < flat.length; i += 2) {
-        verts.push({ x: num(flat[i])*figScale, y: num(flat[i+1])*figScale });
-      }
+      for (let i = 0; i + 1 < flat.length; i += 2)
+        verts.push({ x: num(flat[i]) * figScale, y: num(flat[i+1]) * figScale });
       polyfills.push({
-        anchor,
-        verts,
+        anchor, verts,
         color: hexToRgba(readHex(pf, "colorHex", "#000000")),
         useColor: bool(safeGet(pf, "usePolyfillColor", false)),
       });
     }
   }
+
   return { scene, polyfills, figScale };
 }
 
-/* ── polyfill render ───────────────────────────────────────────── */
 function drawPolyfill(ctx, pf, figColor) {
   const verts = pf.verts;
   if (!verts || verts.length < 3) return;
@@ -483,34 +490,31 @@ function drawPolyfill(ctx, pf, figColor) {
     for (const [dx, dy] of offs) {
       ctx.beginPath();
       ctx.moveTo(verts[0].x+dx, verts[0].y+dy);
-      for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x+dx, verts[i].y+dy);
+      for (let i = 1; i < verts.length; i++)
+        ctx.lineTo(verts[i].x+dx, verts[i].y+dy);
       ctx.closePath(); ctx.fill();
     }
   }
   ctx.fillStyle = c;
   ctx.beginPath();
   ctx.moveTo(verts[0].x, verts[0].y);
-  for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
+  for (let i = 1; i < verts.length; i++)
+    ctx.lineTo(verts[i].x, verts[i].y);
   ctx.closePath(); ctx.fill();
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   JSON EXPORT — outputs our format:
-   { version, build, scale, color, nodes: [nested children], polyfills }
+   JSON EXPORT — outputs our clean format
    ══════════════════════════════════════════════════════════════════════ */
-
 function nodeToJsonObj(n) {
   const j = {};
+
   try { j.id = n.drawIndex; } catch (_) {}
+  try { const t = n.nodeType; if (t >= 0 && t <= 7) j.type = TYPE_INT_TO_NAME[t]; } catch (_) {}
 
-  try {
-    const t = n.nodeType;
-    if (t >= 0 && t <= 7) j.type = TYPE_INT_TO_NAME[t];
-  } catch (_) {}
-
-  try { const v = n.length;    if (v) j.length = v; } catch (_) {}
-  try { const v = n.thickness; if (v) j.thickness = v; } catch (_) {}
-  try { const v = n.localAngle; if (v) j.angle = v; } catch (_) {}
+  try { const v = n.length;     if (v) j.length    = v; } catch (_) {}
+  try { const v = n.thickness;  if (v) j.thickness = v; } catch (_) {}
+  try { const v = n.localAngle; if (v) j.angle     = v; } catch (_) {}
 
   const boolMap = [
     ["static", "isStatic"], ["stretchy", "isStretchy"], ["floaty", "isFloaty"],
@@ -557,14 +561,8 @@ function nodeToJsonObj(n) {
     } catch (_) {}
   }
 
-  try {
-    const gm = n.gradientMode;
-    if (gm === 1) j.gradientMode = "Normal";
-  } catch (_) {}
-  try {
-    const tt = n.triangleType;
-    if (tt === 1) j.triangleType = "RightTriangle";
-  } catch (_) {}
+  try { if (n.gradientMode === 1) j.gradientMode = "Normal"; } catch (_) {}
+  try { if (n.triangleType === 1) j.triangleType = "RightTriangle"; } catch (_) {}
   try {
     const al = n.angleLockMode;
     if (al === 1) j.angleLock = "Absolute";
@@ -573,7 +571,6 @@ function nodeToJsonObj(n) {
 
   try { if (n.useSegmentColor && n.colorHex) j.color = n.colorHex; } catch (_) {}
   try { if (n.useGradient && n.gradientColorHex) j.gradientColor = n.gradientColorHex; } catch (_) {}
-  try { if (n.useCircleOutline && n.circleOutlineHex) j.outlineColor = n.circleOutlineHex; } catch (_) {}
   try { if (n.useCircleOutline && n.circleOutlineColorHex) j.outlineColor = n.circleOutlineColorHex; } catch (_) {}
 
   return j;
@@ -584,6 +581,7 @@ export function figureToJSON(fig) {
   const all = safeCall(fig, "allNodes", [], []);
   const byId = new Map();
   const childMap = new Map();
+
   for (const n of Array.isArray(all) ? all : []) {
     let idx = -1, parent = -1;
     try { idx = n.drawIndex; } catch (_) { continue; }
@@ -597,12 +595,14 @@ export function figureToJSON(fig) {
       childMap.get(parent).push(idx);
     }
   }
+
   const build = (idx) => {
     const j = nodeToJsonObj(byId.get(idx));
     const kids = childMap.get(idx) || [];
     if (kids.length) j.children = kids.map(build);
     return j;
   };
+
   const topLevel = childMap.get(0) || [];
   const nodes = topLevel.map(build);
 
@@ -632,16 +632,26 @@ export function jsonStringifyFigure(fig, pretty = true) {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   JSON IMPORT — reads our format, builds a live WASM Stickfigure
+   JSON IMPORT — takes our format, builds a live WASM Stickfigure
+   Extensively validated; every failure is thrown with the exact
+   reason so the caller can alert it to the user.
    ══════════════════════════════════════════════════════════════════════ */
-
 function jsonNodeToOptions(j) {
   const o = {};
 
-  if (j.type !== undefined) {
-    o.nodeType = typeof j.type === "string" ? j.type : TYPE_INT_TO_NAME[j.type];
+  /* Type — our JSON uses string names, WASM accepts either */
+  if (j.type !== undefined && j.type !== null) {
+    if (typeof j.type === "string") {
+      const n = TYPE_NAME_TO_INT[j.type];
+      if (n === undefined) throw new Error(`unknown node type "${j.type}"`);
+      o.nodeType = j.type;             // WASM's serde wants variant name
+    } else if (typeof j.type === "number") {
+      if (j.type < 0 || j.type > 7) throw new Error(`bad node type ${j.type}`);
+      o.nodeType = TYPE_INT_TO_NAME[j.type];
+    }
   }
 
+  /* Numbers */
   const numMap = {
     length: "length", defaultLength: "defaultLength",
     thickness: "thickness", defaultThickness: "defaultThickness",
@@ -657,9 +667,14 @@ function jsonNodeToOptions(j) {
     smartStretchMultiplier: "smartStretchMultiplier",
   };
   for (const [jk, wk] of Object.entries(numMap)) {
-    if (j[jk] !== undefined) o[wk] = Number(j[jk]);
+    if (j[jk] !== undefined && j[jk] !== null) {
+      const v = Number(j[jk]);
+      if (!Number.isFinite(v)) throw new Error(`"${jk}" not a number`);
+      o[wk] = v;
+    }
   }
 
+  /* Booleans */
   const boolMap = {
     static: "isStatic", stretchy: "isStretchy", floaty: "isFloaty",
     smartStretch: "isSmartStretch",
@@ -682,16 +697,18 @@ function jsonNodeToOptions(j) {
     dragLocked: "isDragLocked",
   };
   for (const [jk, wk] of Object.entries(boolMap)) {
-    if (j[jk] !== undefined) o[wk] = !!j[jk];
+    if (j[jk] !== undefined && j[jk] !== null) o[wk] = !!j[jk];
   }
 
-  if (j.gradientMode !== undefined) o.gradientMode = j.gradientMode;
-  if (j.triangleType !== undefined) o.triangleType = j.triangleType;
-  if (j.angleLock !== undefined)    o.angleLockMode = j.angleLock;
+  /* Enums (strings pass through — WASM's serde wants variant name) */
+  if (j.gradientMode  !== undefined) o.gradientMode  = j.gradientMode;
+  if (j.triangleType  !== undefined) o.triangleType  = j.triangleType;
+  if (j.angleLock     !== undefined) o.angleLockMode = j.angleLock;
 
-  if (j.color !== undefined)         o.color = hexToWasmColor(j.color);
-  if (j.gradientColor !== undefined) o.gradientColor = hexToWasmColor(j.gradientColor);
-  if (j.outlineColor !== undefined)  o.circleOutlineColor = hexToWasmColor(j.outlineColor);
+  /* Colors */
+  if (j.color         !== undefined) o.color              = hexToWasmColor(j.color);
+  if (j.gradientColor !== undefined) o.gradientColor      = hexToWasmColor(j.gradientColor);
+  if (j.outlineColor  !== undefined) o.circleOutlineColor = hexToWasmColor(j.outlineColor);
 
   return o;
 }
@@ -702,46 +719,67 @@ export function jsonToFigure(json, StickfigureClass) {
   if (!StickfigureClass)
     throw new Error("jsonToFigure: pass the Stickfigure class as 2nd arg");
 
+  /* Create empty figure */
   const fig = new StickfigureClass();
+  dbg("fig created");
+
   try { fig.setNodeLimitEnabled(false); } catch (_) {}
 
   if (json.version !== undefined) try { fig.setVersion(num(json.version, 425)); } catch (_) {}
-  if (json.build !== undefined)   try { fig.build   = num(json.build, 100); } catch (_) {}
-  if (json.scale !== undefined)   try { fig.scale   = num(json.scale, 1); } catch (_) {}
-  if (json.color !== undefined)   try { fig.colorHex = json.color; } catch (_) {}
+  if (json.build   !== undefined) try { fig.build   = num(json.build, 100); } catch (_) {}
+  if (json.scale   !== undefined) try { fig.scale   = num(json.scale, 1); } catch (_) {}
+  if (json.color   !== undefined) try { fig.colorHex = json.color; } catch (_) {}
 
-  const idToIndex = new Map();
   const root = fig.rootNode();
+  if (!root) throw new Error("jsonToFigure: rootNode() returned null");
+  dbg("root node obtained");
 
-  const buildNode = (parent, nodeJSON) => {
-    const options = jsonNodeToOptions(nodeJSON);
+  /* `parent.addChild(options)` — WASM deserializes options via serde */
+  const idToIndex = new Map();
+
+  const buildNode = (parent, nodeJSON, depth) => {
+    if (!nodeJSON || typeof nodeJSON !== "object")
+      throw new Error(`node at depth ${depth} is not an object`);
+
+    let options;
+    try {
+      options = jsonNodeToOptions(nodeJSON);
+    } catch (e) {
+      throw new Error(`depth ${depth}: ${e.message}`);
+    }
+
     let child;
     try {
       child = parent.addChild(options);
     } catch (e) {
-      console.error("addChild failed for", nodeJSON, e);
-      throw new Error(`Failed to add node of type ${nodeJSON.type}: ${e.message || e}`);
+      throw new Error(`depth ${depth}: addChild failed — ${e.message || e}`);
     }
+    if (!child) throw new Error(`depth ${depth}: addChild returned null`);
+
     let idx = null;
     try { idx = child.drawIndex; } catch (_) {}
     if (nodeJSON.id !== undefined && idx !== null) {
       idToIndex.set(nodeJSON.id, idx);
     }
+    dbg(`added node depth=${depth} id=${nodeJSON.id} drawIndex=${idx} type=${nodeJSON.type}`);
+
     if (Array.isArray(nodeJSON.children)) {
-      for (const c of nodeJSON.children) buildNode(child, c);
+      for (const c of nodeJSON.children) buildNode(child, c, depth + 1);
     }
   };
 
-  for (const n of (json.nodes || [])) buildNode(root, n);
+  const list = Array.isArray(json.nodes) ? json.nodes : [];
+  dbg(`building ${list.length} top-level nodes`);
+  for (const n of list) buildNode(root, n, 0);
 
+  /* Polyfills */
   const resolve = (ref) => {
     if (typeof ref === "number") return ref;
     if (idToIndex.has(ref)) return idToIndex.get(ref);
     const n = Number(ref);
     return Number.isFinite(n) ? n : -1;
   };
-
-  for (const pf of (json.polyfills || [])) {
+  for (const pf of Array.isArray(json.polyfills) ? json.polyfills : []) {
     const anchor = resolve(pf.anchor);
     if (anchor < 0) continue;
     const attached = Array.isArray(pf.attached)
@@ -758,13 +796,13 @@ export function jsonToFigure(json, StickfigureClass) {
     }
   }
 
+  dbg("jsonToFigure complete");
   return fig;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   Renderer class
+   RENDERER CLASS
    ══════════════════════════════════════════════════════════════════════ */
-
 export class StickNodesRenderer {
   constructor(canvas) {
     if (!canvas) throw new Error("StickNodesRenderer: canvas required");
@@ -831,10 +869,8 @@ export class StickNodesRenderer {
     const h = Math.max(1, parent?.clientHeight || this.canvas.clientHeight || 480);
     const tw = Math.floor(w * dpr), th = Math.floor(h * dpr);
     if (this.canvas.width !== tw || this.canvas.height !== th) {
-      this.canvas.width = tw;
-      this.canvas.height = th;
-      this.canvas.style.width = w + "px";
-      this.canvas.style.height = h + "px";
+      this.canvas.width = tw; this.canvas.height = th;
+      this.canvas.style.width = w + "px"; this.canvas.style.height = h + "px";
       this.view.fitted = false;
     }
   }
@@ -918,7 +954,7 @@ export class StickNodesRenderer {
         ctx.fillStyle = s.drawIndex === sel ? "#4f46e5" : css(s.color); ctx.fill();
         if (s.drawIndex === sel) {
           ctx.beginPath(); ctx.arc(s.ex, s.ey, r + 2.5/zoom, 0, Math.PI*2);
-          ctx.strokeStyle = "#4f46e5"; ctx.lineWidth = 2 / zoom; ctx.stroke();
+          ctx.strokeStyle = "#4f46e5"; ctx.lineWidth = 2/zoom; ctx.stroke();
         }
       }
     }
@@ -933,7 +969,6 @@ export class StickNodesRenderer {
     };
   }
 
-  /* screen → world — flip-aware, correct */
   _screenToWorld(px, py) {
     const W = this.canvas.width, H = this.canvas.height;
     const rawX = (px - W/2) / this.view.zoom;
@@ -960,7 +995,8 @@ export class StickNodesRenderer {
     for (const s of cache.scene) {
       if (this.showLimbPointsOnly && !s.isLimb) continue;
       const d = Math.hypot(world.x - s.ex, world.y - s.ey);
-      const tol = Math.max(20 / Math.max(this.view.zoom, 0.001), Math.abs(s.thickness) * 0.75);
+      const tol = Math.max(20 / Math.max(this.view.zoom, 0.001),
+        Math.abs(s.thickness) * 0.75);
       if (d < tol && d < bestDist) { best = s.node; bestDist = d; }
     }
     return best;
@@ -986,8 +1022,7 @@ export class StickNodesRenderer {
         this.activeDrag = {
           node: hit,
           pivot: [num(start[0]) * figScale, num(start[1]) * figScale],
-          parentAngle,
-          figScale,
+          parentAngle, figScale,
           stretchy: bool(safeGet(hit, "isStretchy", false)),
         };
         this.selectedIndex = num(safeGet(hit, "drawIndex", null), null);
@@ -1009,8 +1044,7 @@ export class StickNodesRenderer {
       this.pinch = {
         startDist: Math.max(Math.hypot(dx, dy), 0.001),
         startZoom: this.view.zoom,
-        startCx: this.view.cx,
-        startCy: this.view.cy,
+        startCx: this.view.cx, startCy: this.view.cy,
       };
       this.activeDrag = null; this.activePan = null;
     }
@@ -1098,9 +1132,7 @@ export class StickNodesRenderer {
     this.canvas.removeEventListener("pointerup", this._up);
     this.canvas.removeEventListener("pointercancel", this._up);
     this.canvas.removeEventListener("wheel", this._wheel);
-    this.pointers.clear();
-    this.fig = null;
-    this.sceneCache = null;
+    this.pointers.clear(); this.fig = null; this.sceneCache = null;
   }
 }
 
